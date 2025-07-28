@@ -4,7 +4,7 @@
              x:Class="GuiaBakio.MainPage"
              Title="Guía de Bakio">
 
-    <Grid RowDefinitions="Auto" Padding="5">
+    <Grid RowDefinitions="Auto,*" Padding="5">
 
         <!-- Encabezado -->
         <Grid Grid.Row="0" ColumnDefinitions="*" Padding="5" Margin="0,5,0,0" BackgroundColor="LightGray">
@@ -16,22 +16,46 @@
         </Grid>
 
         <!-- Lista de localidades  -->
-        
-        <!--
         <CollectionView Grid.Row="1"
-                        ItemsSource="{Binding VistaLocalidades.}"
+                        ItemsSource="{Binding VistaLocalidades.ListaLocalidades}"
                         SelectionMode="Single"
                         SelectedItem="OnCiudadSeleccionada">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <StackLayout Orientation="Horizontal" Padding="10">
+                    <Grid ColumnDefinitions="*" Padding="10" Margin="5">
                         <Label Text="{Binding Nombre}"
                                FontSize="Medium"
-                               VerticalOptions="Center"/>
-                    </StackLayout>
+                               VerticalOptions="Center"
+                               HorizontalOptions="Center"
+                               HorizontalTextAlignment="Center"/>
+                    </Grid>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
-        </CollectionView>-->
+        </CollectionView>
+
+        <!-- Botón para añadir una nueva localidad -->
+        <Button x:Name="BtnAñadir"
+                Grid.Row="1"
+                Text="＋"
+                CornerRadius="30"
+                WidthRequest="60"
+                HeightRequest="60"
+                BackgroundColor="#007AFF"
+                TextColor="White"
+                FontSize="24"
+                VerticalOptions="End"
+                HorizontalOptions="End"
+                Margin="20"
+                Clicked="BtnAñadir_Clicked">
+            <Button.Shadow>
+                <Shadow Brush="Black"
+                Offset="3,3"
+                Opacity="0.3"
+                Radius="8" />
+            </Button.Shadow>
+        </Button>
+
+
     </Grid>
 
 </ContentPage>
