@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="GuiaBakio.MainPage"
+             Title="Guía de Bakio">
+
+    <Grid RowDefinitions="Auto" Padding="5">
+
+        <!-- Encabezado -->
+        <Grid Grid.Row="0" ColumnDefinitions="*" Padding="5" Margin="0,5,0,0" BackgroundColor="LightGray">
+            <Label Text="Localidades"
+                   FontAttributes="Bold"
+                   Grid.Column="0"
+                   HorizontalOptions="Center"
+                   HorizontalTextAlignment="Center"/>
+        </Grid>
+
+        <!-- Lista de localidades  -->
+        
+        <!--
+        <CollectionView Grid.Row="1"
+                        ItemsSource="{Binding VistaLocalidades.}"
+                        SelectionMode="Single"
+                        SelectedItem="OnCiudadSeleccionada">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <StackLayout Orientation="Horizontal" Padding="10">
+                        <Label Text="{Binding Nombre}"
+                               FontSize="Medium"
+                               VerticalOptions="Center"/>
+                    </StackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>-->
+    </Grid>
+
+</ContentPage>
