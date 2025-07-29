@@ -10,6 +10,8 @@
         [NotNull]
         public string Nombre { get; set; }
 
+        public string? Descripcion { get; set; }
+
         public DateTime FechaModificacion { get; set; }
 
         public bool Sincronizado { get; set; } = false;
