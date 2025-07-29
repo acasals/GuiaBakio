@@ -1,25 +1,31 @@
 ﻿using CommunityToolkit.Maui.Views;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GuiaBakio.Views
 {
     internal class AddLocalidadPopup
     {
-        public event EventHandler<string>? CityAdded;
-
+       
         private Entry? _entry;
+        private readonly TaskCompletionSource<string?> _tcs = new();
+
+        private CommunityToolkit.Maui.Views.Popup popup = new() { Color=Colors.White};
+        public Task<string?> MostrarYEsperarAsync(Page parent)
+        {
+            MostrarPopup(parent); 
+
+            return _tcs.Task;
+        }
+
+        public void Cerrar(string nombreLocalidad)
+        {
+           _tcs?.TrySetResult(nombreLocalidad);
+            popup?.Close();
+        }
+
 
         public void MostrarPopup(Page hostPage)
         {
-            var popup = new Popup
-            {
-                Color = Colors.White
-            };
-
+         
             var miTabla = new Grid
             {
                 ColumnDefinitions =
@@ -46,8 +52,7 @@ namespace GuiaBakio.Views
                 HorizontalOptions = LayoutOptions.Fill,
                 Command = new Command(() =>
                 {
-                    CityAdded?.Invoke(this, _entry.Text);
-                    popup.Close();
+                    Cerrar(_entry.Text);
                 })
             };
 
