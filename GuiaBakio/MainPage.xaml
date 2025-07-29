@@ -19,7 +19,7 @@
         <CollectionView Grid.Row="1"
                         ItemsSource="{Binding VistaLocalidades.ListaLocalidades}"
                         SelectionMode="Single"
-                        SelectedItem="OnCiudadSeleccionada">
+                        SelectionChanged="OnLocalidadSeleccionada">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <Grid ColumnDefinitions="*" Padding="10" Margin="5">
