@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:GuiaBakio"
+    xmlns:pages="clr-namespace:GuiaBakio.Pages"
     Shell.FlyoutBehavior="Disabled"
     Title="GuiaBakio">
 
@@ -11,5 +12,9 @@
         Title="Home"
         ContentTemplate="{DataTemplate local:MainPage}"
         Route="MainPage" />
+    <ShellContent
+        Title="Localidad"
+        ContentTemplate="{DataTemplate pages:LocalidadPage}"
+        Route="LocalidadPage" />
 
 </Shell>
