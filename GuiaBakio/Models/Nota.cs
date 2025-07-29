@@ -2,7 +2,7 @@
 
 namespace GuiaBakio.Models
 {
-    internal class Nota
+    public class Nota
     {
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }

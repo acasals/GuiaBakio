@@ -3,7 +3,7 @@ using System.Text;
 
 namespace GuiaBakio.Helpers
 {
-    internal static class MisTextUtils
+    public static class MisTextUtils
     {
         public static string Normalizar(string texto)
         {

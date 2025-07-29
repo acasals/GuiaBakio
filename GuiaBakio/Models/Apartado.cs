@@ -2,7 +2,7 @@
 
 namespace GuiaBakio.Models
 {
-    internal class Apartado
+    public class Apartado
     {
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }

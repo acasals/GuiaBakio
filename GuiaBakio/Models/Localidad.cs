@@ -2,7 +2,7 @@
 {
     using SQLite;
 
-    internal class Localidad
+    public class Localidad
     {
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
