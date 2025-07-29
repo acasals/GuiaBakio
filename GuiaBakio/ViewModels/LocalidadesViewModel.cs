@@ -20,7 +20,7 @@ namespace GuiaBakio.ViewModels
             }
         }
         private readonly DataBaseService _dbService;
-        public LocalidadesViewModel(DataBaseService dbService)
+        public LocalidadesViewModel(DataBaseService? dbService)
         {
             _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
         }

@@ -7,7 +7,7 @@ namespace GuiaBakio.ViewModels
     {
         public LocalidadesViewModel VistaLocalidades { get; set; }
       
-        public MainViewModel(DataBaseService _dbService)
+        public MainViewModel(DataBaseService? _dbService)
         {
             VistaLocalidades = new LocalidadesViewModel(_dbService);
         }

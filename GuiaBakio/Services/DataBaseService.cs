@@ -4,7 +4,7 @@ using SQLite;
 
 namespace GuiaBakio.Services
 {
-    internal class DataBaseService
+    public class DataBaseService
     {
         private readonly SQLiteAsyncConnection _db;
 
