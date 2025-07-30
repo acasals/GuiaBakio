@@ -16,11 +16,12 @@
 
         public bool Sincronizado { get; set; } = false;
 
-        public Localidad(string localidad)
+        public Localidad(string localidad, string texto="")
         {
             if (string.IsNullOrWhiteSpace(localidad))
                 throw new ArgumentException("El nombre de la localidad es obligatorio.", nameof(localidad));
             Nombre = localidad;
+            Texto = texto;
             FechaModificacion = DateTime.UtcNow;
         }
         public Localidad()
