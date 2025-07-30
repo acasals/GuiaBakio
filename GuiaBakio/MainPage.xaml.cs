@@ -2,12 +2,9 @@
 using GuiaBakio.Services;
 using GuiaBakio.ViewModels;
 using GuiaBakio.Views;
-using SQLite;
-using System.Diagnostics;
 
 namespace GuiaBakio
 {
-
     public partial class MainPage : ContentPage
     {
         private readonly DataBaseService? _dbService;
@@ -63,47 +60,33 @@ namespace GuiaBakio
         {
             string? nuevaLocalidad = await _addLocalidadPopup.MostrarYEsperarAsync(this);
 
-            if (string.IsNullOrEmpty(nuevaLocalidad))
             {
-                return;
+                try
+                {
+                    bool añadido = await _myViewModel.VistaLocalidades!.AñadirLocalidadAsync(nuevaLocalidad);
+                    if (!añadido)
+                    {
+                        await DisplayAlert("Localidad existente", "La localidad ya está en la lista o no es válida.", "OK");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await DisplayAlert("Error", $"No se pudo añadir la localidad.\n{ex.Message}", "OK");
+                }
             }
-
-            if (_dbService == null)
-            {
-                return;
-            }
-
-            bool yaExiste = await _dbService.ExisteLocalidadAsync(nuevaLocalidad);
-            if (yaExiste)
-            {
-                _ = DisplayAlert("Localidad existente", "La localidad ya está en la lista.", "OK");
-                return;
-            }
-            try
-            {
-                await _dbService.InsertarLocalidadAsync(nuevaLocalidad);
-                await CargarListaLocalidadesAsync();
-            }
-            catch (Exception ex)
-            {
-                await DisplayAlert("Error", $"No se pudo añadir la localidad.\n{ex.Message}", "OK");
-            }
-
         }
 
         private async Task CargarListaLocalidadesAsync()
         {
-            try
-            {
-                await _myViewModel.VistaLocalidades!.ActualizarVistaLocalidadesAsync();
-            }
-            catch (Exception ex)
-            {
-                await DisplayAlert("Error", $"No se pudo obtener la lista de localidades.\n{ex.Message}", "OK");
-            }
-        }
-
+                            try
+                            {
+                                await _myViewModel.VistaLocalidades!.ActualizarVistaLocalidadesAsync();
+                            }
+                            catch (Exception ex)
+                            {
+                                await DisplayAlert("Error", $"No se pudo obtener la lista de localidades.\n{ex.Message}", "OK");
+                            }
+         }
     }
-
 }
 
