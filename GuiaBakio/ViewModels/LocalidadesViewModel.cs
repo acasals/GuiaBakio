@@ -30,5 +30,21 @@ namespace GuiaBakio.ViewModels
             var lista = await _dbService.ObtenerLocalidadesAsync();
             ListaLocalidades = new ObservableCollection<Localidad>(lista);
         }
+
+        public async Task<bool> AñadirLocalidadAsync(string? nuevaLocalidad)
+        {
+            if (string.IsNullOrWhiteSpace(nuevaLocalidad) || _dbService == null)
+                return false;
+
+            bool yaExiste = await _dbService.ExisteLocalidadAsync(nuevaLocalidad);
+            if (yaExiste)
+                return false;
+
+            await _dbService.InsertarLocalidadAsync(nuevaLocalidad);
+            await ActualizarVistaLocalidadesAsync();
+            return true;
+        }
+
+
     }
 }
