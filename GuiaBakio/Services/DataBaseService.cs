@@ -1,6 +1,7 @@
 ﻿using GuiaBakio.Helpers;
 using GuiaBakio.Models;
 using SQLite;
+using System.Security.Cryptography.X509Certificates;
 
 namespace GuiaBakio.Services
 {
@@ -76,7 +77,7 @@ namespace GuiaBakio.Services
                             .Where(l => l.Nombre.ToLower() == nombreLocalidad.ToLower())
                                      .FirstOrDefaultAsync();
         }
-        public async Task ActualizarLocalidadAsync(Localidad localidad, string nuevoNombre)
+        public async Task ActualizarLocalidadAsync(Localidad localidad, string nuevoNombre, string texto="")
         {
             if (localidad == null)
                 throw new ArgumentNullException(nameof(localidad), "La localidad no puede ser nula.");
@@ -86,19 +87,27 @@ namespace GuiaBakio.Services
             Localidad? _localidad = await ObtenerLocalidadAsync(localidad.Id) ?? throw new InvalidOperationException("No se encontró la localidad.");
 
             _localidad.Nombre = nuevoNombre;
+            _localidad.Texto = texto;
             _localidad.FechaModificacion = DateTime.UtcNow;
             await _db.UpdateAsync(_localidad);
+        }
+        public async Task<int> EliminarLocalidadAsync(int localidadId)
+        {
+            if (localidadId <= 0) throw new ArgumentException("El Id de la localidad debe ser mayor que 0.", nameof(localidadId));
+            var localidad = await ObtenerLocalidadAsync(localidadId);
+            if (localidad == null) throw new InvalidOperationException("No se encontró la localidad.");
+            return await _db.DeleteAsync<Apartado>(localidadId);
         }
 
         #endregion
 
         #region "Apartados"
-        public async Task InsertarApartadoAsync(string nombreApartado, int localidadId)
+        public async Task InsertarApartadoAsync(string nombreApartado, int localidadId, string texto="")
         {
             if (string.IsNullOrWhiteSpace(nombreApartado))
                 throw new ArgumentException("El nombre del apartado es obligatorio.", nameof(nombreApartado));
             if (localidadId <= 0)
-                throw new ArgumentException("El ID de la localidad debe ser mayor que cero.", nameof(localidadId));
+                throw new ArgumentException("El Id de la localidad debe ser mayor que cero.", nameof(localidadId));
 
             bool localidadExiste = await ExisteLocalidadAsync(localidadId);
             if (!localidadExiste)
@@ -108,10 +117,10 @@ namespace GuiaBakio.Services
             if (existeApartado)
                 throw new InvalidOperationException("Ya existe un apartado con ese nombre en esta localidad.");
 
-            Apartado apartado = new(nombreApartado, localidadId);
+            Apartado apartado = new(nombreApartado, localidadId, texto);
             await _db.InsertAsync(apartado);
         }
-        public async Task InsertarApartadoAsync(string nombreApartado, string nombreLocalidad)
+        public async Task InsertarApartadoAsync(string nombreApartado, string nombreLocalidad, string texto="")
         {
             if (string.IsNullOrWhiteSpace(nombreApartado))
                 throw new ArgumentException("El nombre del apartado es obligatorio.", nameof(nombreApartado));
@@ -126,7 +135,7 @@ namespace GuiaBakio.Services
             if (existeApartado)
                 throw new InvalidOperationException("Ya existe un apartado con ese nombre en esta localidad.");
 
-            Apartado apartado = new(nombreApartado, _localidad.Id);
+            Apartado apartado = new(nombreApartado, _localidad.Id,texto);
             await _db.InsertAsync(apartado);
         }
         public async Task<bool> ExisteApartadoAsync(int apartadoId)
@@ -140,7 +149,7 @@ namespace GuiaBakio.Services
             if (string.IsNullOrWhiteSpace(nombreApartado))
                 throw new ArgumentException("El nombre del apartado es obligatorio.", nameof(nombreApartado));
             if (localidadId <= 0)
-                throw new ArgumentException("El ID de la localidad debe ser mayor que cero.", nameof(localidadId));
+                throw new ArgumentException("El Id de la localidad debe ser mayor que cero.", nameof(localidadId));
 
             nombreApartado = MisTextUtils.Normalizar(nombreApartado).Trim();
             var apartado = await _db.Table<Apartado>()
@@ -216,7 +225,7 @@ namespace GuiaBakio.Services
                             .Where(a => a.Nombre == nombreApartado && a.LocalidadId == _localidad.Id)
                             .FirstOrDefaultAsync();
         }
-        public async Task ActualizarApartadoAsync(Apartado apartado, string nuevoNombre)
+        public async Task ActualizarApartadoAsync(Apartado apartado, string nuevoNombre, string texto="")
         {
             if (apartado == null)
                 throw new ArgumentNullException(nameof(apartado), "El apartado no puede ser nulo.");
@@ -225,8 +234,16 @@ namespace GuiaBakio.Services
 
             Apartado _apartado = await ObtenerApartadoAsync(apartado.Id) ?? throw new InvalidOperationException("No se encontró el apartado ");
             _apartado.Nombre = nuevoNombre;
+            _apartado.Texto = texto;    
             _apartado.FechaModificacion = DateTime.UtcNow;
             await _db.UpdateAsync(_apartado);
+        }
+        public async Task<int> EliminarApartadoAsync(int apartadoId)
+        {
+            if (apartadoId <= 0) throw new ArgumentException("El Id del apartado debe ser mayor que 0.", nameof(apartadoId));
+            var apartado = await ObtenerApartadoAsync(apartadoId);
+            if (apartado == null) throw new InvalidOperationException("No se encontró el apartado.");
+            return await _db.DeleteAsync<Apartado>(apartadoId);
         }
 
         #endregion
@@ -237,11 +254,11 @@ namespace GuiaBakio.Services
             if (string.IsNullOrWhiteSpace(titulo))
                 throw new ArgumentException("El título de la nota es obligatorio.", nameof(titulo));
             if (apartadoId <= 0)
-                throw new ArgumentException("El ID del apartado debe ser mayor que cero.", nameof(apartadoId));
+                throw new ArgumentException("El Id del apartado debe ser mayor que cero.", nameof(apartadoId));
 
             bool apartadoExiste = await ExisteApartadoAsync(apartadoId);
             if (!apartadoExiste)
-                throw new InvalidOperationException($"El apartado con ID '{apartadoId}' no existe.");
+                throw new InvalidOperationException($"El apartado con Id '{apartadoId}' no existe.");
 
             bool existeNota = await ExisteNotaAsync(titulo, apartadoId);
             if (existeNota)
@@ -285,7 +302,7 @@ namespace GuiaBakio.Services
             if (string.IsNullOrWhiteSpace(titulo))
                 throw new ArgumentException("El título de la nota es obligatorio.", nameof(titulo));
             if (apartadoId <= 0)
-                throw new ArgumentException("El ID del apartado debe ser mayor que cero.", nameof(apartadoId));
+                throw new ArgumentException("El Id del apartado debe ser mayor que cero.", nameof(apartadoId));
 
             titulo = MisTextUtils.Normalizar(titulo).Trim();
             var nota = await _db.Table<Nota>()
@@ -320,7 +337,7 @@ namespace GuiaBakio.Services
         }
         public async Task<Nota> ObtenerNotaAsync(int notaId)
         {
-            if (notaId <= 0) throw new ArgumentException("El Id del nota debe ser mayor que 0.", nameof(notaId));
+            if (notaId <= 0) throw new ArgumentException("El Id de la nota debe ser mayor que 0.", nameof(notaId));
 
             return await _db.Table<Nota>()
                             .Where(a => a.Id == notaId)
@@ -374,8 +391,140 @@ namespace GuiaBakio.Services
             _nota.FechaModificacion = DateTime.UtcNow;
             await _db.UpdateAsync(_nota);
         }
+        public async Task<int> EliminarNotaAsync(int notaId)
+        {
+            if (notaId <= 0) throw new ArgumentException("El Id de la nota debe ser mayor que 0.", nameof(notaId));
+            var nota = await ObtenerNotaAsync(notaId);
+            if (nota == null) throw new InvalidOperationException("No se encontró la nota.");
+            return await _db.DeleteAsync<Nota>(notaId);
+        }
 
         #endregion
 
+        #region "ImagenesLocalidad"
+
+        public async Task InsertarImagenLocalidadAsync(int localidadId, byte[] byteArray,string nombre="")
+        {
+            if (localidadId <= 0)
+                throw new ArgumentException("El Id de la localidad debe ser mayor que cero.", nameof(localidadId));
+            if (byteArray is null)
+                throw new ArgumentException("La imagen no puede ser null.", nameof(byteArray));
+            bool localidadExiste = await ExisteLocalidadAsync(localidadId);
+            if (!localidadExiste)
+                throw new InvalidOperationException($"La localidad con Id '{localidadId}' no existe.");
+
+            ImagenLocalidad imagen = new(localidadId, byteArray, nombre);
+            await _db.InsertAsync(imagen);
+        }
+        public async Task<ImagenLocalidad> ObtenerImagenLocalidadAsync(int imagenLocalidadId)
+        {
+            if (imagenLocalidadId <= 0) throw new ArgumentException("El Id de la imagen debe ser mayor que 0.", nameof(imagenLocalidadId));
+
+            return await _db.Table<ImagenLocalidad>()
+                            .Where(a => a.Id == imagenLocalidadId)
+                            .FirstOrDefaultAsync();
+        }
+        public async Task<int> EliminarImagenLocalidadAsync(int ImagenLocalidadId)
+        {
+            if (ImagenLocalidadId <= 0) throw new ArgumentException("El Id de la imagen debe ser mayor que 0.", nameof(ImagenLocalidadId));
+
+            var ImagenLocalidad = await ObtenerImagenLocalidadAsync(ImagenLocalidadId);
+            if (ImagenLocalidad == null) throw new InvalidOperationException("No se encontró la imagen.");
+
+            return await _db.DeleteAsync<ImagenLocalidad>(ImagenLocalidadId);
+        }
+
+        #endregion
+
+        #region "ImagenesApartado"
+
+        public async Task InsertarImagenApartadoAsync(int apartadoId, byte[] byteArray, string nombre = "")
+        {
+            if (apartadoId <= 0)
+                throw new ArgumentException("El Id del apartado debe ser mayor que cero.", nameof(apartadoId));
+            if (byteArray is null)
+                throw new ArgumentException("La imagen no puede ser null.", nameof(byteArray));
+            bool apartadoExiste = await ExisteApartadoAsync(apartadoId);
+            if (!apartadoExiste)
+                throw new InvalidOperationException($"El apartado con Id '{apartadoId}' no existe.");
+
+            ImagenApartado imagen = new(apartadoId, byteArray, nombre);
+            await _db.InsertAsync(imagen);
+        }
+        public async Task<ImagenApartado> ObtenerimagenApartadoAsync(int imagenApartadoId)
+        {
+            if (imagenApartadoId <= 0) throw new ArgumentException("El Id de la imagen debe ser mayor que 0.", nameof(imagenApartadoId));
+
+            return await _db.Table<ImagenApartado>()
+                            .Where(a => a.Id == imagenApartadoId)
+                            .FirstOrDefaultAsync();
+        }
+        public async Task<int> EliminarImagenApartadoAsync(int imagenApartadoId)
+        {
+            if (imagenApartadoId <= 0) throw new ArgumentException("El Id de la imagen debe ser mayor que 0.", nameof(imagenApartadoId));
+
+            var imagenApartado = await ObtenerimagenApartadoAsync(imagenApartadoId);
+            if (imagenApartado == null) throw new InvalidOperationException("No se encontró la imagen.");
+
+            return await _db.DeleteAsync<ImagenApartado>(imagenApartadoId);
+        }
+        #endregion
+
+        #region "ImagenesNota"
+        public async Task InsertarImagenNotaAsync(int notaId, byte[] byteArray, string nombre = "")
+        {
+            if (notaId <= 0)
+                throw new ArgumentException("El Id de la nota debe ser mayor que cero.", nameof(notaId));
+            if (byteArray is null)
+                throw new ArgumentException("La imagen no puede ser null.", nameof(byteArray));
+            bool notaExiste = await ExisteNotaAsync(notaId);
+            if (!notaExiste)
+                throw new InvalidOperationException($"La nota con Id '{notaId}' no existe.");
+
+            ImagenNota imagen = new(notaId, byteArray, nombre);
+            await _db.InsertAsync(imagen);
+        }
+        public async Task<ImagenNota> ObtenerimagenNotaAsync(int imagenNotaId)
+        {
+            if (imagenNotaId <= 0) throw new ArgumentException("El Id de la imagen debe ser mayor que 0.", nameof(imagenNotaId));
+
+            return await _db.Table<ImagenNota>()
+                            .Where(a => a.Id == imagenNotaId)
+                            .FirstOrDefaultAsync();
+        }
+        public async Task<int> EliminarImagenNotaAsync(int imagenNotaId)
+        {
+            if (imagenNotaId <= 0) throw new ArgumentException("El Id de la imagen debe ser mayor que 0.", nameof(imagenNotaId));
+            var imagenNota = await ObtenerimagenNotaAsync(imagenNotaId);
+            if (imagenNota == null) throw new InvalidOperationException("No se encontró la imagen.");
+            return await _db.DeleteAsync<ImagenNota>(imagenNotaId);
+        }
+
+        #endregion
+        public async Task<byte[]?> ConvertirImageSourceABytesAsync(ImageSource? imagen)
+        {
+            if (imagen == null)
+                return null;
+
+            if (imagen is StreamImageSource streamImage)
+            {
+                var stream = await streamImage.Stream.Invoke(CancellationToken.None);
+                using MemoryStream memoryStream = new MemoryStream();
+                await stream.CopyToAsync(memoryStream);
+                return memoryStream.ToArray();
+            }
+
+            // Si el tipo de ImageSource no es StreamImageSource, no se puede convertir fácilmente
+            return null;
+        }
+
+        public async Task<ImageSource?> ConvertirBytesAImageSourceAsync(byte[]? foto)
+        {
+            if (foto == null)
+                return null;
+
+            MemoryStream stream = await Task.Run(() => new MemoryStream(foto));
+            return ImageSource.FromStream(() => stream);
+        }
     }
 }
