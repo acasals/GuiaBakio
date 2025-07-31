@@ -11,14 +11,14 @@ namespace GuiaBakio.Models
     {
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
-        public int LocalidadId { get; set; }
+        public int NotaId { get; set; }
         public string? Nombre { get; set; }
         public byte[]? Foto { get; set; }
-        public ImagenNota(int localidadId, byte[] byteArray, string nombre="")
+        public ImagenNota(int notaId, byte[] byteArray, string nombre="")
         {
-            if (localidadId <= 0)
-                throw new ArgumentException("El ID de la localidad debe ser mayor que cero.", nameof(localidadId));
-            LocalidadId = localidadId;
+            if (NotaId <= 0)
+                throw new ArgumentException("El ID de la notadebe ser mayor que cero.", nameof(notaId));
+            NotaId =notaId;
             if (byteArray == null)
                 throw new ArgumentException("La imagen no puede ser nula.", nameof(byteArray));
             Foto = byteArray;
