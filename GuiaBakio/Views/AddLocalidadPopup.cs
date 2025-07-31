@@ -1,13 +1,16 @@
-﻿using CommunityToolkit.Maui.Views;
+﻿using CommunityToolkit.Maui.Extensions;
+using CommunityToolkit.Maui.Views;  
+
+
 
 namespace GuiaBakio.Views
 {
     internal class AddLocalidadPopup
     {
-        public Task<string?> MostrarYEsperarAsync(Page hostPage)
+        public async Task<string?> MostrarYEsperarAsync(Page hostPage)
         {
             var tcs = new TaskCompletionSource<string?>();
-            var popup = new CommunityToolkit.Maui.Views.Popup { Color = Colors.White };
+            var popup = new CommunityToolkit.Maui.Views.Popup { BackgroundColor = Colors.White };
               
             var entry = new Entry
             {
@@ -20,10 +23,10 @@ namespace GuiaBakio.Views
             {
                 Text = "Añadir",
                 HorizontalOptions = LayoutOptions.Fill,
-                Command = new Command(() =>
+                Command = new Command(async () =>
                 {
                     tcs.TrySetResult(entry.Text);
-                    popup.Close();
+                    await popup.CloseAsync();
                 })
             };
 
@@ -49,9 +52,9 @@ namespace GuiaBakio.Views
             };
 
             popup.Content = frame;
-            hostPage.ShowPopup(popup);
+            await hostPage.ShowPopupAsync(popup);
 
-            return tcs.Task;
+            return await tcs.Task;
         }
     }
 }
