@@ -8,14 +8,14 @@ namespace GuiaBakio
     public partial class MainPage : ContentPage
     {
         private readonly DataBaseService? _dbService;
-        private MainViewModel _myViewModel;
+        private ListaLocalidadesViewModel _myViewModel;
         private readonly AddLocalidadPopup _addLocalidadPopup = new();    
         public MainPage()
         {
             InitializeComponent();
             _dbService =  App.Services.GetService<DataBaseService>();
 
-            _myViewModel = new MainViewModel(_dbService);
+            _myViewModel = new ListaLocalidadesViewModel(_dbService);
             BindingContext = _myViewModel;
             AppForegroundNotifier.AppResumed += OnAppResumed;
         }
@@ -63,7 +63,7 @@ namespace GuiaBakio
             {
                 try
                 {
-                    bool añadido = await _myViewModel.VistaLocalidades!.AñadirLocalidadAsync(nuevaLocalidad);
+                    bool añadido = await _myViewModel.AñadirLocalidadAsync(nuevaLocalidad);
                     if (!añadido)
                     {
                         await DisplayAlert("Localidad existente", "La localidad ya está en la lista o no es válida.", "OK");
@@ -80,7 +80,7 @@ namespace GuiaBakio
         {
                             try
                             {
-                                await _myViewModel.VistaLocalidades!.ActualizarVistaLocalidadesAsync();
+                                await _myViewModel.ActualizarVistaLocalidadesAsync();
                             }
                             catch (Exception ex)
                             {
