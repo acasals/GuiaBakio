@@ -17,7 +17,7 @@
 
         <!-- Lista de localidades  -->
         <CollectionView Grid.Row="1"
-                        ItemsSource="{Binding VistaLocalidades.ListaLocalidades}"
+                        ItemsSource="{Binding ListaLocalidades}"
                         SelectionMode="Single"
                         SelectionChanged="OnLocalidadSeleccionada">
             <CollectionView.ItemTemplate>

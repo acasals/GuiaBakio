@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using CommunityToolkit.Maui;
 using GuiaBakio.Services;
+using System.Diagnostics;
 
 namespace GuiaBakio
 {
@@ -22,6 +23,7 @@ namespace GuiaBakio
             {
                 var dbName = "GuiaBakio.db";
                 var dbPath = Path.Combine(FileSystem.AppDataDirectory, dbName);
+                Debug.WriteLine($"Database path: {dbPath}");
                 return new DataBaseService(dbPath);
             });
 
