@@ -5,7 +5,7 @@ using System.ComponentModel;
 
 namespace GuiaBakio.ViewModels
 {
-    internal class LocalidadesViewModel : INotifyPropertyChanged
+    internal class ListaLocalidadesViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -20,7 +20,7 @@ namespace GuiaBakio.ViewModels
             }
         }
         private readonly DataBaseService _dbService;
-        public LocalidadesViewModel(DataBaseService? dbService)
+        public ListaLocalidadesViewModel(DataBaseService? dbService)
         {
             _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
         }
