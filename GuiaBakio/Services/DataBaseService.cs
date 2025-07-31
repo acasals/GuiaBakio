@@ -8,12 +8,10 @@ namespace GuiaBakio.Services
     public class DataBaseService
     {
         private readonly SQLiteAsyncConnection _db;
-
         public DataBaseService(string dbPath)
         {
             _db = new SQLiteAsyncConnection(dbPath);
         }
-
         public async Task InitTablesAsync()
         {
             await _db.CreateTableAsync<Localidad>();
@@ -402,7 +400,6 @@ namespace GuiaBakio.Services
         #endregion
 
         #region "ImagenesLocalidad"
-
         public async Task InsertarImagenLocalidadAsync(int localidadId, byte[] byteArray,string nombre="")
         {
             if (localidadId <= 0)
@@ -424,6 +421,13 @@ namespace GuiaBakio.Services
                             .Where(a => a.Id == imagenLocalidadId)
                             .FirstOrDefaultAsync();
         }
+        public async Task<List<ImagenLocalidad>> ObtenerImagenesPorLocalidadAsync(int localidadId)
+        {
+            if (localidadId <= 0) throw new ArgumentException("El Id de la localidad debe ser mayor que 0.", nameof(localidadId));
+            return await _db.Table<ImagenLocalidad>()
+                            .Where(a => a.LocalidadId == localidadId)
+                            .ToListAsync();
+        }
         public async Task<int> EliminarImagenLocalidadAsync(int ImagenLocalidadId)
         {
             if (ImagenLocalidadId <= 0) throw new ArgumentException("El Id de la imagen debe ser mayor que 0.", nameof(ImagenLocalidadId));
@@ -437,7 +441,6 @@ namespace GuiaBakio.Services
         #endregion
 
         #region "ImagenesApartado"
-
         public async Task InsertarImagenApartadoAsync(int apartadoId, byte[] byteArray, string nombre = "")
         {
             if (apartadoId <= 0)
@@ -458,6 +461,13 @@ namespace GuiaBakio.Services
             return await _db.Table<ImagenApartado>()
                             .Where(a => a.Id == imagenApartadoId)
                             .FirstOrDefaultAsync();
+        }
+        public async Task<List<ImagenApartado>> ObtenerImagenesPorApartadoAsync(int apartadoId)
+        {
+            if (apartadoId <= 0) throw new ArgumentException("El Id del apartado debe ser mayor que 0.", nameof(apartadoId));
+            return await _db.Table<ImagenApartado>()
+                            .Where(a => a.ApartadoId == apartadoId)
+                            .ToListAsync();
         }
         public async Task<int> EliminarImagenApartadoAsync(int imagenApartadoId)
         {
@@ -492,6 +502,13 @@ namespace GuiaBakio.Services
                             .Where(a => a.Id == imagenNotaId)
                             .FirstOrDefaultAsync();
         }
+        public async Task<List<ImagenNota>> ObtenerImagenesPorNotaAsync(int notaId)
+        {
+            if (notaId <= 0) throw new ArgumentException("El Id de la nota debe ser mayor que 0.", nameof(notaId));
+            return await _db.Table<ImagenNota>()
+                            .Where(a => a.NotaId == notaId)
+                            .ToListAsync();
+        }
         public async Task<int> EliminarImagenNotaAsync(int imagenNotaId)
         {
             if (imagenNotaId <= 0) throw new ArgumentException("El Id de la imagen debe ser mayor que 0.", nameof(imagenNotaId));
@@ -501,7 +518,7 @@ namespace GuiaBakio.Services
         }
 
         #endregion
-        public async Task<byte[]?> ConvertirImageSourceABytesAsync(ImageSource? imagen)
+        public static async Task<byte[]?> ConvertirImageSourceABytesAsync(ImageSource? imagen)
         {
             if (imagen == null)
                 return null;
@@ -517,8 +534,7 @@ namespace GuiaBakio.Services
             // Si el tipo de ImageSource no es StreamImageSource, no se puede convertir fácilmente
             return null;
         }
-
-        public async Task<ImageSource?> ConvertirBytesAImageSourceAsync(byte[]? foto)
+        public static async Task<ImageSource?> ConvertirBytesAImageSourceAsync(byte[]? foto)
         {
             if (foto == null)
                 return null;
