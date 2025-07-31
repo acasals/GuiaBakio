@@ -17,6 +17,9 @@ namespace GuiaBakio.Services
             await _db.CreateTableAsync<Localidad>();
             await _db.CreateTableAsync<Apartado>();
             await _db.CreateTableAsync<Nota>();
+            await _db.CreateTableAsync<ImagenLocalidad>();
+            await _db.CreateTableAsync<ImagenApartado>();
+            await _db.CreateTableAsync<ImagenNota>();
         }
 
         #region "Localidades"
