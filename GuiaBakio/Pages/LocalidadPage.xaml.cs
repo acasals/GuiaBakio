@@ -1,66 +1,55 @@
 using GuiaBakio.Models;
 using GuiaBakio.Services;
+using GuiaBakio.ViewModels;
 using System.Diagnostics;
+using CommunityToolkit.Maui.Views;
+
 
 namespace GuiaBakio.Pages;
 public partial class LocalidadPage : ContentPage, IQueryAttributable
 {
     private int localidadId;
-    private readonly DataBaseService? _dbService = App.Services.GetService<DataBaseService>();
+    private readonly DataBaseService? _dbService= App.Services.GetService<DataBaseService>();
+    private LocalidadDetalleViewModel? _myViewModel;
     private Localidad? localidad;
     public LocalidadPage(string nombre)
     {
         InitializeComponent();
+        
+        AppForegroundNotifier.AppResumed += OnAppResumed;
     }
 
     // Constructor por defecto (requerido por Shell)
-    public LocalidadPage() : this("") { }
+    public LocalidadPage() : this("") {}
 
     public async void ApplyQueryAttributes(IDictionary<string, object> query)
     {
-        try
+        if (query.TryGetValue("Id", out var value) && int.TryParse(value?.ToString(), out int id))
         {
-            if (!query.TryGetValue("Id", out object? value))
+            if (_dbService != null)
             {
-                await Shell.Current.GoToAsync("..");
-                return;
+                _myViewModel = new LocalidadDetalleViewModel(id, _dbService);
+                BindingContext = _myViewModel;
+                await _myViewModel.CargarDatosAsync();
             }
-
-            var IdString = value?.ToString();
-            if (string.IsNullOrWhiteSpace(IdString))
+            else
             {
+                Debug.WriteLine("No se pudo obtener el servicio DataBaseService.");
                 await Shell.Current.GoToAsync("..");
-                return;
             }
-
-            if (!int.TryParse(IdString, out localidadId) || localidadId <= 0)
-            {
-                await Shell.Current.GoToAsync("..");
-                return;
-            }
-
-            if (_dbService == null)
-            {
-                await Shell.Current.GoToAsync("..");
-                return;
-            }
-
-            localidad = await _dbService.ObtenerLocalidadAsync(localidadId);
-
-            if (localidad == null)
-            {
-                await Shell.Current.GoToAsync("..");
-                return;
-            }
-
-            this.Title = localidad.Nombre;
-
-            // Mostrar detalles de la localidad aquí...
         }
-        catch (Exception ex)
+        else
         {
-            Debug.WriteLine($"Error al aplicar atributos de consulta: {ex.Message}");
+            Debug.WriteLine("No se pudo obtener el Id de la localidad desde los parámetros de la consulta.");
             await Shell.Current.GoToAsync("..");
+        }
+     }
+ 
+    private void OnAppResumed()
+    {
+        if (_dbService != null)
+        {
+            _ = _myViewModel?.CargarDatosAsync();
         }
     }
 
