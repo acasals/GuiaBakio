@@ -4,41 +4,108 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="GuiaBakio.Pages.LocalidadPage"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-             Title="{Binding LocalidadActual.Nombre}">
-    <ScrollView>
-        <StackLayout Padding="10">
+             Title="{Binding Localidad.Nombre}">
 
-            <!-- Texto descriptivo -->
-            <Editor Text="{Binding LocalidadActual.Texto}" AutoSize="TextChanges" />
+    <Grid x:Name="MainGrid" RowSpacing="10" Padding="10">
+        <Grid.RowDefinitions>
+            <RowDefinition x:Name="TextRow" Height="*" />
+            <RowDefinition x:Name="ItemsRow" Height="*" />
+            <RowDefinition x:Name="ImagesRow" Height="*" />
+        </Grid.RowDefinitions>
 
-            <!-- Lista de Apartados -->
+        <!-- Texto -->
+        <Grid Grid.Row="0" >
+            <Label Text="{Binding Localidad.Texto}" FontSize="18"
+           HorizontalOptions="Center" VerticalOptions="Center" />
+
+            <!-- Sugerencia si no hay texto -->
+            <Label Grid.Row="0"
+                   IsVisible="{Binding NoHayTexto}"
+                   Text="Agrega una descripción para esta sección"
+                   FontAttributes="Italic"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   TextColor="Gray" />
+
+            <!-- Botón flotante de edición -->
+            <Button Text="✏️"
+            HorizontalOptions="End"
+            VerticalOptions="Start"
+            Margin="10"
+            BackgroundColor="LightGray"
+            Command="{Binding EditarTextoCommand}" />
+
+
+            <!-- Sugerencia si no hay texto -->
+            <Label IsVisible="{Binding NoHayTexto}"
+                   Text="Agrega una descripción para esta sección"
+                   FontAttributes="Italic"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   TextColor="Gray" />
+
+        </Grid>
+
+        <!-- Lista de ítems -->
+        <Grid Grid.Row="1">
+
             <CollectionView ItemsSource="{Binding Apartados}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <toolkit:Expander>
-                            <toolkit:Expander.Header>
-                                <Label Text="{Binding Nombre}" FontAttributes="Bold" />
-                            </toolkit:Expander.Header>
-                            <Editor Text="{Binding Texto}" AutoSize="TextChanges" />
-                        </toolkit:Expander>
+                        <Label Text="{Binding Nombre}" FontSize="16" />
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
-            <!-- Galería de imágenes -->
-            <CarouselView ItemsSource="{Binding ImagenesLocalidad}">
+            <!-- Botón flotante de añadir ítem -->
+            <Button Text="➕"
+            HorizontalOptions="End"
+            VerticalOptions="Start"
+            Margin="10"
+            BackgroundColor="LightGray"
+            Command="{Binding AgregarApartadoCommand}" />
+
+            <!-- Sugerencia si no hay ítems -->
+            <Label IsVisible="{Binding NoHayApartados}"
+                   Text="Esta es la sección de apartados. ¡Agrega uno!"
+                   FontAttributes="Italic"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   TextColor="Gray" />
+
+        </Grid>
+
+        <!-- Carrusel de imágenes -->
+        <Grid Grid.Row="2">
+
+            <!-- Carrusel -->
+            <CarouselView ItemsSource="{Binding Imagenes}">
                 <CarouselView.ItemTemplate>
                     <DataTemplate>
-                        <Image Source="{Binding Foto}" Aspect="AspectFill" HeightRequest="200" />
+                        <Image Source="{Binding}" Aspect="AspectFill" />
                     </DataTemplate>
                 </CarouselView.ItemTemplate>
             </CarouselView>
 
-            <!-- Acciones -->
-            <Button Text="Agregar Apartado" Command="{Binding AgregarApartadoCommand}" />
-            <Button Text="Agregar Imagen" Command="{Binding AgregarImagenCommand}" />
-            <Button Text="Guardar cambios" Command="{Binding GuardarLocalidadCommand}" />
+            <!-- Sugerencia si no hay imágenes -->
+            <Grid IsVisible="{Binding NoHayImagenes}" BackgroundColor="White">
+                <Label Text="Agrega imágenes para esta sección"
+                       FontAttributes="Italic"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"
+                       TextColor="Gray" />            
+            </Grid>
+            
+            <!-- Botón flotante para añadir imagen -->
+            <Button Text="➕"
+                    HorizontalOptions="End"
+                    VerticalOptions="Start"
+                    Margin="10"
+                    BackgroundColor="LightGray"
+                    Command="{Binding AgregarImagenCommand}" />
 
-        </StackLayout>
-    </ScrollView>
+        </Grid>
+    </Grid>
+
+
 </ContentPage>

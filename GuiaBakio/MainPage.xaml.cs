@@ -59,23 +59,21 @@ namespace GuiaBakio
         private async void BtnAñadir_Clicked(object sender, EventArgs e)
         {
             string? nuevaLocalidad = await _addLocalidadPopup.MostrarYEsperarAsync(this);
-
+            
+            try
             {
-                try
+                bool añadido = await _myViewModel.AñadirLocalidadAsync(nuevaLocalidad);
+                if (!añadido)
                 {
-                    bool añadido = await _myViewModel.AñadirLocalidadAsync(nuevaLocalidad);
-                    if (!añadido)
-                    {
-                        await DisplayAlert("Localidad existente", "La localidad ya está en la lista o no es válida.", "OK");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    await DisplayAlert("Error", $"No se pudo añadir la localidad.\n{ex.Message}", "OK");
+                    await DisplayAlert("Localidad existente", "La localidad ya está en la lista o no es válida.", "OK");
                 }
             }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", $"No se pudo añadir la localidad.\n{ex.Message}", "OK");
+            }
         }
-
+        
         private async Task CargarListaLocalidadesAsync()
         {
                             try

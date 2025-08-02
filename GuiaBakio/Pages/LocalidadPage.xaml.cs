@@ -8,10 +8,9 @@ using CommunityToolkit.Maui.Views;
 namespace GuiaBakio.Pages;
 public partial class LocalidadPage : ContentPage, IQueryAttributable
 {
-    private int localidadId;
-    private readonly DataBaseService? _dbService= App.Services.GetService<DataBaseService>();
+    private readonly DataBaseService? _dbService = App.Services.GetService<DataBaseService>();
     private LocalidadDetalleViewModel? _myViewModel;
-    private Localidad? localidad;
+    
     public LocalidadPage(string nombre)
     {
         InitializeComponent();
@@ -49,6 +48,7 @@ public partial class LocalidadPage : ContentPage, IQueryAttributable
     {
         if (_dbService != null)
         {
+
             _ = _myViewModel?.CargarDatosAsync();
         }
     }
