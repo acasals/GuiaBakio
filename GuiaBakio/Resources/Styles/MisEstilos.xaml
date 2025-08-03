@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Estilo para botón flotante azul con sombra -->
+    <Style x:Key="FloatingButtonStyle" TargetType="Button">
+        <Setter Property="CornerRadius" Value="25" />
+        <Setter Property="WidthRequest" Value="50" />
+        <Setter Property="HeightRequest" Value="50" />
+        <Setter Property="BackgroundColor" Value="DeepSkyBlue"/>
+        <Setter Property="TextColor" Value="White" />
+        <Setter Property="FontSize" Value="30" />
+        <Setter Property="VerticalOptions" Value="End" />
+        <Setter Property="HorizontalOptions" Value="End" />
+        <Setter Property="Margin" Value="15" />
+        <Setter Property="Shadow">
+            <Setter.Value>
+                <Shadow Brush="Black"
+                        Offset="3,3"
+                        Opacity="0.3"
+                        Radius="8" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Estilo para botón de imagen flotante azul con sombra -->
+    <Style x:Key="FloatingImageButtonStyle" TargetType="ImageButton">
+        <Setter Property="CornerRadius" Value="25" />
+        <Setter Property="WidthRequest" Value="50" />
+        <Setter Property="HeightRequest" Value="50" />
+        <Setter Property="Aspect" Value="AspectFit" />
+        <Setter Property="BackgroundColor" Value="DeepSkyBlue"/>
+        <Setter Property="VerticalOptions" Value="End" />
+        <Setter Property="HorizontalOptions" Value="End" />
+        <Setter Property="Margin" Value="15" />
+        <Setter Property="Shadow">
+            <Setter.Value>
+                <Shadow Brush="Black"
+                Offset="3,3"
+                Opacity="0.3"
+                Radius="8" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
+
+
+</ResourceDictionary>
