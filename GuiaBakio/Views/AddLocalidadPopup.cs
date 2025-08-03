@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Maui.Extensions;
+using Microsoft.Maui.Controls.Shapes;
 
 
 
@@ -41,16 +42,19 @@ namespace GuiaBakio.Views
             grid.Add(entry, 0, 0);
             grid.Add(button, 1, 0);
 
-            var frame = new Frame
+            var border  = new Border
             {
                 Content = grid,
                 WidthRequest = 300,
                 Padding = 10,
-                CornerRadius = 12,
+                StrokeShape = new RoundRectangle
+                {
+                    CornerRadius = 12
+                },
                 BackgroundColor = Colors.White
             };
 
-            popup.Content = frame;
+            popup.Content = border;
             await hostPage.ShowPopupAsync(popup);
 
             return await tcs.Task;
