@@ -34,27 +34,11 @@
         </CollectionView>
 
         <!-- Botón para añadir una nueva localidad -->
-        <Button x:Name="BtnAñadir"
-                Grid.Row="1"
-                Text="＋"
-                CornerRadius="30"
-                WidthRequest="60"
-                HeightRequest="60"
-                BackgroundColor="#007AFF"
-                TextColor="White"
-                FontSize="24"
-                VerticalOptions="End"
-                HorizontalOptions="End"
-                Margin="20"
-                Clicked="BtnAñadir_Clicked">
-            <Button.Shadow>
-                <Shadow Brush="Black"
-                Offset="3,3"
-                Opacity="0.3"
-                Radius="8" />
-            </Button.Shadow>
-        </Button>
-
+        <Button  x:Name="BtnAñadir"
+                 Text="+"
+                 Grid.Row="1"
+                 Style="{StaticResource FloatingButtonStyle}"
+                 Clicked="BtnAñadir_Clicked" />
 
     </Grid>
 

@@ -1,4 +1,5 @@
-﻿using GuiaBakio.Models;
+﻿using GuiaBakio.Helpers;
+using GuiaBakio.Models;
 using GuiaBakio.Services;
 using GuiaBakio.ViewModels;
 using GuiaBakio.Views;
@@ -79,12 +80,14 @@ namespace GuiaBakio
                             try
                             {
                                 await _myViewModel.ActualizarVistaLocalidadesAsync();
-                            }
+                                await MisUtils.MostrarBotonAnimado(BtnAñadir);
+            }
                             catch (Exception ex)
                             {
                                 await DisplayAlert("Error", $"No se pudo obtener la lista de localidades.\n{ex.Message}", "OK");
                             }
          }
+        
     }
 }
 
