@@ -48,7 +48,7 @@ namespace GuiaBakio.Services
             if (string.IsNullOrWhiteSpace(nombreLocalidad))
                 throw new ArgumentException("El nombre de la localidad es obligatorio.", nameof(nombreLocalidad));
 
-            nombreLocalidad = MisTextUtils.Normalizar(nombreLocalidad).Trim();
+            nombreLocalidad = MisUtils.NormalizarTexto(nombreLocalidad).Trim();
 
             var _localidad = await _db.Table<Localidad>()
                                     .Where(a => a.Nombre.ToLower() == nombreLocalidad.ToLower())
@@ -73,7 +73,7 @@ namespace GuiaBakio.Services
             if (string.IsNullOrWhiteSpace(nombreLocalidad))
                 throw new ArgumentException("El nombre de la localidad no puede estar vacío.", nameof(nombreLocalidad));
 
-            nombreLocalidad = MisTextUtils.Normalizar(nombreLocalidad).Trim();
+            nombreLocalidad = MisUtils.NormalizarTexto(nombreLocalidad).Trim();
             return await _db.Table<Localidad>()
                             .Where(l => l.Nombre.ToLower() == nombreLocalidad.ToLower())
                                      .FirstOrDefaultAsync();
@@ -152,7 +152,7 @@ namespace GuiaBakio.Services
             if (localidadId <= 0)
                 throw new ArgumentException("El Id de la localidad debe ser mayor que cero.", nameof(localidadId));
 
-            nombreApartado = MisTextUtils.Normalizar(nombreApartado).Trim();
+            nombreApartado = MisUtils.NormalizarTexto(nombreApartado).Trim();
             var apartado = await _db.Table<Apartado>()
                                     .Where(a => a.Nombre.ToLower() == nombreApartado.ToLower()
                                              && a.LocalidadId == localidadId)
@@ -205,7 +205,7 @@ namespace GuiaBakio.Services
             if (localidadId <= 0)
                 throw new ArgumentException("El Id de localidad debe ser mayor que 0.", nameof(localidadId));
 
-            nombreApartado = MisTextUtils.Normalizar(nombreApartado).Trim();
+            nombreApartado = MisUtils.NormalizarTexto(nombreApartado).Trim();
             return await _db.Table<Apartado>()
                             .Where(a => a.Nombre == nombreApartado && a.LocalidadId == localidadId)
                             .FirstOrDefaultAsync();
@@ -221,7 +221,7 @@ namespace GuiaBakio.Services
             if (_localidad == null)
                 throw new InvalidOperationException($"No se encontró la localidad '{nombreLocalidad}'.");
 
-            nombreApartado = MisTextUtils.Normalizar(nombreApartado).Trim();
+            nombreApartado = MisUtils.NormalizarTexto(nombreApartado).Trim();
             return await _db.Table<Apartado>()
                             .Where(a => a.Nombre == nombreApartado && a.LocalidadId == _localidad.Id)
                             .FirstOrDefaultAsync();
@@ -305,7 +305,7 @@ namespace GuiaBakio.Services
             if (apartadoId <= 0)
                 throw new ArgumentException("El Id del apartado debe ser mayor que cero.", nameof(apartadoId));
 
-            titulo = MisTextUtils.Normalizar(titulo).Trim();
+            titulo = MisUtils.NormalizarTexto(titulo).Trim();
             var nota = await _db.Table<Nota>()
                                 .Where(n => n.Titulo.ToLower() == titulo.ToLower()
                                          && n.ApartadoId == apartadoId)
@@ -329,7 +329,7 @@ namespace GuiaBakio.Services
             if (_apartado == null)
                 throw new InvalidOperationException($"No se encontró el apartado '{nombreApartado}'.");
 
-            titulo = MisTextUtils.Normalizar(titulo).Trim();
+            titulo = MisUtils.NormalizarTexto(titulo).Trim();
             var existeNota = await _db.Table<Nota>()
                                       .Where(n => n.Titulo.ToLower() == titulo.ToLower()
                                                && n.ApartadoId == _apartado.Id)
@@ -351,7 +351,7 @@ namespace GuiaBakio.Services
             if (apartadoId <= 0)
                 throw new ArgumentException("El Id del apartado debe ser mayor que 0.", nameof(apartadoId));
 
-            titulo = MisTextUtils.Normalizar(titulo).Trim();
+            titulo = MisUtils.NormalizarTexto(titulo).Trim();
             return await _db.Table<Nota>()
                             .Where(a => a.Titulo.ToLower() == titulo.ToLower() && a.ApartadoId == apartadoId)
                             .FirstOrDefaultAsync();
@@ -371,7 +371,7 @@ namespace GuiaBakio.Services
                 var _apartado = await ObtenerApartadoAsync(nombreApartado, _localidad.Id);
                 if (_apartado != null)
                 {
-                    titulo = MisTextUtils.Normalizar(titulo).Trim();
+                    titulo = MisUtils.NormalizarTexto(titulo).Trim();
                     return await _db.Table<Nota>().Where(a => a.Titulo.ToLower() == titulo.ToLower() && a.ApartadoId == _apartado.Id).FirstOrDefaultAsync();
                 }
             }
