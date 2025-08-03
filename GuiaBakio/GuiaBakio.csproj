@@ -91,7 +91,7 @@
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
-			
+					
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />
 
@@ -118,10 +118,6 @@
 	  <MauiXaml Update="Resources\Styles\MisEstilos.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Popups\" />
 	</ItemGroup>
 
 </Project>

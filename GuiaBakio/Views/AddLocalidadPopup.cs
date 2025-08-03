@@ -7,7 +7,7 @@ namespace GuiaBakio.Views
 {
     internal class AddLocalidadPopup
     {
-        public async Task<string?> MostrarYEsperarAsync(Page hostPage)
+        public async Task<string?> MostrarAsync(Page hostPage)
         {
             var tcs = new TaskCompletionSource<string?>();
             var popup = new CommunityToolkit.Maui.Views.Popup { BackgroundColor = Colors.White };

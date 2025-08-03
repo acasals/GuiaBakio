@@ -1,7 +1,9 @@
 ﻿using GuiaBakio.Models;
 using GuiaBakio.Services;
+using GuiaBakio.Views;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Windows.Input;
 
 namespace GuiaBakio.ViewModels
 {

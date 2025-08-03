@@ -10,7 +10,6 @@ namespace GuiaBakio
     {
         private readonly DataBaseService? _dbService;
         private ListaLocalidadesViewModel _myViewModel;
-        private readonly AddLocalidadPopup _addLocalidadPopup = new();    
         public MainPage()
         {
             InitializeComponent();
@@ -59,7 +58,8 @@ namespace GuiaBakio
 
         private async void BtnAñadir_Clicked(object sender, EventArgs e)
         {
-            string? nuevaLocalidad = await _addLocalidadPopup.MostrarYEsperarAsync(this);
+            AddLocalidadPopup _addLocalidadPopup = new();
+            string? nuevaLocalidad = await _addLocalidadPopup.MostrarAsync(this);
             
             try
             {
@@ -77,15 +77,15 @@ namespace GuiaBakio
         
         private async Task CargarListaLocalidadesAsync()
         {
-                            try
-                            {
-                                await _myViewModel.ActualizarVistaLocalidadesAsync();
-                                await MisUtils.MostrarBotonAnimado(BtnAñadir);
+            try
+            {
+                await _myViewModel.ActualizarVistaLocalidadesAsync();
+                await MisUtils.MostrarBotonAnimado(BtnAñadir);
             }
-                            catch (Exception ex)
-                            {
-                                await DisplayAlert("Error", $"No se pudo obtener la lista de localidades.\n{ex.Message}", "OK");
-                            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", $"No se pudo obtener la lista de localidades.\n{ex.Message}", "OK");
+            }
          }
         
     }
