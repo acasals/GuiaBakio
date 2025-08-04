@@ -1,6 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
-using CommunityToolkit.Maui;
+﻿using CommunityToolkit.Maui;
+using CommunityToolkit.Maui.Services;
+using GuiaBakio.Pages;
 using GuiaBakio.Services;
+using GuiaBakio.Services.Interfaces;
+using GuiaBakio.ViewModels;
+using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 
 namespace GuiaBakio
@@ -26,6 +30,10 @@ namespace GuiaBakio
                 Debug.WriteLine($"Database path: {dbPath}");
                 return new DataBaseService(dbPath);
             });
+
+            builder.Services.AddSingleton<ITextEditorPopupService, TextEditorPopupService>();
+            builder.Services.AddTransient<LocalidadDetalleViewModel>();
+            builder.Services.AddTransient<LocalidadPage>();
 
 #if DEBUG
             builder.Logging.AddDebug();

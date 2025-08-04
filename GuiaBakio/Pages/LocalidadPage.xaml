@@ -28,11 +28,11 @@
                    TextColor="Gray" />
 
             <!-- Botón flotante de edición -->
-                <ImageButton Source="edit_icon.png"
+            <ImageButton Source="edit_icon.png"
                          Style="{StaticResource FloatingImageButtonStyle}"
-                         Command="{Binding EditarTextoCommand}">
+                         Command="{Binding EditarTextoAsyncCommand}">
                 <ImageButton.Behaviors>
-                     <toolkit:IconTintColorBehavior TintColor="White" />
+                    <toolkit:IconTintColorBehavior TintColor="White" />
                 </ImageButton.Behaviors>
             </ImageButton>
 
@@ -57,10 +57,10 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
-            <!-- Botón flotante de añadir ítem -->
+            <!--Botón flotante de añadir ítem-->
             <Button Text="+"
             Style="{StaticResource FloatingButtonStyle}"
-            Command="{Binding AgregarApartadoCommand}" />
+            Command="{Binding AgregarApartadoAsyncCommand}" />
 
             <!-- Sugerencia si no hay ítems -->
             <Label IsVisible="{Binding NoHayApartados}"
@@ -90,13 +90,13 @@
                        FontAttributes="Italic"
                        HorizontalOptions="Center"
                        VerticalOptions="Center"
-                       TextColor="Gray" />            
+                       TextColor="Gray" />
             </Grid>
-            
+
             <!-- Botón flotante para añadir imagen -->
             <Button Text="+"
                     Style="{StaticResource FloatingButtonStyle}"
-                    Command="{Binding AgregarImagenCommand}" />
+                    Command="{Binding AgregarImagenAsyncCommand}" />
 
         </Grid>
     </Grid>

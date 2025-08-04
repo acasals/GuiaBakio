@@ -3,60 +3,44 @@ using GuiaBakio.Services;
 using GuiaBakio.ViewModels;
 using System.Diagnostics;
 using CommunityToolkit.Maui.Views;
+using GuiaBakio.Views;
 
 
 namespace GuiaBakio.Pages;
 public partial class LocalidadPage : ContentPage, IQueryAttributable
 {
-    private readonly DataBaseService? _dbService = App.Services.GetService<DataBaseService>();
-    private LocalidadDetalleViewModel? _myViewModel;
-    
-    public LocalidadPage(string nombre)
+    private readonly LocalidadDetalleViewModel _myViewModel;
+    private int localidadId;
+
+    public LocalidadPage(LocalidadDetalleViewModel viewModel)
     {
         InitializeComponent();
-        
+        _myViewModel = viewModel;
         AppForegroundNotifier.AppResumed += OnAppResumed;
     }
-
-    // Constructor por defecto (requerido por Shell)
-    public LocalidadPage() : this("") {}
-
     public async void ApplyQueryAttributes(IDictionary<string, object> query)
     {
         if (query.TryGetValue("Id", out var value) && int.TryParse(value?.ToString(), out int id))
         {
-            if (_dbService != null)
-            {
-                _myViewModel = new LocalidadDetalleViewModel(id, _dbService);
-                BindingContext = _myViewModel;
-                await _myViewModel.CargarDatosAsync();
-            }
-            else
-            {
-                Debug.WriteLine("No se pudo obtener el servicio DataBaseService.");
-                await Shell.Current.GoToAsync("..");
-            }
+            localidadId = id;
+            BindingContext = _myViewModel;
+            await _myViewModel.CargarDatosAsync(id);
         }
         else
         {
-            Debug.WriteLine("No se pudo obtener el Id de la localidad desde los parámetros de la consulta.");
+            Debug.WriteLine("No se pudo obtener el servicio DataBaseService.");
             await Shell.Current.GoToAsync("..");
         }
      }
  
-    private void OnAppResumed()
+    private async void OnAppResumed()
     {
-        if (_dbService != null)
-        {
-
-            _ = _myViewModel?.CargarDatosAsync();
-        }
+       await _myViewModel.CargarDatosAsync(localidadId);
     }
 
     private async void OnVolverButton_Clicked(object sender, EventArgs e)
     {
         await Shell.Current.GoToAsync("..");
     }
-
-
+ 
 }
