@@ -43,7 +43,7 @@ namespace GuiaBakio.Services
             {
                 ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(2, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(1,GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }
             }
             };
@@ -51,16 +51,11 @@ namespace GuiaBakio.Services
             grid.Add(entry, 0, 0);
             grid.Add(button, 1, 0);
 
-            var border  = new Border
+            popup.Content = grid;
+            await currentPage.ShowPopupAsync(popup, new PopupOptions
             {
-                Content = grid,
-                WidthRequest = 300,
-                Padding = 10,
-                BackgroundColor = Colors.White
-            };
-
-            popup.Content = border;
-            await currentPage.ShowPopupAsync(popup);
+                OnTappingOutsideOfPopup = () => tcs.TrySetResult(null)
+            });
             return await tcs.Task;
         }
     }

@@ -58,10 +58,11 @@ namespace GuiaBakio.ViewModels
         {
             var resultado = await _textEditorPopupService.MostrarEditorAsync("Texto inicial");
 
-            if (resultado != null)
+            if (resultado is null)
             {
-                // Procesar el texto editado
+                return;
             }
+            //código para guardar el texto editado
         }
 
         [RelayCommand]

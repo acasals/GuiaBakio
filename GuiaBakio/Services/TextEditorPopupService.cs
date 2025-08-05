@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Maui.Extensions;
+﻿using CommunityToolkit.Maui;
+using CommunityToolkit.Maui.Extensions;
 using GuiaBakio.Services.Interfaces;
 
 namespace GuiaBakio.Services
@@ -57,7 +58,10 @@ namespace GuiaBakio.Services
             }
             };
 
-            await currentPage.ShowPopupAsync(popup);
+            await currentPage.ShowPopupAsync(popup,new PopupOptions
+            {
+                OnTappingOutsideOfPopup = () => tcs.TrySetResult(null)
+            });
             return await tcs.Task;
         }
     }

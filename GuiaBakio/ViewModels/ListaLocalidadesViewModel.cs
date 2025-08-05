@@ -43,6 +43,10 @@ namespace GuiaBakio.ViewModels
         public async Task AddLocalidadAsync()
         {
             var nuevaLocalidad = await _addLocalidadPopupService.MostrarAsync();
+            if (nuevaLocalidad is null)
+            {
+               return;
+            }
 
             if (string.IsNullOrWhiteSpace(nuevaLocalidad))
             {
