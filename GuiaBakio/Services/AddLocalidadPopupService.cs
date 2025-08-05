@@ -1,17 +1,26 @@
-﻿using CommunityToolkit.Maui.Extensions;
+﻿using CommunityToolkit.Maui;
+using CommunityToolkit.Maui.Extensions;
+using GuiaBakio.Services.Interfaces;
 using Microsoft.Maui.Controls.Shapes;
 
 
 
-namespace GuiaBakio.Views
+namespace GuiaBakio.Services
 {
-    internal class AddLocalidadPopup
+    public class AddLocalidadPopupService : IAddLocalidadPopupService
     {
-        public async Task<string?> MostrarAsync(Page hostPage)
+        public async Task<string?> MostrarAsync()
         {
-            var tcs = new TaskCompletionSource<string?>();
+            var currentPage = Shell.Current?.CurrentPage
+                             ?? Application.Current?.MainPage;
+
+            if (currentPage is null)
+                throw new InvalidOperationException("No se pudo obtener la página actual.");
+
             var popup = new CommunityToolkit.Maui.Views.Popup { BackgroundColor = Colors.White };
-              
+
+            var tcs = new TaskCompletionSource<string?>();
+
             var entry = new Entry
             {
                 Placeholder = "Introduce una localidad",
@@ -47,16 +56,11 @@ namespace GuiaBakio.Views
                 Content = grid,
                 WidthRequest = 300,
                 Padding = 10,
-                StrokeShape = new RoundRectangle
-                {
-                    CornerRadius = 12
-                },
                 BackgroundColor = Colors.White
             };
 
             popup.Content = border;
-            await hostPage.ShowPopupAsync(popup);
-
+            await currentPage.ShowPopupAsync(popup);
             return await tcs.Task;
         }
     }

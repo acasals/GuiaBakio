@@ -2,20 +2,16 @@
 using GuiaBakio.Models;
 using GuiaBakio.Services;
 using GuiaBakio.ViewModels;
-using GuiaBakio.Views;
 
 namespace GuiaBakio
 {
     public partial class MainPage : ContentPage
     {
-        private readonly DataBaseService? _dbService;
         private ListaLocalidadesViewModel _myViewModel;
-        public MainPage()
+        public MainPage(ListaLocalidadesViewModel viewmodel)
         {
             InitializeComponent();
-            _dbService =  App.Services.GetService<DataBaseService>();
-
-            _myViewModel = new ListaLocalidadesViewModel(_dbService);
+            _myViewModel = viewmodel;
             BindingContext = _myViewModel;
             AppForegroundNotifier.AppResumed += OnAppResumed;
         }
@@ -24,19 +20,28 @@ namespace GuiaBakio
         {
             base.OnAppearing();
 
-            if (_dbService != null)
+            try
             {
-                await _dbService.InitTablesAsync();
-                await CargarListaLocalidadesAsync();
+                await _myViewModel.CargarListaLocalidadesAsync();
             }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", $"No se pudo obtener la lista de localidades.\n{ex.Message}", "OK");
+            }
+            await MisUtils.MostrarBotonAnimado(BtnAñadir);
         }
 
-        private void OnAppResumed()
+        private async void OnAppResumed()
         {
-            if (_dbService != null)
+            try
             {
-                _ = CargarListaLocalidadesAsync();
+                await _myViewModel.CargarListaLocalidadesAsync();
             }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", $"No se pudo obtener la lista de localidades.\n{ex.Message}", "OK");
+            }
+            await MisUtils.MostrarBotonAnimado(BtnAñadir);
         }
 
         private async void OnLocalidadSeleccionada(object sender, SelectionChangedEventArgs e)
@@ -55,39 +60,6 @@ namespace GuiaBakio
                 }
             }
         }
-
-        private async void BtnAñadir_Clicked(object sender, EventArgs e)
-        {
-            AddLocalidadPopup _addLocalidadPopup = new();
-            string? nuevaLocalidad = await _addLocalidadPopup.MostrarAsync(this);
-            
-            try
-            {
-                bool añadido = await _myViewModel.AñadirLocalidadAsync(nuevaLocalidad);
-                if (!añadido)
-                {
-                    await DisplayAlert("Localidad existente", "La localidad ya está en la lista o no es válida.", "OK");
-                }
-            }
-            catch (Exception ex)
-            {
-                await DisplayAlert("Error", $"No se pudo añadir la localidad.\n{ex.Message}", "OK");
-            }
-        }
-        
-        private async Task CargarListaLocalidadesAsync()
-        {
-            try
-            {
-                await _myViewModel.ActualizarVistaLocalidadesAsync();
-                await MisUtils.MostrarBotonAnimado(BtnAñadir);
-            }
-            catch (Exception ex)
-            {
-                await DisplayAlert("Error", $"No se pudo obtener la lista de localidades.\n{ex.Message}", "OK");
-            }
-         }
-        
     }
 }
 

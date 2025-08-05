@@ -38,7 +38,7 @@
                  Text="+"
                  Grid.Row="1"
                  Style="{StaticResource FloatingButtonStyle}"
-                 Clicked="BtnAñadir_Clicked" />
+                 Command="{Binding AddLocalidadAsyncCommand}" />
 
     </Grid>
 

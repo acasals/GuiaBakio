@@ -32,6 +32,11 @@ namespace GuiaBakio
             });
 
             builder.Services.AddSingleton<ITextEditorPopupService, TextEditorPopupService>();
+            builder.Services.AddSingleton<IAddLocalidadPopupService, AddLocalidadPopupService>();
+              builder.Services.AddSingleton<IDialogService, DialogService>();
+            builder.Services.AddTransient<ListaLocalidadesViewModel>();
+
+              builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<LocalidadDetalleViewModel>();
             builder.Services.AddTransient<LocalidadPage>();
 

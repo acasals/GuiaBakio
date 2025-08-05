@@ -1,9 +1,6 @@
-using GuiaBakio.Models;
 using GuiaBakio.Services;
 using GuiaBakio.ViewModels;
 using System.Diagnostics;
-using CommunityToolkit.Maui.Views;
-using GuiaBakio.Views;
 
 
 namespace GuiaBakio.Pages;

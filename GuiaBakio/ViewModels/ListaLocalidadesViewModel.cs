@@ -1,50 +1,71 @@
 ﻿using GuiaBakio.Models;
 using GuiaBakio.Services;
-using GuiaBakio.Views;
+using GuiaBakio.Services.Interfaces;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Windows.Input;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace GuiaBakio.ViewModels
 {
-    internal class ListaLocalidadesViewModel : INotifyPropertyChanged
+    public partial class ListaLocalidadesViewModel : ObservableObject
     {
-        public event PropertyChangedEventHandler? PropertyChanged;
+        private readonly DataBaseService _dbService;
+        private readonly IAddLocalidadPopupService _addLocalidadPopupService;
+        private readonly IDialogService _dialogService;
 
-        private ObservableCollection<Localidad> _ListaLocalidades = [];
-        public ObservableCollection<Localidad> ListaLocalidades
+        public IRelayCommand AddLocalidadAsyncCommand { get; }
+
+        [ObservableProperty]
+        private ObservableCollection<Localidad> listaLocalidades = [];
+               
+        public ListaLocalidadesViewModel(DataBaseService dbService,IAddLocalidadPopupService addLocalidadPopupService,IDialogService dialogService)
         {
-            get => _ListaLocalidades;
-            set
+            AddLocalidadAsyncCommand = new AsyncRelayCommand(AddLocalidadAsync);
+            _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
+            _addLocalidadPopupService =addLocalidadPopupService ?? throw new ArgumentNullException(nameof(_addLocalidadPopupService));
+            _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+        }
+
+        public async Task CargarListaLocalidadesAsync()
+        {
+            try
             {
-                _ListaLocalidades = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ListaLocalidades)));
+                var lista = await _dbService.ObtenerLocalidadesAsync();
+                ListaLocalidades = new ObservableCollection<Localidad>(lista);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("No se pudo cargar la lista de localidades.", ex);
             }
         }
-        private readonly DataBaseService _dbService;
-        public ListaLocalidadesViewModel(DataBaseService? dbService)
-        {
-            _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
-        }
 
-        public async Task ActualizarVistaLocalidadesAsync()
+        [RelayCommand]
+        public async Task AddLocalidadAsync()
         {
-            var lista = await _dbService.ObtenerLocalidadesAsync();
-            ListaLocalidades = new ObservableCollection<Localidad>(lista);
-        }
+            var nuevaLocalidad = await _addLocalidadPopupService.MostrarAsync();
 
-        public async Task<bool> AñadirLocalidadAsync(string? nuevaLocalidad)
-        {
-            if (string.IsNullOrWhiteSpace(nuevaLocalidad) || _dbService == null)
-                return false;
-
+            if (string.IsNullOrWhiteSpace(nuevaLocalidad))
+            {
+                await _dialogService.ShowAlertAsync("Error", "El nombre de la localidad no puede estar vacío.", "OK");
+                return;
+            }
             bool yaExiste = await _dbService.ExisteLocalidadAsync(nuevaLocalidad);
             if (yaExiste)
-                return false;
+            {
+                await _dialogService.ShowAlertAsync("Error", "Localidad existente.", "OK");
+                return;
+            }
 
-            await _dbService.InsertarLocalidadAsync(nuevaLocalidad);
-            await ActualizarVistaLocalidadesAsync();
-            return true;
+            try
+            {
+               await _dbService.InsertarLocalidadAsync(nuevaLocalidad);
+            }
+            catch (Exception ex)
+            {
+                await _dialogService.ShowAlertAsync("Error", $"No se pudo añadir la localidad.\n{ex.Message}", "OK");
+            }
+            
+            await CargarListaLocalidadesAsync();
         }
 
 
