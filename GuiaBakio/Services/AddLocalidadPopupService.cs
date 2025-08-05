@@ -17,7 +17,10 @@ namespace GuiaBakio.Services
             if (currentPage is null)
                 throw new InvalidOperationException("No se pudo obtener la página actual.");
 
-            var popup = new CommunityToolkit.Maui.Views.Popup { BackgroundColor = Colors.White };
+            var popup = new CommunityToolkit.Maui.Views.Popup
+            {
+                BackgroundColor = Colors.White
+            };
 
             var tcs = new TaskCompletionSource<string?>();
 

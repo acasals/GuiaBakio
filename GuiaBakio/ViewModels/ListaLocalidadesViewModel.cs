@@ -53,16 +53,15 @@ namespace GuiaBakio.ViewModels
                 await _dialogService.ShowAlertAsync("Error", "El nombre de la localidad no puede estar vacío.", "OK");
                 return;
             }
-            bool yaExiste = await _dbService.ExisteLocalidadAsync(nuevaLocalidad);
-            if (yaExiste)
-            {
-                await _dialogService.ShowAlertAsync("Error", "Localidad existente.", "OK");
-                return;
-            }
-
             try
             {
-               await _dbService.InsertarLocalidadAsync(nuevaLocalidad);
+                bool yaExiste = await _dbService.ExisteLocalidadAsync(nuevaLocalidad);
+                if (yaExiste)
+                    {
+                    await _dialogService.ShowAlertAsync("Error", "Localidad existente.", "OK");
+                    return;
+                    }
+                await _dbService.InsertarLocalidadAsync(nuevaLocalidad);
             }
             catch (Exception ex)
             {

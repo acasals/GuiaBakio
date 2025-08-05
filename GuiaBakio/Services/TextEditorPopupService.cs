@@ -44,7 +44,6 @@ namespace GuiaBakio.Services
 
             popup.Content = new VerticalStackLayout
             {
-                Padding = 20,
                 Spacing = 10,
                 Children =
             {

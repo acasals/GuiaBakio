@@ -1,7 +1,6 @@
 ﻿using GuiaBakio.Helpers;
 using GuiaBakio.Models;
 using SQLite;
-using System.Security.Cryptography.X509Certificates;
 
 namespace GuiaBakio.Services
 {
@@ -11,6 +10,7 @@ namespace GuiaBakio.Services
         public DataBaseService(string dbPath)
         {
             _db = new SQLiteAsyncConnection(dbPath);
+            var _ = InitTablesAsync();
         }
         public async Task InitTablesAsync()
         {
