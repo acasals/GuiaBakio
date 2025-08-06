@@ -23,20 +23,20 @@ namespace GuiaBakio
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
 
+            builder.Services.AddSingleton<IDialogOKService, DialogOKService>();
+            builder.Services.AddSingleton<IDialogYesNoService, DialogYesNoService>(); 
             builder.Services.AddSingleton<DataBaseService>(provider =>
             {
                 var dbName = "GuiaBakio.db";
                 var dbPath = Path.Combine(FileSystem.AppDataDirectory, dbName);
                 Debug.WriteLine($"Database path: {dbPath}");
-                return new DataBaseService(dbPath);
+                var dialogService = provider.GetRequiredService<IDialogYesNoService>();
+                return new DataBaseService(dbPath,dialogService);
             });
-
             builder.Services.AddSingleton<ITextEditorPopupService, TextEditorPopupService>();
             builder.Services.AddSingleton<IAddLocalidadPopupService, AddLocalidadPopupService>();
-            builder.Services.AddSingleton<IDialogService, DialogService>();
             builder.Services.AddTransient<ListaLocalidadesViewModel>();
-
-              builder.Services.AddTransient<MainPage>();
+            builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<LocalidadDetalleViewModel>();
             builder.Services.AddTransient<LocalidadPage>();
 

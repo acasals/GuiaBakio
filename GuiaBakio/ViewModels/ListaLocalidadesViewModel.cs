@@ -11,14 +11,14 @@ namespace GuiaBakio.ViewModels
     {
         private readonly DataBaseService _dbService;
         private readonly IAddLocalidadPopupService _addLocalidadPopupService;
-        private readonly IDialogService _dialogService;
+        private readonly IDialogOKService _dialogService;
 
         public IRelayCommand AddLocalidadAsyncCommand { get; }
 
         [ObservableProperty]
         private ObservableCollection<Localidad> listaLocalidades = [];
                
-        public ListaLocalidadesViewModel(DataBaseService dbService,IAddLocalidadPopupService addLocalidadPopupService,IDialogService dialogService)
+        public ListaLocalidadesViewModel(DataBaseService dbService,IAddLocalidadPopupService addLocalidadPopupService,IDialogOKService dialogService)
         {
             AddLocalidadAsyncCommand = new AsyncRelayCommand(AddLocalidadAsync);
             _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
