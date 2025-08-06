@@ -89,7 +89,24 @@ namespace GuiaBakio.Services
                             .Where(l => l.Nombre.ToLower() == nombreLocalidad.ToLower())
                                      .FirstOrDefaultAsync();
         }
-        public async Task ActualizarLocalidadAsync(Localidad localidad, string nuevoNombre, string texto="")
+        public async Task ActualizarLocalidadAsync(Localidad? localidad)
+        {
+            if (localidad == null)
+                throw new ArgumentNullException(nameof(localidad), "La localidad no puede ser nula.");
+            if (string.IsNullOrWhiteSpace(localidad.Nombre))
+                throw new ArgumentException("El nuevo nombre de la localidad es obligatorio.", nameof(localidad.Nombre));
+
+            try
+            {
+                localidad.FechaModificacion = DateTime.UtcNow;
+                await _db.UpdateAsync(localidad);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"No se pudo actualizar la localidad. {ex.Message}");
+            }
+        }
+        public async Task ActualizarLocalidadAsync(Localidad? localidad, string nuevoNombre, string texto="")
         {
             if (localidad == null)
                 throw new ArgumentNullException(nameof(localidad), "La localidad no puede ser nula.");
@@ -290,6 +307,23 @@ namespace GuiaBakio.Services
                             .Where(a => a.Nombre == nombreApartado && a.LocalidadId == _localidad.Id)
                             .FirstOrDefaultAsync();
         }
+        public async Task ActualizarApartadoAsync(Apartado apartado)
+        {
+            if (apartado == null)
+                throw new ArgumentNullException(nameof(apartado), "El apartado no puede ser nulo.");
+            if (string.IsNullOrWhiteSpace(apartado.Nombre))
+                throw new ArgumentException("El nuevo nombre del apartado es obligatorio.", nameof(apartado.Nombre));
+
+            try
+            {
+                apartado.FechaModificacion = DateTime.UtcNow;
+                await _db.UpdateAsync(apartado);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"No se pudo actualizar el apartado. {ex.Message}");
+            }
+        }
         public async Task ActualizarApartadoAsync(Apartado apartado, string nuevoNombre, string texto="")
         {
             if (apartado == null)
@@ -297,13 +331,13 @@ namespace GuiaBakio.Services
             if (string.IsNullOrWhiteSpace(nuevoNombre))
                 throw new ArgumentException("El nuevo nombre del apartado es obligatorio.", nameof(nuevoNombre));
 
-            Apartado _apartado = await ObtenerApartadoAsync(apartado.Id) ?? throw new InvalidOperationException("No se encontró el apartado ");
-            _apartado.Nombre = nuevoNombre;
-            _apartado.Texto = texto;    
-            _apartado.FechaModificacion = DateTime.UtcNow;
-
             try
             {
+                Apartado _apartado = await ObtenerApartadoAsync(apartado.Id) ?? throw new InvalidOperationException("No se encontró el apartado ");
+                _apartado.Nombre = nuevoNombre;
+                _apartado.Texto = texto;
+                _apartado.FechaModificacion = DateTime.UtcNow;
+
                 await _db.UpdateAsync(_apartado);
             }
             catch (Exception ex)
@@ -495,19 +529,36 @@ namespace GuiaBakio.Services
             }
             return null;
         }
+        public async Task ActualizarNotaAsync(Nota nota)
+        {
+            if (nota == null)
+                throw new ArgumentNullException(nameof(nota), "La nota no puede ser nula.");
+            if (string.IsNullOrWhiteSpace(nota.Titulo))
+                throw new ArgumentException("El nuevo título de la nota es obligatorio.", nameof(nota.Titulo));
+
+            try
+            {
+                nota.FechaModificacion = DateTime.UtcNow;
+                await _db.UpdateAsync(nota);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"No se pudo actualizar la nota. {ex.Message}");
+            }
+        }
         public async Task ActualizarNotaAsync(Nota nota, string nuevoTitulo, string nuevoContenido)
         {
             if (nota == null)
                 throw new ArgumentNullException(nameof(nota), "La nota no puede ser nula.");
             if (string.IsNullOrWhiteSpace(nuevoTitulo))
                 throw new ArgumentException("El nuevo título de la nota es obligatorio.", nameof(nuevoTitulo));
-
-            Nota _nota = await ObtenerNotaAsync(nota.Id) ?? throw new InvalidOperationException("No se encontró la nota.");
-            _nota.Titulo = nuevoTitulo;
-            _nota.Contenido = nuevoContenido;
-            _nota.FechaModificacion = DateTime.UtcNow;
+            
             try
             {
+                Nota _nota = await ObtenerNotaAsync(nota.Id) ?? throw new InvalidOperationException("No se encontró la nota.");
+                _nota.Titulo = nuevoTitulo;
+                _nota.Contenido = nuevoContenido;
+                _nota.FechaModificacion = DateTime.UtcNow;
                 await _db.UpdateAsync(_nota);
             }
             catch (Exception ex)
