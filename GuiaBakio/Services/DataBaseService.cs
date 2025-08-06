@@ -1,5 +1,6 @@
 ﻿using GuiaBakio.Helpers;
 using GuiaBakio.Models;
+using GuiaBakio.Services.Interfaces;
 using SQLite;
 
 namespace GuiaBakio.Services
@@ -7,9 +8,11 @@ namespace GuiaBakio.Services
     public class DataBaseService
     {
         private readonly SQLiteAsyncConnection _db;
-        public DataBaseService(string dbPath)
+        private readonly IDialogYesNoService _dialogService;
+        public DataBaseService(string dbPath, IDialogYesNoService dialogService)
         {
             _db = new SQLiteAsyncConnection(dbPath);
+            _dialogService= dialogService ?? throw new ArgumentNullException(nameof(dialogService), "El servicio de diálogo no puede ser nulo.");
             var _ = InitTablesAsync();
         }
         public async Task InitTablesAsync()
@@ -22,6 +25,7 @@ namespace GuiaBakio.Services
             await _db.CreateTableAsync<ImagenNota>();
         }
 
+    
         #region "Localidades"
         public async Task InsertarLocalidadAsync(string nombreLocalidad)
         {
@@ -31,9 +35,16 @@ namespace GuiaBakio.Services
             bool localidadExiste = await ExisteLocalidadAsync(nombreLocalidad);
             if (localidadExiste)
                 throw new InvalidOperationException("Ya existe una localidad con ese nombre.");
-
-            Localidad _localidad = new(nombreLocalidad);
-            await _db.InsertAsync(_localidad);
+           
+            try
+            {
+                Localidad _localidad = new(nombreLocalidad);
+                await _db.InsertAsync(_localidad);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"No se pudo crear la localidad. {ex.Message}");
+            }
         }
         public async Task<bool> ExisteLocalidadAsync(int localidadId)
         {
@@ -85,20 +96,57 @@ namespace GuiaBakio.Services
             if (string.IsNullOrWhiteSpace(nuevoNombre))
                 throw new ArgumentException("El nuevo nombre de la localidad es obligatorio.", nameof(nuevoNombre));
 
-            Localidad? _localidad = await ObtenerLocalidadAsync(localidad.Id) ?? throw new InvalidOperationException("No se encontró la localidad.");
+            try
+            {
+                Localidad? _localidad = await ObtenerLocalidadAsync(localidad.Id) ?? throw new InvalidOperationException("No se encontró la localidad.");
 
-            _localidad.Nombre = nuevoNombre;
-            _localidad.Texto = texto;
-            _localidad.FechaModificacion = DateTime.UtcNow;
-            await _db.UpdateAsync(_localidad);
+                _localidad.Nombre = nuevoNombre;
+                _localidad.Texto = texto;
+                _localidad.FechaModificacion = DateTime.UtcNow;
+            
+                await _db.UpdateAsync(_localidad);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"No se pudo actualizar la localidad. {ex.Message}");
+            }
         }
-        public async Task<int> EliminarLocalidadAsync(int localidadId)
+        public async Task<int> EliminarLocalidadAsync(int localidadId,bool confirmarBorrado = true)
         {
             if (localidadId <= 0) throw new ArgumentException("El Id de la localidad debe ser mayor que 0.", nameof(localidadId));
-            var localidad = await ObtenerLocalidadAsync(localidadId);
-            if (localidad == null) throw new InvalidOperationException("No se encontró la localidad.");
-            return await _db.DeleteAsync<Apartado>(localidadId);
-        }
+            var localidad = await ObtenerLocalidadAsync(localidadId) ?? throw new InvalidOperationException("No se encontró la localidad.");
+                        
+            var localidadApartados = await ObtenerApartadosAsync(localidadId);
+            if (confirmarBorrado)
+            {
+                string texto = "¿Seguro que quieres borrar esta localidad?";
+
+                if (localidadApartados != null)
+                {
+                    if (localidadApartados.Count > 0)
+                        texto = "Hay algunos apartados asociados a esta localidad. " + texto;
+                }
+
+                bool confirmacion = await _dialogService.ShowAlertAsync(
+                    "Confirmar borrado",
+                    texto,
+                    "Sí",
+                    "No");
+                if (!confirmacion)
+                    return 0; // Cancelar el borrado si el usuario no confirma      
+            }
+            try
+            {
+                if (localidadApartados != null)
+                        foreach (Apartado apartado in localidadApartados)
+                            await EliminarApartadoAsync(apartado.Id, false);
+                return await _db.DeleteAsync<Localidad>(localidadId);
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Hubo un problema al eliminar la localidad.{ex.Message}");
+                }
+            }
 
         #endregion
 
@@ -117,9 +165,16 @@ namespace GuiaBakio.Services
             var existeApartado = await ExisteApartadoAsync(nombreApartado, localidadId);
             if (existeApartado)
                 throw new InvalidOperationException("Ya existe un apartado con ese nombre en esta localidad.");
-
-            Apartado apartado = new(nombreApartado, localidadId, texto);
-            await _db.InsertAsync(apartado);
+       
+            try
+            {
+                Apartado apartado = new(nombreApartado, localidadId, texto);
+                await _db.InsertAsync(apartado);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"No se pudo crear el apartado. {ex.Message}");
+            }
         }
         public async Task InsertarApartadoAsync(string nombreApartado, string nombreLocalidad, string texto="")
         {
@@ -128,16 +183,21 @@ namespace GuiaBakio.Services
             if (string.IsNullOrWhiteSpace(nombreLocalidad))
                 throw new ArgumentException("Una localidad es obligatoria.", nameof(nombreLocalidad));
 
-            Localidad? _localidad = await ObtenerLocalidadAsync(nombreLocalidad);
-            if (_localidad == null)
-                throw new InvalidOperationException($"No se encontró la localidad '{nombreLocalidad}'.");
+            Localidad? _localidad = await ObtenerLocalidadAsync(nombreLocalidad) ?? throw new InvalidOperationException($"No se encontró la localidad '{nombreLocalidad}'.");
 
             var existeApartado = await ExisteApartadoAsync(nombreApartado, nombreLocalidad);
             if (existeApartado)
                 throw new InvalidOperationException("Ya existe un apartado con ese nombre en esta localidad.");
 
-            Apartado apartado = new(nombreApartado, _localidad.Id,texto);
-            await _db.InsertAsync(apartado);
+            try
+            {
+                Apartado apartado = new(nombreApartado, _localidad.Id, texto);
+                await _db.InsertAsync(apartado);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"No se pudo crear el apartado. {ex.Message}");
+            }
         }
         public async Task<bool> ExisteApartadoAsync(int apartadoId)
         {
@@ -166,10 +226,17 @@ namespace GuiaBakio.Services
             if (string.IsNullOrWhiteSpace(nombreLocalidad))
                 throw new ArgumentException("El nombre de la localidad es obligatorio.", nameof(nombreLocalidad));
 
-            var _localidad = await ObtenerLocalidadAsync(nombreLocalidad);
-            if (_localidad != null)
+            try
             {
-                return await ExisteApartadoAsync(nombreApartado, _localidad.Id);
+                var _localidad = await ObtenerLocalidadAsync(nombreLocalidad);
+                if (_localidad != null)
+                {
+                    return await ExisteApartadoAsync(nombreApartado, _localidad.Id);
+                }
+            }
+            catch
+            {
+                return false; 
             }
             return false;
         }
@@ -185,9 +252,8 @@ namespace GuiaBakio.Services
             if (string.IsNullOrWhiteSpace(nombreLocalidad))
                 throw new ArgumentException("El nombre de la localidad es obligatorio.", nameof(nombreLocalidad));
 
-            Localidad? _localidad = await ObtenerLocalidadAsync(nombreLocalidad);
-            if (_localidad == null)
-                throw new InvalidOperationException($"No se encontró la localidad '{nombreLocalidad}'.");
+            Localidad? _localidad = await ObtenerLocalidadAsync(nombreLocalidad) ?? throw new InvalidOperationException($"No se encontró la localidad '{nombreLocalidad}'.");
+
             return await ObtenerApartadosAsync(_localidad.Id);
         }
         public async Task<Apartado> ObtenerApartadoAsync(int apartadoId)
@@ -217,9 +283,7 @@ namespace GuiaBakio.Services
             if (string.IsNullOrWhiteSpace(nombreLocalidad))
                 throw new ArgumentException("Una localidad es obligatoria.", nameof(nombreLocalidad));
 
-            Localidad? _localidad = await ObtenerLocalidadAsync(nombreLocalidad);
-            if (_localidad == null)
-                throw new InvalidOperationException($"No se encontró la localidad '{nombreLocalidad}'.");
+            Localidad? _localidad = await ObtenerLocalidadAsync(nombreLocalidad) ?? throw new InvalidOperationException($"No se encontró la localidad '{nombreLocalidad}'.");
 
             nombreApartado = MisUtils.NormalizarTexto(nombreApartado).Trim();
             return await _db.Table<Apartado>()
@@ -237,14 +301,51 @@ namespace GuiaBakio.Services
             _apartado.Nombre = nuevoNombre;
             _apartado.Texto = texto;    
             _apartado.FechaModificacion = DateTime.UtcNow;
-            await _db.UpdateAsync(_apartado);
+
+            try
+            {
+                await _db.UpdateAsync(_apartado);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"No se pudo actualizar el apartado. {ex.Message}");
+            }
         }
-        public async Task<int> EliminarApartadoAsync(int apartadoId)
+        public async Task<int> EliminarApartadoAsync(int apartadoId,bool confirmarBorrado = true)
         {
             if (apartadoId <= 0) throw new ArgumentException("El Id del apartado debe ser mayor que 0.", nameof(apartadoId));
-            var apartado = await ObtenerApartadoAsync(apartadoId);
-            if (apartado == null) throw new InvalidOperationException("No se encontró el apartado.");
-            return await _db.DeleteAsync<Apartado>(apartadoId);
+            var apartado = await ObtenerApartadoAsync(apartadoId) ?? throw new InvalidOperationException("No se encontró el apartado.");
+
+            var apartadoNotas = await ObtenerNotasAsync(apartadoId);
+            if (confirmarBorrado)
+            {
+                string texto = "¿Seguro que quieres borrar este apartado?";
+
+                if (apartadoNotas != null)
+                {
+                    if (apartadoNotas.Count > 0)
+                        texto = "Hay algunas notas asociadas a este apartado. " + texto;
+                }
+
+                bool confirmacion = await _dialogService.ShowAlertAsync(
+                    "Confirmar borrado",
+                    texto,
+                    "Sí",
+                    "No");
+                if (!confirmacion)
+                    return 0; // Cancelar el borrado si el usuario no confirma      
+            }
+            try
+            {
+                if (apartadoNotas != null)
+                    foreach (Nota nota in apartadoNotas)
+                        await EliminarNotaAsync(nota.Id,false);
+                return await _db.DeleteAsync<Apartado>(apartadoId);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Hubo un problema al eliminar el apartado.{ex.Message}");
+            }
         }
 
         #endregion
@@ -265,8 +366,15 @@ namespace GuiaBakio.Services
             if (existeNota)
                 throw new InvalidOperationException("Ya existe una nota con ese título en este apartado.");
 
-            Nota nota = new(titulo, texto, apartadoId);
-            await _db.InsertAsync(nota);
+            try
+            {
+                Nota nota = new(titulo, texto, apartadoId);
+                await _db.InsertAsync(nota);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"No se pudo crear la nota. {ex.Message}");
+            }
         }
         public async Task InsertarNotaAsync(string titulo, string texto, string nombreApartado, string nombreLocalidad)
         {
@@ -277,20 +385,23 @@ namespace GuiaBakio.Services
             if (string.IsNullOrWhiteSpace(nombreLocalidad))
                 throw new ArgumentException("La localidad es obligatoria.", nameof(nombreLocalidad));
 
-            var _localidad = await ObtenerLocalidadAsync(nombreLocalidad);
-            if (_localidad == null)
-                throw new InvalidOperationException("No se encontró la localidad con nombre '{localidad}'.");
+            var _localidad = await ObtenerLocalidadAsync(nombreLocalidad) ?? throw new InvalidOperationException("No se encontró la localidad con nombre '{localidad}'.");
 
-            var _apartado = await ObtenerApartadoAsync(nombreApartado, _localidad.Id);
-            if (_apartado == null)
-                throw new InvalidOperationException($"No se encontró el apartado '{nombreApartado}' en la localidad '{nombreLocalidad}'.");
+            var _apartado = await ObtenerApartadoAsync(nombreApartado, _localidad.Id) ?? throw new InvalidOperationException($"No se encontró el apartado '{nombreApartado}' en la localidad '{nombreLocalidad}'.");
 
             bool existeNota = await ExisteNotaAsync(titulo, _apartado.Id);
             if (existeNota)
                 throw new InvalidOperationException("Ya existe una nota con ese título en este apartado.");
 
-            Nota nota = new(titulo, texto, _apartado.Id);
-            await _db.InsertAsync(nota);
+            try
+            {
+                Nota nota = new(titulo, texto, _apartado.Id); 
+                await _db.InsertAsync(nota);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"No se pudo crear la nota. {ex.Message}");
+            }
         }
         public async Task<bool> ExisteNotaAsync(int notaId)
         {
@@ -335,6 +446,13 @@ namespace GuiaBakio.Services
                                                && n.ApartadoId == _apartado.Id)
                                       .FirstOrDefaultAsync();
             return existeNota != null;
+        }
+        public async Task<List<Nota>> ObtenerNotasAsync(int apartadoId)
+        {
+            if (apartadoId <= 0) throw new ArgumentException("El Id del apartado debe ser mayor que 0.", nameof(apartadoId));
+            return await _db.Table<Nota>()
+                            .Where(a => a.ApartadoId == apartadoId)
+                            .ToListAsync();
         }
         public async Task<Nota> ObtenerNotaAsync(int notaId)
         {
@@ -384,20 +502,54 @@ namespace GuiaBakio.Services
             if (string.IsNullOrWhiteSpace(nuevoTitulo))
                 throw new ArgumentException("El nuevo título de la nota es obligatorio.", nameof(nuevoTitulo));
 
-            Nota _nota = await ObtenerNotaAsync(nota.Id);
-            if (_nota == null) throw new InvalidOperationException("No se encontró la nota.");
-
+            Nota _nota = await ObtenerNotaAsync(nota.Id) ?? throw new InvalidOperationException("No se encontró la nota.");
             _nota.Titulo = nuevoTitulo;
             _nota.Contenido = nuevoContenido;
             _nota.FechaModificacion = DateTime.UtcNow;
-            await _db.UpdateAsync(_nota);
+            try
+            {
+                await _db.UpdateAsync(_nota);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"No se pudo actualizar la nota. {ex.Message}");
+            }
         }
-        public async Task<int> EliminarNotaAsync(int notaId)
+        public async Task<int> EliminarNotaAsync(int notaId, bool confirmarBorrado = true)
         {
             if (notaId <= 0) throw new ArgumentException("El Id de la nota debe ser mayor que 0.", nameof(notaId));
-            var nota = await ObtenerNotaAsync(notaId);
-            if (nota == null) throw new InvalidOperationException("No se encontró la nota.");
-            return await _db.DeleteAsync<Nota>(notaId);
+            _ = await ObtenerNotaAsync(notaId) ?? throw new InvalidOperationException("No se encontró la nota.");
+
+            var notaImagenes = await ObtenerImagenesPorNotaAsync(notaId);
+            if (confirmarBorrado)
+            {
+                string texto = "¿Seguro que quieres borrar esta nota?";
+                
+                if (notaImagenes != null)
+                {
+                    if (notaImagenes.Count > 0)
+                        texto = "Hay algunas imágenes asociadas a esta nota. " + texto;
+                }
+
+                bool confirmacion = await _dialogService.ShowAlertAsync(
+                    "Confirmar borrado",
+                    texto,
+                    "Sí",
+                    "No");
+                if (!confirmacion)
+                    return 0; // Cancelar el borrado si el usuario no confirma      
+            }
+            try
+            {
+                if (notaImagenes != null)
+                    foreach (ImagenNota imagenNota in notaImagenes)
+                        await EliminarImagenNotaAsync(imagenNota.Id,false);
+                return await _db.DeleteAsync<Nota>(notaId);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Hubo un problema al eliminar la nota.{ex.Message}");
+            }
         }
 
         #endregion
@@ -413,8 +565,15 @@ namespace GuiaBakio.Services
             if (!localidadExiste)
                 throw new InvalidOperationException($"La localidad con Id '{localidadId}' no existe.");
 
-            ImagenLocalidad imagen = new(localidadId, byteArray, nombre);
-            await _db.InsertAsync(imagen);
+            try
+            {
+                ImagenLocalidad imagen = new(localidadId, byteArray, nombre); 
+                await _db.InsertAsync(imagen);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"No se pudo insertar la imagen. {ex.Message}");
+            }
         }
         public async Task<ImagenLocalidad> ObtenerImagenLocalidadAsync(int imagenLocalidadId)
         {
@@ -431,14 +590,30 @@ namespace GuiaBakio.Services
                             .Where(a => a.LocalidadId == localidadId)
                             .ToListAsync();
         }
-        public async Task<int> EliminarImagenLocalidadAsync(int ImagenLocalidadId)
+        public async Task<int> EliminarImagenLocalidadAsync(int imagenLocalidadId,bool confirmarBorrado = true)
         {
-            if (ImagenLocalidadId <= 0) throw new ArgumentException("El Id de la imagen debe ser mayor que 0.", nameof(ImagenLocalidadId));
+            if (imagenLocalidadId <= 0) throw new ArgumentException("El Id de la imagen debe ser mayor que 0.", nameof(imagenLocalidadId));
 
-            var ImagenLocalidad = await ObtenerImagenLocalidadAsync(ImagenLocalidadId);
-            if (ImagenLocalidad == null) throw new InvalidOperationException("No se encontró la imagen.");
+            _ = await ObtenerImagenLocalidadAsync(imagenLocalidadId) ?? throw new InvalidOperationException("No se encontró la imagen.");
 
-            return await _db.DeleteAsync<ImagenLocalidad>(ImagenLocalidadId);
+            if (confirmarBorrado)
+            {
+                bool confirmacion = await _dialogService.ShowAlertAsync(
+                    "Confirmar borrado",
+                    "¿Seguro que quieres borrar esta imagen?",
+                    "Sí",
+                    "No");
+                if (!confirmacion)
+                    return 0; // Cancelar el borrado si el usuario no confirma      
+            }
+            try
+            {
+                return await _db.DeleteAsync<ImagenLocalidad>(imagenLocalidadId);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Hubo un problema al eliminar la imagen. {ex.Message}");
+            }
         }
 
         #endregion
@@ -454,8 +629,15 @@ namespace GuiaBakio.Services
             if (!apartadoExiste)
                 throw new InvalidOperationException($"El apartado con Id '{apartadoId}' no existe.");
 
-            ImagenApartado imagen = new(apartadoId, byteArray, nombre);
-            await _db.InsertAsync(imagen);
+            try
+            {
+                ImagenApartado imagen = new(apartadoId, byteArray, nombre); 
+                await _db.InsertAsync(imagen);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"No se pudo insertar la imagen. {ex.Message}");
+            }
         }
         public async Task<ImagenApartado> ObtenerimagenApartadoAsync(int imagenApartadoId)
         {
@@ -472,14 +654,30 @@ namespace GuiaBakio.Services
                             .Where(a => a.ApartadoId == apartadoId)
                             .ToListAsync();
         }
-        public async Task<int> EliminarImagenApartadoAsync(int imagenApartadoId)
+        public async Task<int> EliminarImagenApartadoAsync(int imagenApartadoId,bool confirmarBorrado = true)
         {
             if (imagenApartadoId <= 0) throw new ArgumentException("El Id de la imagen debe ser mayor que 0.", nameof(imagenApartadoId));
 
-            var imagenApartado = await ObtenerimagenApartadoAsync(imagenApartadoId);
-            if (imagenApartado == null) throw new InvalidOperationException("No se encontró la imagen.");
+            _ = await ObtenerimagenApartadoAsync(imagenApartadoId) ?? throw new InvalidOperationException("No se encontró la imagen.");
 
-            return await _db.DeleteAsync<ImagenApartado>(imagenApartadoId);
+            if (confirmarBorrado)
+            {        
+                    bool confirmacion = await _dialogService.ShowAlertAsync(
+                    "Confirmar borrado",
+                    "¿Seguro que quieres borrar esta imagen?",
+                    "Sí",
+                    "No");
+                if (!confirmacion)
+                    return 0; // Cancelar el borrado si el usuario no confirma      
+            }
+            try
+            {
+                return await _db.DeleteAsync<ImagenApartado>(imagenApartadoId);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Hubo un problema al eliminar la imagen. {ex.Message}");
+            }
         }
         #endregion
 
@@ -494,8 +692,15 @@ namespace GuiaBakio.Services
             if (!notaExiste)
                 throw new InvalidOperationException($"La nota con Id '{notaId}' no existe.");
 
-            ImagenNota imagen = new(notaId, byteArray, nombre);
-            await _db.InsertAsync(imagen);
+            try
+            {
+                ImagenNota imagen = new(notaId, byteArray, nombre);
+                await _db.InsertAsync(imagen);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"No se pudo insertar la imagen. {ex.Message}");
+            }
         }
         public async Task<ImagenNota> ObtenerimagenNotaAsync(int imagenNotaId)
         {
@@ -512,12 +717,29 @@ namespace GuiaBakio.Services
                             .Where(a => a.NotaId == notaId)
                             .ToListAsync();
         }
-        public async Task<int> EliminarImagenNotaAsync(int imagenNotaId)
+        public async Task<int> EliminarImagenNotaAsync(int imagenNotaId, bool confirmarBorrado = true)
         {
             if (imagenNotaId <= 0) throw new ArgumentException("El Id de la imagen debe ser mayor que 0.", nameof(imagenNotaId));
-            var imagenNota = await ObtenerimagenNotaAsync(imagenNotaId);
-            if (imagenNota == null) throw new InvalidOperationException("No se encontró la imagen.");
-            return await _db.DeleteAsync<ImagenNota>(imagenNotaId);
+            _ = await ObtenerimagenNotaAsync(imagenNotaId) ?? throw new InvalidOperationException("No se encontró la imagen.");
+
+            if (confirmarBorrado)
+            {
+                bool confirmacion = await _dialogService.ShowAlertAsync(
+                    "Confirmar borrado",
+                    "¿Seguro que quieres borrar esta imagen?",
+                    "Sí",
+                    "No");
+                if (!confirmacion)
+                    return 0; // Cancelar el borrado si el usuario no confirma      
+            }
+            try
+            {
+                return await _db.DeleteAsync<ImagenNota>(imagenNotaId);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Hubo un problema al eliminar la imagen. {ex.Message}");
+            }
         }
 
         #endregion
