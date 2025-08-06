@@ -14,19 +14,24 @@
         </Grid.RowDefinitions>
 
         <!-- Texto -->
-        <Grid Grid.Row="0" >
-            <Label Text="{Binding Localidad.Texto}" FontSize="18"
+        <Grid Grid.Row="0">
+            <ScrollView>
+                <Grid>
+                    <Label Text="{Binding Localidad.Texto}" FontSize="18"
            HorizontalOptions="Center" VerticalOptions="Center" />
 
-            <!-- Sugerencia si no hay texto -->
-            <Label Grid.Row="0"
-                   IsVisible="{Binding NoHayTexto}"
+                    <!-- Sugerencia si no hay texto -->
+                    <Label IsVisible="{Binding NoHayTexto}"
                    Text="Agrega una descripción para esta sección"
                    FontAttributes="Italic"
                    HorizontalOptions="Center"
                    VerticalOptions="Center"
                    TextColor="Gray" />
 
+
+                </Grid>
+            </ScrollView>
+            
             <!-- Botón flotante de edición -->
             <ImageButton Source="edit_icon.png"
                          Style="{StaticResource FloatingImageButtonStyle}"
@@ -35,15 +40,6 @@
                     <toolkit:IconTintColorBehavior TintColor="White" />
                 </ImageButton.Behaviors>
             </ImageButton>
-
-            <!-- Sugerencia si no hay texto -->
-            <Label IsVisible="{Binding NoHayTexto}"
-                   Text="Agrega una descripción para esta sección"
-                   FontAttributes="Italic"
-                   HorizontalOptions="Center"
-                   VerticalOptions="Center"
-                   TextColor="Gray" />
-
         </Grid>
 
         <!-- Lista de ítems -->

@@ -1,4 +1,5 @@
 using GuiaBakio.Services;
+using GuiaBakio.Services.Interfaces;
 using GuiaBakio.ViewModels;
 using System.Diagnostics;
 
@@ -7,12 +8,15 @@ namespace GuiaBakio.Pages;
 public partial class LocalidadPage : ContentPage, IQueryAttributable
 {
     private readonly LocalidadDetalleViewModel _myViewModel;
+    private readonly IDialogOKService _dialogService;
+
     private int localidadId;
 
-    public LocalidadPage(LocalidadDetalleViewModel viewModel)
+    public LocalidadPage(LocalidadDetalleViewModel viewModel,IDialogOKService dialogService)
     {
         InitializeComponent();
-        _myViewModel = viewModel;
+        _myViewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel)); ;
+        _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService), "El servicio de diálogo no puede ser nulo.");
         AppForegroundNotifier.AppResumed += OnAppResumed;
     }
     public async void ApplyQueryAttributes(IDictionary<string, object> query)
@@ -20,12 +24,19 @@ public partial class LocalidadPage : ContentPage, IQueryAttributable
         if (query.TryGetValue("Id", out var value) && int.TryParse(value?.ToString(), out int id))
         {
             localidadId = id;
-            BindingContext = _myViewModel;
-            await _myViewModel.CargarDatosAsync(id);
+            try
+            {
+                BindingContext = _myViewModel;
+                await _myViewModel.CargarDatosAsync(id);
+            }
+            catch
+            {
+                await _dialogService.ShowAlertAsync("Error al cargar datos de localidad", $"Hubo un error al obtener los datos de la localidad con Id: ;{Id}", "OK");
+                await Shell.Current.GoToAsync("..");
+            }
         }
         else
         {
-            Debug.WriteLine("No se pudo obtener el servicio DataBaseService.");
             await Shell.Current.GoToAsync("..");
         }
      }
