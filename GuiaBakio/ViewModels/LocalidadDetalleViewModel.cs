@@ -11,16 +11,18 @@ namespace GuiaBakio.ViewModels
     {
         private readonly DataBaseService _dbService;
         private readonly ITextEditorPopupService _textEditorPopupService;
+        private readonly IDialogOKService _dialogService;
         public IRelayCommand EditarTextoAsyncCommand { get; }
         public IRelayCommand AgregarApartadoAsyncCommand { get; }
         public IRelayCommand AgregarImagenAsyncCommand { get; }
-        public LocalidadDetalleViewModel(DataBaseService dbService, ITextEditorPopupService textEditorPopupService)
+        public LocalidadDetalleViewModel(DataBaseService dbService, ITextEditorPopupService textEditorPopupService, IDialogOKService dialogService )
         {
             EditarTextoAsyncCommand = new AsyncRelayCommand(EditarTextoAsync);
             AgregarApartadoAsyncCommand = new AsyncRelayCommand(AgregarApartadoAsync);
-            AgregarApartadoAsyncCommand = new AsyncRelayCommand(AgregarImagenAsync);
+            AgregarImagenAsyncCommand = new AsyncRelayCommand(AgregarImagenAsync);
             _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
             _textEditorPopupService = textEditorPopupService ?? throw new ArgumentNullException(nameof(textEditorPopupService));
+            _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService), "El servicio de diálogo no puede ser nulo.");
         }
 
         [ObservableProperty]
@@ -35,10 +37,13 @@ namespace GuiaBakio.ViewModels
         
         [ObservableProperty] 
         private ObservableCollection<ImagenLocalidad> imagenes = new();
-       
-        public bool NoHayTexto => string.IsNullOrWhiteSpace(Localidad?.Texto);
-        public bool NoHayApartados => !Apartados?.Any() == true;
-        public bool NoHayImagenes => !Imagenes?.Any() == true;
+
+        [ObservableProperty]
+        private bool noHayTexto;
+        [ObservableProperty] 
+        private bool noHayApartados;
+        [ObservableProperty] 
+        private bool noHayImagenes;
         public async Task CargarDatosAsync(int localidadId)
         {
             if (localidadId <= 0)
@@ -46,23 +51,43 @@ namespace GuiaBakio.ViewModels
                 throw new ArgumentNullException(nameof(localidadId), "La Id de localidad debe ser mayor que 0.");
             }
             LocalidadId = localidadId;
-            Localidad = await _dbService.ObtenerLocalidadAsync(LocalidadId);
-            Apartados = new ObservableCollection<Apartado>(
-                await _dbService.ObtenerApartadosAsync(LocalidadId));
-            Imagenes = new ObservableCollection<ImagenLocalidad>(
-                await _dbService.ObtenerImagenesPorLocalidadAsync(LocalidadId));
+            try
+            {
+                Localidad = await _dbService.ObtenerLocalidadAsync(LocalidadId);
+                Apartados = new ObservableCollection<Apartado>(
+                    await _dbService.ObtenerApartadosAsync(LocalidadId));
+                Imagenes = new ObservableCollection<ImagenLocalidad>(
+                    await _dbService.ObtenerImagenesPorLocalidadAsync(LocalidadId));
+                NoHayTexto = string.IsNullOrWhiteSpace(Localidad?.Texto);
+                NoHayApartados = !Apartados?.Any() == true;
+                NoHayImagenes = !Imagenes?.Any() == true;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Error al cargar datos de localidad. {ex.Message}");
+            }
         }
      
         [RelayCommand]
         public async Task EditarTextoAsync()
         {
-            var resultado = await _textEditorPopupService.MostrarEditorAsync("Texto inicial");
-
-            if (resultado is null)
+            try
             {
+                var resultado = await _textEditorPopupService.MostrarEditorAsync(Localidad?.Texto);
+
+                if (resultado is null)
+                {
+                    return;
+                }
+                string? v = Localidad?.Texto = resultado;
+                await _dbService.ActualizarLocalidadAsync(Localidad);
+                await CargarDatosAsync(LocalidadId);
+            }
+            catch (Exception ex)
+            {
+                await _dialogService.ShowAlertAsync("Error al actualizar.", $"Hubo un error al actualziar la localidad. El texto no fue guardado. {Environment.NewLine}{ex.Message}", "OK");
                 return;
             }
-            //código para guardar el texto editado
         }
 
         [RelayCommand]
@@ -71,7 +96,7 @@ namespace GuiaBakio.ViewModels
             //var nuevo = new Apartado { Titulo = "Nuevo apartado", LocalidadId = LocalidadId };
             //Apartados.Add(nuevo);
             //await _dbService.GuardarApartadoAsync(nuevo);
-            OnPropertyChanged(nameof(Apartados));
+            //OnPropertyChanged(nameof(Apartados));
         }
 
         [RelayCommand]
