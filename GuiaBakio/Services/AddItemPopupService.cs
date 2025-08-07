@@ -7,12 +7,11 @@ using Microsoft.Maui.Controls.Shapes;
 
 namespace GuiaBakio.Services
 {
-    public class AddLocalidadPopupService : IAddLocalidadPopupService
+    public class AddItemPopupService : IAddItemPopupService
     {
-        public async Task<string?> MostrarAsync()
+        public async Task<string?> MostrarAsync(string texto)
         {
-            var currentPage = Shell.Current?.CurrentPage
-                             ?? Application.Current?.MainPage;
+            var currentPage = Shell.Current?.CurrentPage;
 
             if (currentPage is null)
                 throw new InvalidOperationException("No se pudo obtener la página actual.");
@@ -26,7 +25,7 @@ namespace GuiaBakio.Services
 
             var entry = new Entry
             {
-                Placeholder = "Introduce una localidad",
+                Placeholder = texto,
                 HorizontalOptions = LayoutOptions.Fill,
                 VerticalOptions = LayoutOptions.Fill
             };
