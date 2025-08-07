@@ -43,7 +43,25 @@
         </Setter>
     </Style>
 
-
+    <!-- Estilo para botón de imagen flotante rojo con sombra -->
+    <Style x:Key="FloatingImageButtonStyleRed" TargetType="ImageButton">
+        <Setter Property="CornerRadius" Value="25" />
+        <Setter Property="WidthRequest" Value="50" />
+        <Setter Property="HeightRequest" Value="50" />
+        <Setter Property="Aspect" Value="AspectFit" />
+        <Setter Property="BackgroundColor" Value= "Red"/>
+        <Setter Property="VerticalOptions" Value="End" />
+        <Setter Property="HorizontalOptions" Value="End" />
+        <Setter Property="Margin" Value="0,5,15,5" />
+        <Setter Property="Shadow">
+            <Setter.Value>
+                <Shadow Brush="Black"
+            Offset="3,3"
+            Opacity="0.3"
+            Radius="8" />
+            </Setter.Value>
+        </Setter>
+    </Style>
 
 
 </ResourceDictionary>
