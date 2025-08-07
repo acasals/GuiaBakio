@@ -38,8 +38,9 @@ namespace GuiaBakio.Services
            
             try
             {
-                Localidad _localidad = new(nombreLocalidad);
-                return await _db.InsertAsync(_localidad);
+                Localidad localidad = new(nombreLocalidad);
+                await _db.InsertAsync(localidad);
+                return localidad.Id;
             }
             catch (Exception ex)
             {
@@ -186,7 +187,8 @@ namespace GuiaBakio.Services
             try
             {
                 Apartado apartado = new(nombreApartado, localidadId, texto);
-                return await _db.InsertAsync(apartado);
+                await _db.InsertAsync(apartado);
+                return apartado.Id;
             }
             catch (Exception ex)
             {
@@ -209,7 +211,8 @@ namespace GuiaBakio.Services
             try
             {
                 Apartado apartado = new(nombreApartado, _localidad.Id, texto);
-                return await _db.InsertAsync(apartado);
+                await _db.InsertAsync(apartado);
+                return apartado.Id;
             }
             catch (Exception ex)
             {
@@ -403,7 +406,8 @@ namespace GuiaBakio.Services
             try
             {
                 Nota nota = new(titulo, texto, apartadoId);
-                return await _db.InsertAsync(nota);
+                await _db.InsertAsync(nota);
+                return nota.Id;
             }
             catch (Exception ex)
             {
@@ -430,7 +434,8 @@ namespace GuiaBakio.Services
             try
             {
                 Nota nota = new(titulo, texto, _apartado.Id); 
-                return await _db.InsertAsync(nota);
+                await _db.InsertAsync(nota);
+                return nota.Id;
             }
             catch (Exception ex)
             {
@@ -619,7 +624,8 @@ namespace GuiaBakio.Services
             try
             {
                 ImagenLocalidad imagen = new(localidadId, byteArray, nombre); 
-                return await _db.InsertAsync(imagen);
+                await _db.InsertAsync(imagen);
+                return imagen.Id;
             }
             catch (Exception ex)
             {
@@ -682,8 +688,9 @@ namespace GuiaBakio.Services
 
             try
             {
-                ImagenApartado imagen = new(apartadoId, byteArray, nombre); 
-                return await _db.InsertAsync(imagen);
+                ImagenApartado imagen = new(apartadoId, byteArray, nombre);
+                await _db.InsertAsync(imagen);
+                return imagen.Id;
             }
             catch (Exception ex)
             {
@@ -746,7 +753,8 @@ namespace GuiaBakio.Services
             try
             {
                 ImagenNota imagen = new(notaId, byteArray, nombre);
-                return await _db.InsertAsync(imagen);
+                await _db.InsertAsync(imagen);
+                return imagen.Id;
             }
             catch (Exception ex)
             {
