@@ -15,11 +15,13 @@ namespace GuiaBakio.ViewModels
         public IRelayCommand EditarTextoAsyncCommand { get; }
         public IRelayCommand AgregarApartadoAsyncCommand { get; }
         public IRelayCommand AgregarImagenAsyncCommand { get; }
+        public IRelayCommand EliminarLocalidadAsyncCommand { get; }
         public LocalidadDetalleViewModel(DataBaseService dbService, ITextEditorPopupService textEditorPopupService, IDialogOKService dialogService )
         {
             EditarTextoAsyncCommand = new AsyncRelayCommand(EditarTextoAsync);
             AgregarApartadoAsyncCommand = new AsyncRelayCommand(AgregarApartadoAsync);
             AgregarImagenAsyncCommand = new AsyncRelayCommand(AgregarImagenAsync);
+            EliminarLocalidadAsyncCommand = new AsyncRelayCommand(EliminarLocalidadAsync);
             _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
             _textEditorPopupService = textEditorPopupService ?? throw new ArgumentNullException(nameof(textEditorPopupService));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService), "El servicio de diálogo no puede ser nulo.");
@@ -66,6 +68,25 @@ namespace GuiaBakio.ViewModels
             {
                 throw new InvalidOperationException($"Error al cargar datos de localidad. {ex.Message}");
             }
+        }
+
+        [RelayCommand]
+        public async Task EliminarLocalidadAsync()
+        {
+            try
+            {
+                int eliminado = await _dbService.EliminarLocalidadAsync(LocalidadId);
+                if (eliminado>0)
+                {
+                    await Shell.Current.GoToAsync("mainPage");
+                }
+            }
+            catch (Exception ex)
+            {
+                await _dialogService.ShowAlertAsync("Error al eliminar", $"Hubo un error al eliminar la localidad. {Environment.NewLine}{ex.Message}", "OK");
+                return;
+            }
+            //
         }
      
         [RelayCommand]
