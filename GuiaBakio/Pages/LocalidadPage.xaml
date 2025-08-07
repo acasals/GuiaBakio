@@ -4,17 +4,37 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="GuiaBakio.Pages.LocalidadPage"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-             Title="{Binding Localidad.Nombre}">
-
+             Title="">
+    
     <Grid x:Name="MainGrid" RowSpacing="10" Padding="10">
         <Grid.RowDefinitions>
+            <RowDefinition x:Name="HeaderRow" Height="Auto" />
             <RowDefinition x:Name="TextRow" Height="*" />
             <RowDefinition x:Name="ItemsRow" Height="*" />
             <RowDefinition x:Name="ImagesRow" Height="*" />
         </Grid.RowDefinitions>
 
+        <Grid Grid.Row="0" ColumnDefinitions="*" Padding="5" Margin="0" BackgroundColor="AntiqueWhite">
+            <Label Text="{Binding Localidad.Nombre}"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   FontSize="24"/>
+            
+            <!-- Botón flotante para eliminar -->
+            <ImageButton Source="trash_can.png"
+             Style="{StaticResource FloatingImageButtonStyleRed}"
+             Command="{Binding EliminarLocalidadAsyncCommand}">
+                <ImageButton.Behaviors>
+                    <toolkit:IconTintColorBehavior TintColor="White" />
+                </ImageButton.Behaviors>
+            </ImageButton>
+
+        </Grid>
+        
+        
         <!-- Texto -->
-        <Grid Grid.Row="0">
+        <Grid Grid.Row="1">
             <ScrollView>
                 <Grid>
                     <Label Text="{Binding Localidad.Texto}" FontSize="18"
@@ -43,7 +63,7 @@
         </Grid>
 
         <!-- Lista de ítems -->
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="2">
 
             <CollectionView ItemsSource="{Binding Apartados}">
                 <CollectionView.ItemTemplate>
@@ -69,7 +89,7 @@
         </Grid>
 
         <!-- Carrusel de imágenes -->
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="3">
 
             <!-- Carrusel -->
             <CarouselView ItemsSource="{Binding Imagenes}">
