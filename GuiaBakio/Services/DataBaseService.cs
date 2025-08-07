@@ -27,7 +27,7 @@ namespace GuiaBakio.Services
 
     
         #region "Localidades"
-        public async Task InsertarLocalidadAsync(string nombreLocalidad)
+        public async Task<int> InsertarLocalidadAsync(string nombreLocalidad)
         {
             if (string.IsNullOrWhiteSpace(nombreLocalidad))
                 throw new ArgumentException("El nombre de la localidad es obligatorio.", nameof(nombreLocalidad));
@@ -39,7 +39,7 @@ namespace GuiaBakio.Services
             try
             {
                 Localidad _localidad = new(nombreLocalidad);
-                await _db.InsertAsync(_localidad);
+                return await _db.InsertAsync(_localidad);
             }
             catch (Exception ex)
             {
@@ -168,7 +168,7 @@ namespace GuiaBakio.Services
         #endregion
 
         #region "Apartados"
-        public async Task InsertarApartadoAsync(string nombreApartado, int localidadId, string texto="")
+        public async Task<int> InsertarApartadoAsync(string nombreApartado, int localidadId, string texto="")
         {
             if (string.IsNullOrWhiteSpace(nombreApartado))
                 throw new ArgumentException("El nombre del apartado es obligatorio.", nameof(nombreApartado));
@@ -186,14 +186,14 @@ namespace GuiaBakio.Services
             try
             {
                 Apartado apartado = new(nombreApartado, localidadId, texto);
-                await _db.InsertAsync(apartado);
+                return await _db.InsertAsync(apartado);
             }
             catch (Exception ex)
             {
                 throw new InvalidOperationException($"No se pudo crear el apartado. {ex.Message}");
             }
         }
-        public async Task InsertarApartadoAsync(string nombreApartado, string nombreLocalidad, string texto="")
+        public async Task<int> InsertarApartadoAsync(string nombreApartado, string nombreLocalidad, string texto="")
         {
             if (string.IsNullOrWhiteSpace(nombreApartado))
                 throw new ArgumentException("El nombre del apartado es obligatorio.", nameof(nombreApartado));
@@ -209,7 +209,7 @@ namespace GuiaBakio.Services
             try
             {
                 Apartado apartado = new(nombreApartado, _localidad.Id, texto);
-                await _db.InsertAsync(apartado);
+                return await _db.InsertAsync(apartado);
             }
             catch (Exception ex)
             {
@@ -385,7 +385,7 @@ namespace GuiaBakio.Services
         #endregion
 
         #region "Notas"
-        public async Task InsertarNotaAsync(string titulo, string texto, int apartadoId)
+        public async Task<int> InsertarNotaAsync(string titulo, string texto, int apartadoId)
         {
             if (string.IsNullOrWhiteSpace(titulo))
                 throw new ArgumentException("El título de la nota es obligatorio.", nameof(titulo));
@@ -403,14 +403,14 @@ namespace GuiaBakio.Services
             try
             {
                 Nota nota = new(titulo, texto, apartadoId);
-                await _db.InsertAsync(nota);
+                return await _db.InsertAsync(nota);
             }
             catch (Exception ex)
             {
                 throw new InvalidOperationException($"No se pudo crear la nota. {ex.Message}");
             }
         }
-        public async Task InsertarNotaAsync(string titulo, string texto, string nombreApartado, string nombreLocalidad)
+        public async Task<int> InsertarNotaAsync(string titulo, string texto, string nombreApartado, string nombreLocalidad)
         {
             if (string.IsNullOrWhiteSpace(titulo))
                 throw new ArgumentException("El título de la nota es obligatorio.", nameof(titulo));
@@ -430,7 +430,7 @@ namespace GuiaBakio.Services
             try
             {
                 Nota nota = new(titulo, texto, _apartado.Id); 
-                await _db.InsertAsync(nota);
+                return await _db.InsertAsync(nota);
             }
             catch (Exception ex)
             {
@@ -606,7 +606,7 @@ namespace GuiaBakio.Services
         #endregion
 
         #region "ImagenesLocalidad"
-        public async Task InsertarImagenLocalidadAsync(int localidadId, byte[] byteArray,string nombre="")
+        public async Task<int> InsertarImagenLocalidadAsync(int localidadId, byte[] byteArray,string nombre="")
         {
             if (localidadId <= 0)
                 throw new ArgumentException("El Id de la localidad debe ser mayor que cero.", nameof(localidadId));
@@ -619,7 +619,7 @@ namespace GuiaBakio.Services
             try
             {
                 ImagenLocalidad imagen = new(localidadId, byteArray, nombre); 
-                await _db.InsertAsync(imagen);
+                return await _db.InsertAsync(imagen);
             }
             catch (Exception ex)
             {
@@ -670,7 +670,7 @@ namespace GuiaBakio.Services
         #endregion
 
         #region "ImagenesApartado"
-        public async Task InsertarImagenApartadoAsync(int apartadoId, byte[] byteArray, string nombre = "")
+        public async Task<int> InsertarImagenApartadoAsync(int apartadoId, byte[] byteArray, string nombre = "")
         {
             if (apartadoId <= 0)
                 throw new ArgumentException("El Id del apartado debe ser mayor que cero.", nameof(apartadoId));
@@ -683,7 +683,7 @@ namespace GuiaBakio.Services
             try
             {
                 ImagenApartado imagen = new(apartadoId, byteArray, nombre); 
-                await _db.InsertAsync(imagen);
+                return await _db.InsertAsync(imagen);
             }
             catch (Exception ex)
             {
@@ -733,7 +733,7 @@ namespace GuiaBakio.Services
         #endregion
 
         #region "ImagenesNota"
-        public async Task InsertarImagenNotaAsync(int notaId, byte[] byteArray, string nombre = "")
+        public async Task<int> InsertarImagenNotaAsync(int notaId, byte[] byteArray, string nombre = "")
         {
             if (notaId <= 0)
                 throw new ArgumentException("El Id de la nota debe ser mayor que cero.", nameof(notaId));
@@ -746,7 +746,7 @@ namespace GuiaBakio.Services
             try
             {
                 ImagenNota imagen = new(notaId, byteArray, nombre);
-                await _db.InsertAsync(imagen);
+                return await _db.InsertAsync(imagen);
             }
             catch (Exception ex)
             {
