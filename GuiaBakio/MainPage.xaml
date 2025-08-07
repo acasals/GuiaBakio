@@ -7,7 +7,7 @@
     <Grid RowDefinitions="Auto,*" Padding="5">
 
         <!-- Encabezado -->
-        <Grid Grid.Row="0" ColumnDefinitions="*" Padding="5" Margin="0,5,0,0" BackgroundColor="LightGray">
+        <Grid Grid.Row="0" ColumnDefinitions="*" Padding="5" Margin="0,5,0,0" BackgroundColor="AntiqueWhite">
             <Label Text="Localidades"
                    FontAttributes="Bold"
                    Grid.Column="0"
