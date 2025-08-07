@@ -11,12 +11,13 @@ namespace GuiaBakio.ViewModels
     {
         private readonly DataBaseService _dbService;
         private readonly ITextEditorPopupService _textEditorPopupService;
+        private readonly IAddItemPopupService _addItemPopupService;
         private readonly IDialogOKService _dialogService;
         public IRelayCommand EditarTextoAsyncCommand { get; }
         public IRelayCommand AgregarApartadoAsyncCommand { get; }
         public IRelayCommand AgregarImagenAsyncCommand { get; }
         public IRelayCommand EliminarLocalidadAsyncCommand { get; }
-        public LocalidadDetalleViewModel(DataBaseService dbService, ITextEditorPopupService textEditorPopupService, IDialogOKService dialogService )
+        public LocalidadDetalleViewModel(DataBaseService dbService, IAddItemPopupService addItemPopupService, ITextEditorPopupService textEditorPopupService, IDialogOKService dialogService )
         {
             EditarTextoAsyncCommand = new AsyncRelayCommand(EditarTextoAsync);
             AgregarApartadoAsyncCommand = new AsyncRelayCommand(AgregarApartadoAsync);
@@ -24,6 +25,7 @@ namespace GuiaBakio.ViewModels
             EliminarLocalidadAsyncCommand = new AsyncRelayCommand(EliminarLocalidadAsync);
             _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
             _textEditorPopupService = textEditorPopupService ?? throw new ArgumentNullException(nameof(textEditorPopupService));
+            _addItemPopupService = addItemPopupService ?? throw new ArgumentNullException(nameof(_addItemPopupService));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService), "El servicio de diálogo no puede ser nulo.");
         }
 
