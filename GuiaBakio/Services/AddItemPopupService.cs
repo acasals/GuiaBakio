@@ -43,9 +43,11 @@ namespace GuiaBakio.Services
 
             var grid = new Grid
             {
+                ColumnSpacing=10,
+                WidthRequest = 300,
                 ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1,GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(2,GridUnitType.Star) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }
             }
             };
