@@ -73,12 +73,12 @@ namespace GuiaBakio.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    await _dialogService.ShowAlertAsync("Error", $"No se pudo navegar a la página de la localidad.\n{ex.Message}", "OK");
+                    await _dialogService.ShowAlertAsync("Error", $"No se pudo navegar a la página de la localidad.{Environment.NewLine}{ex.Message}", "OK");
                 }
             }
             catch (Exception ex)
             {
-                await _dialogService.ShowAlertAsync("Error", $"No se pudo añadir la localidad.\n{ex.Message}", "OK");
+                await _dialogService.ShowAlertAsync("Error", $"No se pudo añadir la localidad.{Environment.NewLine}{ex.Message}", "OK");
             }
             
             await CargarListaLocalidadesAsync();

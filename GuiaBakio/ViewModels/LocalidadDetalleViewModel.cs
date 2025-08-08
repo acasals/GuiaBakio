@@ -116,10 +116,45 @@ namespace GuiaBakio.ViewModels
         [RelayCommand]
         public async Task AgregarApartadoAsync() 
         {
-            //var nuevo = new Apartado { Titulo = "Nuevo apartado", LocalidadId = LocalidadId };
-            //Apartados.Add(nuevo);
-            //await _dbService.GuardarApartadoAsync(nuevo);
-            //OnPropertyChanged(nameof(Apartados));
+            var nuevoApartado = await _addItemPopupService.MostrarAsync("Añade un apartado");
+            if (nuevoApartado is null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(nuevoApartado))
+            {
+                await _dialogService.ShowAlertAsync("Error", "El nombre del apartado no puede estar vacío.", "OK");
+                return;
+            }
+            try
+            {
+                bool yaExiste = await _dbService.ExisteApartadoAsync(nuevoApartado,Localidad.Id);
+                if (yaExiste)
+                {
+                    await _dialogService.ShowAlertAsync("Error", "Apartado existente.", "OK");
+                    return;
+                }
+                var id = await _dbService.InsertarApartadoAsync(nuevoApartado,Localidad.Id);
+                if (id <= 0)
+                {
+                    await _dialogService.ShowAlertAsync("Error", "No se pudo añadir el apartado.", "OK");
+                    return;
+                }
+                try
+                {
+                    await Shell.Current.GoToAsync($"apartadoPage?Id={id}");
+                }
+                catch (Exception ex)
+                {
+                    await _dialogService.ShowAlertAsync("Error", $"No se pudo navegar a la página del apartado.{Environment.NewLine}{ex.Message}", "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                await _dialogService.ShowAlertAsync("Error", $"No se pudo añadir el apartado.{Environment.NewLine}{ex.Message}", "OK");
+            }
+
         }
 
         [RelayCommand]
