@@ -1,3 +1,4 @@
+using GuiaBakio.Models;
 using GuiaBakio.Services;
 using GuiaBakio.Services.Interfaces;
 using GuiaBakio.ViewModels;
@@ -46,9 +47,26 @@ public partial class LocalidadPage : ContentPage, IQueryAttributable
        await _myViewModel.CargarDatosAsync(localidadId);
     }
 
+    private async void OnApartadoSeleccionado(object sender, SelectionChangedEventArgs e)
+    {
+        var apartadoSeleccionado = e.CurrentSelection.FirstOrDefault() as Apartado;
+
+        if (apartadoSeleccionado != null)
+        {
+            try
+            {
+                await Shell.Current.GoToAsync($"apartadoPage?Id={apartadoSeleccionado.Id}");
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", $"No se pudo navegar a la página del apartado.{Environment.NewLine}{ex.Message}", "OK");
+            }
+        }
+    }
     private async void OnVolverButton_Clicked(object sender, EventArgs e)
     {
         await Shell.Current.GoToAsync("..");
     }
  
 }
+

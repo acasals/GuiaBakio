@@ -34,7 +34,7 @@
         
         
         <!-- Texto -->
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="1" ColumnDefinitions="*" >
             <ScrollView>
                 <Grid>
                     <Label Text="{Binding Localidad.Texto}" FontSize="18"
@@ -62,34 +62,45 @@
             </ImageButton>
         </Grid>
 
-        <!-- Lista de ítems -->
-        <Grid Grid.Row="2">
+        <!--Lista de Apartados-->
+        <Grid Grid.Row="2" ColumnDefinitions="*" >
 
-            <CollectionView ItemsSource="{Binding Apartados}">
+            <!-- Lista de ítems -->
+            <CollectionView ItemsSource="{Binding Apartados}"
+                        SelectionMode="Single"
+                        SelectionChanged="OnApartadoSeleccionado"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Center">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Label Text="{Binding Nombre}" FontSize="16" />
+                        <Grid ColumnDefinitions="*" Padding="10" Margin="5">
+                            <Label Text="{Binding Nombre}"
+                            FontSize="Medium"
+                            VerticalOptions="Center"
+                            HorizontalOptions="Center"
+                            HorizontalTextAlignment="Center"/>
+                        </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
             <!--Botón flotante de añadir ítem-->
             <Button Text="+"
-            Style="{StaticResource FloatingButtonStyle}"
-            Command="{Binding AgregarApartadoAsyncCommand}" />
+                Style="{StaticResource FloatingButtonStyle}"
+                Command="{Binding AgregarApartadoAsyncCommand}" />
 
             <!-- Sugerencia si no hay ítems -->
-            <Label IsVisible="{Binding NoHayApartados}"
-                   Text="Esta es la sección de apartados. ¡Agrega uno!"
-                   FontAttributes="Italic"
-                   HorizontalOptions="Center"
-                   VerticalOptions="Center"
-                   TextColor="Gray" />
+            <Label  IsVisible="{Binding NoHayApartados}"
+                Text="Esta es la sección de apartados. ¡Agrega uno!"
+                FontAttributes="Italic"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                TextColor="Gray" />
 
         </Grid>
-
+        
         <!-- Carrusel de imágenes -->
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="3" ColumnDefinitions="*" >
 
             <!-- Carrusel -->
             <CarouselView ItemsSource="{Binding Imagenes}">

@@ -56,7 +56,7 @@ namespace GuiaBakio
                 }
                 catch (Exception ex)
                 {
-                    await DisplayAlert("Error", $"No se pudo navegar a la página de la localidad.\n{ex.Message}", "OK");
+                    await DisplayAlert("Error", $"No se pudo navegar a la página de la localidad.{Environment.NewLine}{ex.Message}", "OK");
                 }
             }
         }
