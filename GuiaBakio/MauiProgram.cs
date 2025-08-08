@@ -39,6 +39,8 @@ namespace GuiaBakio
             builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<LocalidadDetalleViewModel>();
             builder.Services.AddTransient<LocalidadPage>();
+            builder.Services.AddTransient<ApartadoViewModel>();
+            builder.Services.AddTransient<ApartadoPage>();
 
 #if DEBUG
             builder.Logging.AddDebug();
