@@ -4,6 +4,7 @@
              x:Class="GuiaBakio.Pages.ApartadoPage"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              Title="">
+    
     <Grid x:Name="MainGrid" RowSpacing="10" Padding="10">
         <Grid.RowDefinitions>
             <RowDefinition x:Name="HeaderRow" Height="Auto" />
@@ -22,7 +23,7 @@
             <!-- Botón flotante para eliminar -->
             <ImageButton Source="trash_can.png"
          Style="{StaticResource FloatingImageButtonStyleRed}"
-         Command="{Binding EliminarApartyadoAsyncCommand}">
+         Command="{Binding EliminarApartadoAsyncCommand}">
                 <ImageButton.Behaviors>
                     <toolkit:IconTintColorBehavior TintColor="White" />
                 </ImageButton.Behaviors>
@@ -63,11 +64,15 @@
         <!-- Lista de ítems -->
         <Grid Grid.Row="2" ColumnDefinitions="*" >
 
-            <CollectionView ItemsSource="{Binding Notas}">
+            <CollectionView ItemsSource="{Binding Notas}"
+                        SelectionMode="Single"
+                        SelectionChanged="OnNotaSeleccionada"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Center">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <Grid ColumnDefinitions="*" >
-                            <Label Text="{Binding Nombre}"
+                            <Label Text="{Binding Titulo}"
                                 FontSize="Medium"
                                 VerticalOptions="Center"
                                 HorizontalOptions="Center"
@@ -80,11 +85,11 @@
             <!--Botón flotante de añadir ítem-->
             <Button Text="+"
         Style="{StaticResource FloatingButtonStyle}"
-        Command="{Binding AgregarApartadoAsyncCommand}" />
+        Command="{Binding AgregarNotaAsyncCommand}" />
 
             <!-- Sugerencia si no hay ítems -->
-            <Label IsVisible="{Binding NoHayApartados}"
-               Text="Esta es la sección de apartados. ¡Agrega uno!"
+            <Label IsVisible="{Binding NoHayNotas}"
+               Text="Esta es la sección de notas. ¡Agrega una!"
                FontAttributes="Italic"
                HorizontalOptions="Center"
                VerticalOptions="Center"

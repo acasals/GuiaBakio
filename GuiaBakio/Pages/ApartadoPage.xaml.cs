@@ -40,7 +40,23 @@ public partial class ApartadoPage : ContentPage, IQueryAttributable
         }
     }
 
-        private async void OnAppResumed()
+    private async void OnNotaSeleccionada(object sender, SelectionChangedEventArgs e)
+    {
+        var notaSeleccionada= e.CurrentSelection.FirstOrDefault() as Nota;
+
+        if (notaSeleccionada != null)
+        {
+            try
+            {
+                await Shell.Current.GoToAsync($"notaPage?Id={notaSeleccionada.Id}");
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", $"No se pudo navegar a la página de la nota.{Environment.NewLine}{ex.Message}", "OK");
+            }
+        }
+    }
+    private async void OnAppResumed()
     {
         await _myViewModel.CargarDatosAsync(apartadoId);
     }
