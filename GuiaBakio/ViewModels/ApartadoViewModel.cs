@@ -4,11 +4,6 @@ using GuiaBakio.Services.Interfaces;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GuiaBakio.ViewModels
 {
@@ -89,7 +84,7 @@ namespace GuiaBakio.ViewModels
         {
             try
             {
-                int eliminado = await _dbService.EliminarLocalidadAsync(ApartadoId);
+                int eliminado = await _dbService.EliminarApartadoAsync(ApartadoId);
                 if (eliminado > 0)
                 {
                     await Shell.Current.GoToAsync("mainPage");
@@ -120,7 +115,7 @@ namespace GuiaBakio.ViewModels
             }
             catch (Exception ex)
             {
-                await _dialogService.ShowAlertAsync("Error al actualizar.", $"Hubo un error al actualziar oel apartado. El texto no fue guardado. {Environment.NewLine}{ex.Message}", "OK");
+                await _dialogService.ShowAlertAsync("Error al actualizar.", $"Hubo un error al actualizar el texto del apartado. El texto no fue guardado. {Environment.NewLine}{ex.Message}", "OK");
                 return;
             }
         }
