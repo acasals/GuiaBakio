@@ -108,7 +108,7 @@ namespace GuiaBakio.ViewModels
             }
             catch (Exception ex)
             {
-                await _dialogService.ShowAlertAsync("Error al actualizar.", $"Hubo un error al actualziar la localidad. El texto no fue guardado. {Environment.NewLine}{ex.Message}", "OK");
+                await _dialogService.ShowAlertAsync("Error al actualizar.", $"Hubo un error al actualizar la localidad. El texto no fue guardado. {Environment.NewLine}{ex.Message}", "OK");
                 return;
             }
         }

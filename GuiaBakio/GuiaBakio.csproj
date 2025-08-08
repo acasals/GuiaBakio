@@ -93,6 +93,9 @@
 		<MauiXaml Update="Pages\LocalidadPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
+		<MauiXaml Update="Pages\NotaPage.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 		<MauiXaml Update="Resources\Styles\MisEstilos.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
