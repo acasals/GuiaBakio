@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="GuiaBakio.Pages.ApartadoPage"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             Title="">
+    <Grid x:Name="MainGrid" RowSpacing="10" Padding="10">
+        <Grid.RowDefinitions>
+            <RowDefinition x:Name="HeaderRow" Height="Auto" />
+            <RowDefinition x:Name="TextRow" Height="*" />
+            <RowDefinition x:Name="ItemsRow" Height="*" />
+            <RowDefinition x:Name="ImagesRow" Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" ColumnDefinitions="*" Padding="5" Margin="0" BackgroundColor="AntiqueWhite">
+            <Label Text="{Binding Titulo}"
+               FontAttributes="Bold"
+               HorizontalOptions="Center"
+               VerticalOptions="Center"
+               FontSize="24"/>
+
+            <!-- Botón flotante para eliminar -->
+            <ImageButton Source="trash_can.png"
+         Style="{StaticResource FloatingImageButtonStyleRed}"
+         Command="{Binding EliminarApartyadoAsyncCommand}">
+                <ImageButton.Behaviors>
+                    <toolkit:IconTintColorBehavior TintColor="White" />
+                </ImageButton.Behaviors>
+            </ImageButton>
+
+        </Grid>
+
+
+        <!-- Texto -->
+        <Grid Grid.Row="1" ColumnDefinitions="*" >
+            <ScrollView>
+                <Grid>
+                    <Label Text="{Binding Apartado.Texto}" FontSize="18"
+       HorizontalOptions="Center" VerticalOptions="Center" />
+
+                    <!-- Sugerencia si no hay texto -->
+                    <Label IsVisible="{Binding NoHayTexto}"
+               Text="Agrega una descripción para esta sección"
+               FontAttributes="Italic"
+               HorizontalOptions="Center"
+               VerticalOptions="Center"
+               TextColor="Gray" />
+
+
+                </Grid>
+            </ScrollView>
+
+            <!-- Botón flotante de edición -->
+            <ImageButton Source="edit_icon.png"
+                     Style="{StaticResource FloatingImageButtonStyle}"
+                     Command="{Binding EditarTextoAsyncCommand}">
+                <ImageButton.Behaviors>
+                    <toolkit:IconTintColorBehavior TintColor="White" />
+                </ImageButton.Behaviors>
+            </ImageButton>
+        </Grid>
+
+        <!-- Lista de ítems -->
+        <Grid Grid.Row="2" ColumnDefinitions="*" >
+
+            <CollectionView ItemsSource="{Binding Notas}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid ColumnDefinitions="*" >
+                            <Label Text="{Binding Nombre}"
+                                FontSize="Medium"
+                                VerticalOptions="Center"
+                                HorizontalOptions="Center"
+                                HorizontalTextAlignment="Center"/>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!--Botón flotante de añadir ítem-->
+            <Button Text="+"
+        Style="{StaticResource FloatingButtonStyle}"
+        Command="{Binding AgregarApartadoAsyncCommand}" />
+
+            <!-- Sugerencia si no hay ítems -->
+            <Label IsVisible="{Binding NoHayApartados}"
+               Text="Esta es la sección de apartados. ¡Agrega uno!"
+               FontAttributes="Italic"
+               HorizontalOptions="Center"
+               VerticalOptions="Center"
+               TextColor="Gray" />
+
+        </Grid>
+
+        <!-- Carrusel de imágenes -->
+        <Grid Grid.Row="3" ColumnDefinitions="*" >
+
+            <!-- Carrusel -->
+            <CarouselView ItemsSource="{Binding Imagenes}">
+                <CarouselView.ItemTemplate>
+                    <DataTemplate>
+                        <Image Source="{Binding}" Aspect="AspectFill" />
+                    </DataTemplate>
+                </CarouselView.ItemTemplate>
+            </CarouselView>
+
+            <!-- Sugerencia si no hay imágenes -->
+            <Grid IsVisible="{Binding NoHayImagenes}" BackgroundColor="White">
+                <Label Text="Agrega imágenes para esta sección"
+                   FontAttributes="Italic"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   TextColor="Gray" />
+            </Grid>
+
+            <!-- Botón flotante para añadir imagen -->
+            <Button Text="+"
+                Style="{StaticResource FloatingButtonStyle}"
+                Command="{Binding AgregarImagenAsyncCommand}" />
+
+        </Grid>
+    </Grid>
+
+</ContentPage>

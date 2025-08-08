@@ -87,6 +87,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<MauiXaml Update="Pages\ApartadoPage.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 		<MauiXaml Update="Pages\LocalidadPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>

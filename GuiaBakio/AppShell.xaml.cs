@@ -8,6 +8,7 @@ namespace GuiaBakio
         {
             InitializeComponent();
             Routing.RegisterRoute("localidadPage", typeof(LocalidadPage));
+            Routing.RegisterRoute("apartadoPage", typeof(ApartadoPage));
             Routing.RegisterRoute("mainPage", typeof(MainPage));
         }
     }
