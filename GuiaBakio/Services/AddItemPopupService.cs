@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Extensions;
 using GuiaBakio.Services.Interfaces;
-using Microsoft.Maui.Controls.Shapes;
 
 
 

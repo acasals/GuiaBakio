@@ -611,7 +611,7 @@ namespace GuiaBakio.Services
         #endregion
 
         #region "ImagenesLocalidad"
-        public async Task<int> InsertarImagenLocalidadAsync(int localidadId, byte[] byteArray,string nombre="")
+        public async Task<int> InsertarImagenLocalidadAsync(int localidadId, byte[] byteArray,string nombre="",bool esMapa=false,string urlMapa="" )
         {
             if (localidadId <= 0)
                 throw new ArgumentException("El Id de la localidad debe ser mayor que cero.", nameof(localidadId));
@@ -623,7 +623,7 @@ namespace GuiaBakio.Services
 
             try
             {
-                ImagenLocalidad imagen = new(localidadId, byteArray, nombre); 
+                ImagenLocalidad imagen = new(localidadId, byteArray, nombre,esMapa,urlMapa); 
                 await _db.InsertAsync(imagen);
                 return imagen.Id;
             }
@@ -676,7 +676,7 @@ namespace GuiaBakio.Services
         #endregion
 
         #region "ImagenesApartado"
-        public async Task<int> InsertarImagenApartadoAsync(int apartadoId, byte[] byteArray, string nombre = "")
+        public async Task<int> InsertarImagenApartadoAsync(int apartadoId, byte[] byteArray, string nombre = "",bool esMapa=false, string urlMapa="")
         {
             if (apartadoId <= 0)
                 throw new ArgumentException("El Id del apartado debe ser mayor que cero.", nameof(apartadoId));
@@ -688,7 +688,7 @@ namespace GuiaBakio.Services
 
             try
             {
-                ImagenApartado imagen = new(apartadoId, byteArray, nombre);
+                ImagenApartado imagen = new(apartadoId, byteArray, nombre,esMapa,urlMapa);
                 await _db.InsertAsync(imagen);
                 return imagen.Id;
             }
@@ -740,7 +740,7 @@ namespace GuiaBakio.Services
         #endregion
 
         #region "ImagenesNota"
-        public async Task<int> InsertarImagenNotaAsync(int notaId, byte[] byteArray, string nombre = "")
+        public async Task<int> InsertarImagenNotaAsync(int notaId, byte[] byteArray, string nombre = "",bool esMapa=false, string urlMapa="")
         {
             if (notaId <= 0)
                 throw new ArgumentException("El Id de la nota debe ser mayor que cero.", nameof(notaId));
@@ -752,7 +752,7 @@ namespace GuiaBakio.Services
 
             try
             {
-                ImagenNota imagen = new(notaId, byteArray, nombre);
+                ImagenNota imagen = new(notaId, byteArray, nombre, esMapa, urlMapa);
                 await _db.InsertAsync(imagen);
                 return imagen.Id;
             }
