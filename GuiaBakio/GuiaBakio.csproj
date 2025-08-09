@@ -13,7 +13,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 
-		<ApplicationTitle>GuiaBakio</ApplicationTitle>
+		<ApplicationTitle>Guía de Bakio</ApplicationTitle>
 		<ApplicationId>com.alexcasals.guiabakio</ApplicationId>
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
@@ -31,42 +31,50 @@
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-android|AnyCPU'">
 		<ApplicationId>com.alexcasals.guiabakio</ApplicationId>
 		<ApplicationIdGuid>00a255db-265a-4e7b-89b7-54bde1551ce9</ApplicationIdGuid>
+		<ApplicationTitle>Guia de Bakio</ApplicationTitle>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-ios|AnyCPU'">
 		<ApplicationId>com.alexcasals.guiabakio</ApplicationId>
 		<ApplicationIdGuid>00a255db-265a-4e7b-89b7-54bde1551ce9</ApplicationIdGuid>
+		<ApplicationTitle>Guia de Bakio</ApplicationTitle>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-maccatalyst|AnyCPU'">
 		<ApplicationId>com.alexcasals.guiabakio</ApplicationId>
 		<ApplicationIdGuid>00a255db-265a-4e7b-89b7-54bde1551ce9</ApplicationIdGuid>
+		<ApplicationTitle>Guia de Bakio</ApplicationTitle>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-windows10.0.19041.0|AnyCPU'">
 		<ApplicationId>com.alexcasals.guiabakio</ApplicationId>
 		<ApplicationIdGuid>00a255db-265a-4e7b-89b7-54bde1551ce9</ApplicationIdGuid>
+		<ApplicationTitle>Guia de Bakio</ApplicationTitle>
 	</PropertyGroup>
 
 	<!-- Updated Release configurations -->
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-android|AnyCPU'">
 		<ApplicationId>com.alexcasals.guiabakio</ApplicationId>
 		<ApplicationIdGuid>00a255db-265a-4e7b-89b7-54bde1551ce9</ApplicationIdGuid>
+		<ApplicationTitle>Guia de Bakio</ApplicationTitle>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-ios|AnyCPU'">
 		<ApplicationId>com.alexcasals.guiabakio</ApplicationId>
 		<ApplicationIdGuid>00a255db-265a-4e7b-89b7-54bde1551ce9</ApplicationIdGuid>
+		<ApplicationTitle>Guia de Bakio</ApplicationTitle>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-maccatalyst|AnyCPU'">
 		<ApplicationId>com.alexcasals.guiabakio</ApplicationId>
 		<ApplicationIdGuid>00a255db-265a-4e7b-89b7-54bde1551ce9</ApplicationIdGuid>
+		<ApplicationTitle>Guia de Bakio</ApplicationTitle>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-windows10.0.19041.0|AnyCPU'">
 		<ApplicationId>com.alexcasals.guiabakio</ApplicationId>
 		<ApplicationIdGuid>00a255db-265a-4e7b-89b7-54bde1551ce9</ApplicationIdGuid>
+		<ApplicationTitle>Guia de Bakio</ApplicationTitle>
 	</PropertyGroup>
 
 	<ItemGroup>

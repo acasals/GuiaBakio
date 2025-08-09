@@ -11,7 +11,9 @@ namespace GuiaBakio.Models
         public int ApartadoId { get; set; }
         public string? Nombre { get; set; }
         public byte[]? Foto { get; set; }
-        public ImagenApartado(int apartadoId, byte[] byteArray, string nombre = "")
+        public bool EsMapa { get; set; } = false;
+
+        public ImagenApartado(int apartadoId, byte[] byteArray, string nombre = "",bool esmapa=false)
         {
             if (apartadoId <= 0)
                 throw new ArgumentException("El ID de la apartado debe ser mayor que cero.", nameof(apartadoId));
@@ -20,6 +22,7 @@ namespace GuiaBakio.Models
                 throw new ArgumentException("La imagen no puede ser nula.", nameof(byteArray));
             Foto = byteArray;
             Nombre = nombre;
+            EsMapa = esmapa;
         }
         public ImagenApartado() { }
     }
