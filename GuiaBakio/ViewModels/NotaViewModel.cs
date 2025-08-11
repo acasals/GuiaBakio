@@ -11,19 +11,20 @@ namespace GuiaBakio.ViewModels
     {
         private readonly DataBaseService _dbService;
         private readonly ITextEditorPopupService _textEditorPopupService;
-        private readonly IAddItemPopupService _addItemPopupService;
+        private readonly IAddImagenPopupService _addImagenPopupService;
         private readonly IDialogOKService _dialogService;
         public IRelayCommand EditarTextoAsyncCommand { get; }
         public IRelayCommand AgregarImagenAsyncCommand { get; }
         public IRelayCommand EliminarNotaAsyncCommand { get; }
 
-        public NotaViewModel(DataBaseService dbService, ITextEditorPopupService textEditorPopupService, IDialogOKService dialogService)
+        public NotaViewModel(DataBaseService dbService, ITextEditorPopupService textEditorPopupService, IAddImagenPopupService addImagenPopupService, IDialogOKService dialogService)
         {
             EditarTextoAsyncCommand = new AsyncRelayCommand(EditarTextoAsync);
             AgregarImagenAsyncCommand = new AsyncRelayCommand(AgregarImagenAsync);
             EliminarNotaAsyncCommand = new AsyncRelayCommand(EliminarNotaAsync);
             _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
             _textEditorPopupService = textEditorPopupService ?? throw new ArgumentNullException(nameof(textEditorPopupService));
+            _addImagenPopupService = addImagenPopupService ?? throw new ArgumentNullException(nameof(addImagenPopupService));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService), "El servicio de diálogo no puede ser nulo.");
         }
 
@@ -37,7 +38,7 @@ namespace GuiaBakio.ViewModels
         private Nota? nota;
 
         [ObservableProperty]
-        private ObservableCollection<ImagenNota> imagenes = new();
+        private ObservableCollection<MiImagen> imagenes = new();
 
         [ObservableProperty]
         private bool noHayTexto;
@@ -57,14 +58,23 @@ namespace GuiaBakio.ViewModels
                 var apartado = await _dbService.ObtenerApartadoAsync(Nota.ApartadoId);
                 var localidad = await _dbService.ObtenerLocalidadAsync(apartado.LocalidadId);
                 Titulo = localidad?.Nombre + " - " + apartado.Nombre + " - " + Nota.Titulo;
-                Imagenes = new ObservableCollection<ImagenNota>(
-                    await _dbService.ObtenerImagenesPorNotaAsync(notaId));
+                Imagenes = new ObservableCollection<MiImagen>(
+                    await _dbService.ObtenerImagenesPorEntidadAsync(TipoEntidad.Nota, notaId));
+                await AsignarImagenSourceAsync();
                 NoHayTexto = string.IsNullOrWhiteSpace(Nota.Contenido);
                 NoHayImagenes = !Imagenes?.Any() == true;
             }
             catch (Exception ex)
             {
                 throw new InvalidOperationException($"Error al cargar datos de la nota. {ex.Message}");
+            }
+        }
+        
+        private async Task AsignarImagenSourceAsync()
+        {
+            foreach (var imagen in Imagenes)
+            {
+                imagen.ImagenSource = await DataBaseService.ConvertirBytesAImageSourceAsync(imagen.Foto);
             }
         }
 

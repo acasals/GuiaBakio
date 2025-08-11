@@ -7,17 +7,18 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace GuiaBakio.ViewModels
 {
-    public partial class LocalidadDetalleViewModel : ObservableObject
+    public partial class LocalidadViewModel : ObservableObject
     {
         private readonly DataBaseService _dbService;
         private readonly ITextEditorPopupService _textEditorPopupService;
+        private readonly IAddImagenPopupService _addImagenPopupService;
         private readonly IAddItemPopupService _addItemPopupService;
         private readonly IDialogOKService _dialogService;
         public IRelayCommand EditarTextoAsyncCommand { get; }
         public IRelayCommand AgregarApartadoAsyncCommand { get; }
         public IRelayCommand AgregarImagenAsyncCommand { get; }
         public IRelayCommand EliminarLocalidadAsyncCommand { get; }
-        public LocalidadDetalleViewModel(DataBaseService dbService, IAddItemPopupService addItemPopupService, ITextEditorPopupService textEditorPopupService, IDialogOKService dialogService )
+        public LocalidadViewModel(DataBaseService dbService, IAddItemPopupService addItemPopupService, IAddImagenPopupService addImagenPopupService, ITextEditorPopupService textEditorPopupService, IDialogOKService dialogService )
         {
             EditarTextoAsyncCommand = new AsyncRelayCommand(EditarTextoAsync);
             AgregarApartadoAsyncCommand = new AsyncRelayCommand(AgregarApartadoAsync);
@@ -26,6 +27,7 @@ namespace GuiaBakio.ViewModels
             _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
             _textEditorPopupService = textEditorPopupService ?? throw new ArgumentNullException(nameof(textEditorPopupService));
             _addItemPopupService = addItemPopupService ?? throw new ArgumentNullException(nameof(_addItemPopupService));
+            _addImagenPopupService=addImagenPopupService ?? throw new ArgumentNullException(nameof(addImagenPopupService));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService), "El servicio de diálogo no puede ser nulo.");
         }
 
@@ -40,14 +42,17 @@ namespace GuiaBakio.ViewModels
         private ObservableCollection<Apartado> apartados = new();
         
         [ObservableProperty] 
-        private ObservableCollection<ImagenLocalidad> imagenes = new();
+        private ObservableCollection<MiImagen> imagenes = new();
 
         [ObservableProperty]
         private bool noHayTexto;
+
         [ObservableProperty] 
         private bool noHayApartados;
+
         [ObservableProperty] 
         private bool noHayImagenes;
+
         public async Task CargarDatosAsync(int localidadId)
         {
             if (localidadId <= 0)
@@ -60,8 +65,9 @@ namespace GuiaBakio.ViewModels
                 Localidad = await _dbService.ObtenerLocalidadAsync(LocalidadId);
                 Apartados = new ObservableCollection<Apartado>(
                     await _dbService.ObtenerApartadosAsync(LocalidadId));
-                Imagenes = new ObservableCollection<ImagenLocalidad>(
-                    await _dbService.ObtenerImagenesPorLocalidadAsync(LocalidadId));
+                Imagenes = new ObservableCollection<MiImagen>(
+                    await _dbService.ObtenerImagenesPorEntidadAsync(TipoEntidad.Localidad,LocalidadId));
+                await AsignarImagenSourceAsync();
                 NoHayTexto = string.IsNullOrWhiteSpace(Localidad?.Texto);
                 NoHayApartados = !Apartados?.Any() == true;
                 NoHayImagenes = !Imagenes?.Any() == true;
@@ -69,6 +75,14 @@ namespace GuiaBakio.ViewModels
             catch (Exception ex)
             {
                 throw new InvalidOperationException($"Error al cargar datos de localidad. {ex.Message}");
+            }
+        }
+
+        private async Task AsignarImagenSourceAsync()
+        {
+            foreach (var imagen in Imagenes)
+            {
+                imagen.ImagenSource = await DataBaseService.ConvertirBytesAImageSourceAsync(imagen.Foto);
             }
         }
 
@@ -160,10 +174,7 @@ namespace GuiaBakio.ViewModels
         [RelayCommand]
         public async Task AgregarImagenAsync()
         {
-            //var nueva = new ImagenLocalidad { Url = "https://ejemplo.com/imagen.jpg", LocalidadId = LocalidadId };
-            //Imagenes.Add(nueva);
-            //await _dbService.GuardarImagenAsync(nueva);
-            OnPropertyChanged(nameof(Imagenes));
+            //
         }
     }
 }
