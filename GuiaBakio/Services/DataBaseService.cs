@@ -685,7 +685,7 @@ namespace GuiaBakio.Services
         {
             if (entidadId <= 0) throw new ArgumentException("El Id de la localidad, apartado o nota debe ser mayor que 0.", nameof(entidadId));
             return await _db.Table<MiImagen>()
-                            .Where(a => a.TipoDeEntidad == tipoEntidad && a.LocalidadId == entidadId)
+                            .Where(a => a.TipoDeEntidad == tipoEntidad && a.EntidadID == entidadId)
                             .ToListAsync();
         }
         public async Task<int> EliminarImagenAsync(int imagenId,bool confirmarBorrado = true)

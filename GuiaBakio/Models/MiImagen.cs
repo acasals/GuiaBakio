@@ -7,11 +7,11 @@ namespace GuiaBakio.Models
 
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
-        public int LocalidadId { get; set; }
-        public string Nombre { get; set; }
+        public int EntidadID { get; set; }
+        public string? Nombre { get; set; }
         public byte[]? Foto { get; set; }
         public bool EsMapa { get; set; } 
-        public string UrlMapa { get; set; }
+        public string? UrlMapa { get; set; }
         public TipoEntidad TipoDeEntidad { get; set; }
         public MiImagen( int entidadId, TipoEntidad tipoDeEntidad, byte[] byteArray, string nombre = "", bool esmapa = false, string urlMapa= "")
         {
@@ -26,5 +26,8 @@ namespace GuiaBakio.Models
             TipoDeEntidad = tipoDeEntidad;
         }
         public MiImagen() { }
+
+        [Ignore]
+        public ImageSource? ImagenSource { get; set; }
     }
 }
