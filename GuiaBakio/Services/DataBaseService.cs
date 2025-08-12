@@ -666,6 +666,45 @@ namespace GuiaBakio.Services
                 throw new InvalidOperationException($"No se pudo insertar la imagen. {ex.Message}");
             }
         }
+
+        public async Task<int> InsertarImagensync(MiImagen imagen)
+        {
+            if (imagen.EntidadId <= 0)
+                throw new ArgumentException("El Id de la localidad, apartado o nota debe ser mayor que cero.", nameof(imagen.EntidadId));
+            if (imagen.Foto is null)
+                throw new ArgumentException("La imagen no puede ser null.", nameof(imagen.Foto));
+
+            switch (imagen.TipoDeEntidad)
+            {
+                case TipoEntidad.Localidad:
+                    bool localidadExiste = await ExisteLocalidadAsync(imagen.EntidadId);
+                    if (!localidadExiste)
+                        throw new InvalidOperationException($"La localidad con Id '{imagen.EntidadId}' no existe.");
+                    break;
+                case TipoEntidad.Apartado:
+                    bool apartadoExiste = await ExisteApartadoAsync(imagen.EntidadId);
+                    if (!apartadoExiste)
+                        throw new InvalidOperationException($"El apartado con Id '{imagen.EntidadId}' no existe.");
+                    break;
+                case TipoEntidad.Nota:
+                    bool notaExiste = await ExisteNotaAsync(imagen.EntidadId);
+                    if (!notaExiste)
+                        throw new InvalidOperationException($"La nota con Id '{imagen.EntidadId}' no existe.");
+                    break;
+                default:
+                    throw new ArgumentException("El tipo de entidad (localidad, aparatado o nota) es incorrecto.", nameof(imagen.TipoDeEntidad));
+            }
+
+            try
+            {
+                await _db.InsertAsync(imagen);
+                return imagen.Id;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"No se pudo insertar la imagen. {ex.Message}");
+            }
+        }
         public async Task<MiImagen> ObtenerImagenAsync(int imagenId)
         {
             if (imagenId <= 0) throw new ArgumentException("El Id de la imagen debe ser mayor que 0.", nameof(imagenId));
@@ -685,7 +724,7 @@ namespace GuiaBakio.Services
         {
             if (entidadId <= 0) throw new ArgumentException("El Id de la localidad, apartado o nota debe ser mayor que 0.", nameof(entidadId));
             return await _db.Table<MiImagen>()
-                            .Where(a => a.TipoDeEntidad == tipoEntidad && a.EntidadID == entidadId)
+                            .Where(a => a.TipoDeEntidad == tipoEntidad && a.EntidadId == entidadId)
                             .ToListAsync();
         }
         public async Task<int> EliminarImagenAsync(int imagenId,bool confirmarBorrado = true)

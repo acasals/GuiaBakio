@@ -7,7 +7,7 @@ namespace GuiaBakio.Models
 
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
-        public int EntidadID { get; set; }
+        public int EntidadId { get; set; }
         public string? Nombre { get; set; }
         public byte[]? Foto { get; set; }
         public bool EsMapa { get; set; } 
