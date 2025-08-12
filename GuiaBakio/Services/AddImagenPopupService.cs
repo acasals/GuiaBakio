@@ -38,7 +38,7 @@ namespace GuiaBakio.Services
 
             buttonUrl = new Button
             {
-                Text = "Cargar",
+                Text = "Cargar Url",
                 HorizontalOptions = LayoutOptions.Fill,
                 Command=new Command(async() => await DetectarCommandAsync())
             };
@@ -52,7 +52,7 @@ namespace GuiaBakio.Services
 
             buttonSelect = new Button
             {
-                Text = "Abrir",
+                Text = "Abrir archivo",
                 HorizontalOptions = LayoutOptions.Fill,
                 Command=new Command(async () => await SeleccionarArchivoCommandAsync())
             };
@@ -62,7 +62,9 @@ namespace GuiaBakio.Services
             {
                 HorizontalOptions = LayoutOptions.Fill,
                 Aspect =Aspect.AspectFill,
-                IsVisible = false
+                IsVisible = false,
+                VerticalOptions = LayoutOptions.Start
+
             };
 
             //Guardar
@@ -81,7 +83,8 @@ namespace GuiaBakio.Services
             var grid = new Grid
             {
                 ColumnSpacing = 10,
-                WidthRequest = 300,
+                RowSpacing = 10,
+                WidthRequest = 350,
                 RowDefinitions =
                 {
                     new RowDefinition{Height = GridLength.Star},
@@ -99,12 +102,18 @@ namespace GuiaBakio.Services
             grid.Add(entryUrl, 0, 0);
             grid.Add(buttonUrl, 1, 0);
             grid.Add(labelDispositivo, 0, 1);
-            grid.Add(buttonSelect, 0, 1);
+            grid.Add(buttonSelect, 1, 1);
             grid.Add(previewImage, 0, 2);
             grid.SetColumnSpan(previewImage, 2);
             grid.Add(buttonGuardar, 1, 3);
 
-            popup.Content = grid;
+            var scrView = new ScrollView
+            {
+                Content = grid,
+                WidthRequest=350
+            };
+
+            popup.Content = scrView;
             await currentPage.ShowPopupAsync(popup, new PopupOptions
             {
                 OnTappingOutsideOfPopup = () => tcs.TrySetResult(null)
@@ -193,7 +202,7 @@ namespace GuiaBakio.Services
 
         private static async Task<byte[]> GenerarImagenMapaDesdeUrl(string entrada)
         {
-            string apiKey = "TU_API_KEY"; // Reemplaza con tu clave real
+            string apiKey = "AIzaSyDV93Uvy1WGfJ5IlOkoGzULbYg6s3IXw7s";
             string center = ExtraerCentroDesdeUrl(entrada);
 
             if (string.IsNullOrEmpty(center))
