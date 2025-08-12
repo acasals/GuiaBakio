@@ -18,7 +18,7 @@ namespace GuiaBakio.ViewModels
         public IRelayCommand AgregarApartadoAsyncCommand { get; }
         public IRelayCommand AgregarImagenAsyncCommand { get; }
         public IRelayCommand EliminarLocalidadAsyncCommand { get; }
-        public LocalidadViewModel(DataBaseService dbService, IAddItemPopupService addItemPopupService, IAddImagenPopupService addImagenPopupService, ITextEditorPopupService textEditorPopupService, IDialogOKService dialogService )
+        public LocalidadViewModel(DataBaseService dbService, IAddItemPopupService addItemPopupService, IAddImagenPopupService addImagenPopupService, ITextEditorPopupService textEditorPopupService, IDialogOKService dialogService)
         {
             EditarTextoAsyncCommand = new AsyncRelayCommand(EditarTextoAsync);
             AgregarApartadoAsyncCommand = new AsyncRelayCommand(AgregarApartadoAsync);
@@ -27,30 +27,30 @@ namespace GuiaBakio.ViewModels
             _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
             _textEditorPopupService = textEditorPopupService ?? throw new ArgumentNullException(nameof(textEditorPopupService));
             _addItemPopupService = addItemPopupService ?? throw new ArgumentNullException(nameof(_addItemPopupService));
-            _addImagenPopupService=addImagenPopupService ?? throw new ArgumentNullException(nameof(addImagenPopupService));
+            _addImagenPopupService = addImagenPopupService ?? throw new ArgumentNullException(nameof(addImagenPopupService));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService), "El servicio de diálogo no puede ser nulo.");
         }
 
         [ObservableProperty]
         private int localidadId;
 
-        [ObservableProperty] 
+        [ObservableProperty]
         private Localidad? localidad;
-       
 
-        [ObservableProperty] 
+
+        [ObservableProperty]
         private ObservableCollection<Apartado> apartados = new();
-        
-        [ObservableProperty] 
+
+        [ObservableProperty]
         private ObservableCollection<MiImagen> imagenes = new();
 
         [ObservableProperty]
         private bool noHayTexto;
 
-        [ObservableProperty] 
+        [ObservableProperty]
         private bool noHayApartados;
 
-        [ObservableProperty] 
+        [ObservableProperty]
         private bool noHayImagenes;
 
         public async Task CargarDatosAsync(int localidadId)
@@ -66,7 +66,7 @@ namespace GuiaBakio.ViewModels
                 Apartados = new ObservableCollection<Apartado>(
                     await _dbService.ObtenerApartadosAsync(LocalidadId));
                 Imagenes = new ObservableCollection<MiImagen>(
-                    await _dbService.ObtenerImagenesPorEntidadAsync(TipoEntidad.Localidad,LocalidadId));
+                    await _dbService.ObtenerImagenesPorEntidadAsync(TipoEntidad.Localidad, LocalidadId));
                 await AsignarImagenSourceAsync();
                 NoHayTexto = string.IsNullOrWhiteSpace(Localidad?.Texto);
                 NoHayApartados = !Apartados?.Any() == true;
@@ -92,7 +92,7 @@ namespace GuiaBakio.ViewModels
             try
             {
                 int eliminado = await _dbService.EliminarLocalidadAsync(LocalidadId);
-                if (eliminado>0)
+                if (eliminado > 0)
                 {
                     await Shell.Current.GoToAsync("mainPage");
                 }
@@ -104,7 +104,7 @@ namespace GuiaBakio.ViewModels
             }
             //
         }
-     
+
         [RelayCommand]
         public async Task EditarTextoAsync()
         {
@@ -128,7 +128,7 @@ namespace GuiaBakio.ViewModels
         }
 
         [RelayCommand]
-        public async Task AgregarApartadoAsync() 
+        public async Task AgregarApartadoAsync()
         {
             var nuevoApartado = await _addItemPopupService.MostrarAsync("Añade un apartado");
             if (nuevoApartado is null)
@@ -143,13 +143,13 @@ namespace GuiaBakio.ViewModels
             }
             try
             {
-                bool yaExiste = await _dbService.ExisteApartadoAsync(nuevoApartado,Localidad.Id);
+                bool yaExiste = await _dbService.ExisteApartadoAsync(nuevoApartado, Localidad.Id);
                 if (yaExiste)
                 {
                     await _dialogService.ShowAlertAsync("Error", "Apartado existente.", "OK");
                     return;
                 }
-                var id = await _dbService.InsertarApartadoAsync(nuevoApartado,Localidad.Id);
+                var id = await _dbService.InsertarApartadoAsync(nuevoApartado, Localidad.Id);
                 if (id <= 0)
                 {
                     await _dialogService.ShowAlertAsync("Error", "No se pudo añadir el apartado.", "OK");
@@ -174,7 +174,27 @@ namespace GuiaBakio.ViewModels
         [RelayCommand]
         public async Task AgregarImagenAsync()
         {
-            //
+            try
+            {
+                var miImagen = await _addImagenPopupService.MostrarAsync();
+                if (miImagen is null)
+                {
+                    return;
+                }
+                if (miImagen.Foto is null || miImagen.Foto.Length == 0)
+                {
+                    await _dialogService.ShowAlertAsync("Error", "La imagen no puede estar vacía.", "OK");
+                    return;
+                }
+                miImagen.EntidadId = LocalidadId;
+                miImagen.TipoDeEntidad = TipoEntidad.Localidad;
+                await _dbService.InsertarImagensync(miImagen);
+            }
+            catch (Exception ex)
+            {
+                await _dialogService.ShowAlertAsync("Error", $"No se pudo añadir la imagen.{Environment.NewLine}{ex.Message}", "OK");
+                return;
+            }
         }
     }
 }

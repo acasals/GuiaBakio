@@ -178,10 +178,27 @@ namespace GuiaBakio.ViewModels
         [RelayCommand]
         public async Task AgregarImagenAsync()
         {
-            //var nueva = new ImagenLocalidad { Url = "https://ejemplo.com/imagen.jpg", LocalidadId = LocalidadId };
-            //Imagenes.Add(nueva);
-            //await _dbService.GuardarImagenAsync(nueva);
-            OnPropertyChanged(nameof(Imagenes));
+            try
+            {
+                var miImagen = await _addImagenPopupService.MostrarAsync();
+                if (miImagen is null)
+                {
+                    return;
+                }
+                if (miImagen.Foto is null || miImagen.Foto.Length == 0)
+                {
+                    await _dialogService.ShowAlertAsync("Error", "La imagen no puede estar vacía.", "OK");
+                    return;
+                }
+                miImagen.EntidadId = ApartadoId;
+                miImagen.TipoDeEntidad = TipoEntidad.Apartado;
+                await _dbService.InsertarImagensync(miImagen);
+            }
+            catch (Exception ex)
+            {
+                await _dialogService.ShowAlertAsync("Error", $"No se pudo añadir la imagen.{Environment.NewLine}{ex.Message}", "OK");
+                return;
+            }
         }
     }
 }

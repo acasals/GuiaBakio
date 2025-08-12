@@ -2,7 +2,6 @@
 using CommunityToolkit.Maui.Extensions;
 using GuiaBakio.Models;
 using GuiaBakio.Services.Interfaces;
-using Microsoft.Maui.Layouts;
 using System.Text.RegularExpressions;
 
 namespace GuiaBakio.Services
