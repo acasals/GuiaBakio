@@ -202,7 +202,10 @@ namespace GuiaBakio.Services
 
         private static async Task<byte[]> GenerarImagenMapaDesdeUrl(string entrada)
         {
-            string apiKey = "AIzaSyDV93Uvy1WGfJ5IlOkoGzULbYg6s3IXw7s";
+            string? apiKey = Helpers.ApiKeyProvider.GetApiKey();
+            if (string.IsNullOrEmpty(apiKey))
+                throw new InvalidOperationException("La clave de API de Google Maps no está configurada.");
+
             string center = ExtraerCentroDesdeUrl(entrada);
 
             if (string.IsNullOrEmpty(center))
