@@ -2,3 +2,5 @@
 GuiaBakio/bin/
 GuiaBakio/obj/
 GuiaBakio/secrets.json
+GuiaBakio/Platforms/Android/Keystore/GuiaBakio.keystore
+GuiaBakio/Resources/Data/Signing.props

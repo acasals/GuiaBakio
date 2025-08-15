@@ -32,7 +32,7 @@
 		<ApplicationId>com.alexcasals.guiabakio</ApplicationId>
 		<ApplicationIdGuid>00a255db-265a-4e7b-89b7-54bde1551ce9</ApplicationIdGuid>
 		<ApplicationTitle>Guia de Bakio</ApplicationTitle>
-	</PropertyGroup>
+  </PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-ios|AnyCPU'">
 		<ApplicationId>com.alexcasals.guiabakio</ApplicationId>
@@ -119,4 +119,6 @@
 		</MauiXaml>
 	</ItemGroup>
 
+	<Import Project="Resources\data\Signing.props" Condition="Exists('Resources\data\Signing.props')" />
+	
 </Project>
