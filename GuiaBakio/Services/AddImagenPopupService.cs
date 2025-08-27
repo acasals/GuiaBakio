@@ -8,12 +8,12 @@ namespace GuiaBakio.Services
 {
     public class AddImagenPopupService: IAddImagenPopupService
     {
-        private MiImagen miImagen=new();
+        private Foto miImagen=new();
         private byte[] imagenBytes;
         private Entry entryUrl;
         private Button buttonUrl, buttonGuardar, buttonSelect;
         private Image previewImage;
-        public async Task<MiImagen?> MostrarAsync()
+        public async Task<Foto?> MostrarAsync()
         {
             var currentPage = Shell.Current?.CurrentPage;
 
@@ -25,7 +25,7 @@ namespace GuiaBakio.Services
                 BackgroundColor = Colors.White
             };
 
-            var tcs = new TaskCompletionSource<MiImagen?>();
+            var tcs = new TaskCompletionSource<Foto?>();
 
             // sección URL
             entryUrl = new Entry
@@ -145,7 +145,7 @@ namespace GuiaBakio.Services
                     return;
                 }
 
-                miImagen.Foto = imagenBytes;
+                miImagen.Blob = imagenBytes;
                 MostrarVistaPrevia(imagenBytes);
             }
             catch (Exception ex)
@@ -171,7 +171,7 @@ namespace GuiaBakio.Services
 
                 miImagen.EsMapa = false;
                 miImagen.UrlMapa = "";
-                miImagen.Foto = imagenBytes;
+                miImagen.Blob = imagenBytes;
 
                 MostrarVistaPrevia(imagenBytes);
             }

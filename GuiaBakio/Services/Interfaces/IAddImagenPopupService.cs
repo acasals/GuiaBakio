@@ -4,6 +4,6 @@ namespace GuiaBakio.Services.Interfaces
 {
     public interface IAddImagenPopupService
     {
-        Task<MiImagen?> MostrarAsync();
+        Task<Foto?> MostrarAsync();
     }
 }

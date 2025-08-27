@@ -38,7 +38,7 @@ namespace GuiaBakio.ViewModels
         private Nota? nota;
 
         [ObservableProperty]
-        private ObservableCollection<MiImagen> imagenes = new();
+        private ObservableCollection<Foto> imagenes = new();
 
         [ObservableProperty]
         private bool noHayTexto;
@@ -58,10 +58,10 @@ namespace GuiaBakio.ViewModels
                 var apartado = await _dbService.ObtenerApartadoAsync(Nota.ApartadoId);
                 var localidad = await _dbService.ObtenerLocalidadAsync(apartado.LocalidadId);
                 Titulo = localidad?.Nombre + " - " + apartado.Nombre + " - " + Nota.Titulo;
-                Imagenes = new ObservableCollection<MiImagen>(
+                Imagenes = new ObservableCollection<Foto>(
                     await _dbService.ObtenerImagenesPorEntidadAsync(TipoEntidad.Nota, notaId));
                 await AsignarImagenSourceAsync();
-                NoHayTexto = string.IsNullOrWhiteSpace(Nota.Contenido);
+                NoHayTexto = string.IsNullOrWhiteSpace(Nota.Texto);
                 NoHayImagenes = !Imagenes?.Any() == true;
             }
             catch (Exception ex)
@@ -74,7 +74,7 @@ namespace GuiaBakio.ViewModels
         {
             foreach (var imagen in Imagenes)
             {
-                imagen.ImagenSource = await DataBaseService.ConvertirBytesAImageSourceAsync(imagen.Foto);
+                imagen.ImagenSource = await DataBaseService.ConvertirBytesAImageSourceAsync(imagen.Blob);
             }
         }
 
@@ -83,13 +83,13 @@ namespace GuiaBakio.ViewModels
         {
             try
             {
-                var resultado = await _textEditorPopupService.MostrarEditorAsync(Nota?.Contenido);
+                var resultado = await _textEditorPopupService.MostrarEditorAsync(Nota?.Texto);
 
                 if (resultado is null)
                 {
                     return;
                 }
-                string? v = Nota?.Contenido = resultado;
+                string? v = Nota?.Texto = resultado;
                 await _dbService.ActualizarNotaAsync(Nota);
                 await CargarDatosAsync(NotaId);
             }
@@ -128,7 +128,7 @@ namespace GuiaBakio.ViewModels
                 {
                     return;
                 }
-                if (miImagen.Foto is null || miImagen.Foto.Length == 0)
+                if (miImagen.Blob is null || miImagen.Blob.Length == 0)
                 {
                     await _dialogService.ShowAlertAsync("Error", "La imagen no puede estar vacía.", "OK");
                     return;

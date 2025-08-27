@@ -105,9 +105,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<MauiXaml Update="Pages\ApartadoPage.xaml">
-		  <Generator>MSBuild:Compile</Generator>
-		</MauiXaml>
 		<MauiXaml Update="Pages\LocalidadPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
@@ -119,6 +116,10 @@
 		</MauiXaml>
 	</ItemGroup>
 
-	<Import Project="Resources\data\Signing.props" Condition="Exists('Resources\data\Signing.props')" />
+	<ItemGroup>
+	  <Folder Include="Resources\Data\" />
+	</ItemGroup>
+
+	<Import Project="Resources\Data\Signing.props" Condition="Exists('Resources\data\Signing.props')" />
 	
 </Project>
