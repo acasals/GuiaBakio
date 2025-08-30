@@ -22,6 +22,28 @@ namespace GuiaBakio.Services
             await _db.CreateTableAsync<Foto>();
             await _db.CreateTableAsync<Etiqueta>();
 
+            // Crear etiquetas predeterminadas si no existen
+            if (await _db.Table<Etiqueta>().CountAsync() == 0)
+            {
+                try
+                {
+                    List<Etiqueta> etiquetasPredeterminadas =
+                    [
+                        new Etiqueta("Comer", "restaurant"),
+                        new Etiqueta("Cafetería", "emoji_food_beverage"),
+                        new Etiqueta("Pintxos", "tapas"),
+                        new Etiqueta("Pasear", "hiking"),
+                        new Etiqueta("Paisaje", "landscape"),
+                        new Etiqueta("Aparcar", "local_parking"),
+                    ];
+                    await _db.InsertAllAsync(etiquetasPredeterminadas);
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"No se pudieron crear las etiquetas predeterminadas. {ex.Message}");
+                }
+            }
+
         }
 
 
@@ -167,7 +189,7 @@ namespace GuiaBakio.Services
         #endregion
 
         #region "Notas"
-        public async Task<int> InsertarNotaAsync(string titulo, string texto, int localidadId)
+        public async Task<int> InsertarNotaAsync(string titulo, int localidadId, string texto = "")
         {
             if (string.IsNullOrWhiteSpace(titulo))
                 throw new ArgumentException("El título de la nota es obligatorio.", nameof(titulo));
@@ -193,7 +215,7 @@ namespace GuiaBakio.Services
                 throw new InvalidOperationException($"No se pudo crear la nota. {ex.Message}");
             }
         }
-        public async Task<int> InsertarNotaAsync(string titulo, string texto, string nombreLocalidad)
+        public async Task<int> InsertarNotaAsync(string titulo, string nombreLocalidad, string texto = "")
         {
             if (string.IsNullOrWhiteSpace(titulo))
                 throw new ArgumentException("El título de la nota es obligatorio.", nameof(titulo));
@@ -263,6 +285,32 @@ namespace GuiaBakio.Services
                             .Where(a => a.LocalidadId == localidadId)
                             .ToListAsync();
         }
+
+        public async Task<List<Nota>> ObtenerNotasPorEtiquetasAsync(int localidadId, List<Etiqueta> listaEtiquetas)
+        {
+            if (localidadId <= 0) throw new ArgumentException("El Id de la localidad debe ser mayor que 0.", nameof(localidadId));
+            if (listaEtiquetas == null || listaEtiquetas.Count == 0)
+                return await _db.Table<Nota>().ToListAsync(); // O tu método personalizado
+
+            var etiquetaIds = listaEtiquetas.Select(e => e.Id).ToList();
+
+            // Obtener relaciones que coincidan con alguna etiqueta
+            var relaciones = await _db.Table<NotaEtiqueta>()
+                                      .Where(ne => etiquetaIds.Contains(ne.EtiquetaId))
+                                      .ToListAsync();
+
+            // Obtener los IDs únicos de notas relacionadas
+            var notaIds = relaciones.Select(r => r.NotaId).Distinct().ToList();
+
+            // Obtener las notas correspondientes
+            var notas = await _db.Table<Nota>()
+                                 .Where(n => n.LocalidadId == localidadId && notaIds.Contains(n.Id))
+                                 .ToListAsync();
+
+            return notas;
+        }
+
+
         public async Task<Nota> ObtenerNotaAsync(int notaId)
         {
             if (notaId <= 0) throw new ArgumentException("El Id de la nota debe ser mayor que 0.", nameof(notaId));
@@ -488,6 +536,112 @@ namespace GuiaBakio.Services
             catch (Exception ex)
             {
                 throw new InvalidOperationException($"Hubo un problema al eliminar la imagen. {ex.Message}");
+            }
+        }
+
+        #endregion
+
+        #region "Etiquetas"
+        public async Task<int> InsertarEtiquetaAsync(string nombre, string icono)
+        {
+            if (string.IsNullOrWhiteSpace(nombre))
+                throw new ArgumentException("El nombre de la etiqueta es obligatorio.", nameof(nombre));
+            if (string.IsNullOrWhiteSpace(icono))
+                throw new ArgumentException("El icono de la etiqueta es obligatorio.", nameof(icono));
+            bool existeEtiqueta = await ExisteEtiquetaAsync(nombre);
+            if (existeEtiqueta)
+                throw new InvalidOperationException("Ya existe una etiqueta con ese nombre.");
+            try
+            {
+                Etiqueta etiqueta = new(nombre, icono);
+                await _db.InsertAsync(etiqueta);
+                return etiqueta.Id;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"No se pudo crear la etiqueta. {ex.Message}");
+            }
+        }
+        public async Task<bool> ExisteEtiquetaAsync(string nombre)
+        {
+            if (string.IsNullOrWhiteSpace(nombre))
+                throw new ArgumentException("El nombre de la etiqueta es obligatorio.", nameof(nombre));
+            nombre = MisUtils.NormalizarTexto(nombre).Trim();
+            var etiqueta = await _db.Table<Etiqueta>()
+                                    .Where(a => a.Nombre.ToLower() == nombre.ToLower())
+                                    .FirstOrDefaultAsync();
+            return etiqueta != null;
+        }
+
+        public async Task<List<Etiqueta>> ObtenerEtiquetasAsync()
+        {
+            return await _db.Table<Etiqueta>().ToListAsync();
+        }
+
+        public async Task<List<Etiqueta>> ObtenerEtiquetasDeNotaAsync(int notaId)
+        {
+            if (notaId <= 0) throw new ArgumentException("El Id de la nota debe ser mayor que 0.", nameof(notaId));
+            var nota = await _db.FindAsync<Nota>(notaId) ?? throw new InvalidOperationException("No se encontró la nota.");
+
+            // Obtener los IDs de etiquetas asociadas a la nota
+            var relaciones = await _db.Table<NotaEtiqueta>()
+                                     .Where(ne => ne.NotaId == notaId)
+                                     .ToListAsync();
+
+            var etiquetaIds = relaciones.Select(r => r.EtiquetaId).ToList();
+
+            // Obtener las etiquetas correspondientes
+            var etiquetas = await _db.Table<Etiqueta>()
+                                    .Where(e => etiquetaIds.Contains(e.Id))
+                                    .ToListAsync();
+
+            return etiquetas;
+        }
+        public async Task<Etiqueta> ObtenerEtiquetaAsync(int etiquetaId)
+        {
+            if (etiquetaId <= 0) throw new ArgumentException("El Id de la etiqueta debe ser mayor que 0.", nameof(etiquetaId));
+            return await _db.Table<Etiqueta>()
+                            .Where(a => a.Id == etiquetaId)
+                            .FirstOrDefaultAsync();
+        }
+
+        public async Task ActualizarEtiquetaAsync(Etiqueta etiqueta)
+        {
+            if (etiqueta == null)
+                throw new ArgumentNullException(nameof(etiqueta), "La etiqueta no puede ser nula.");
+            if (string.IsNullOrWhiteSpace(etiqueta.Nombre))
+                throw new ArgumentException("El nuevo nombre de la etiqueta es obligatorio.", nameof(etiqueta.Nombre));
+            try
+            {
+                await _db.UpdateAsync(etiqueta);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"No se pudo actualizar la etiqueta. {ex.Message}");
+            }
+        }
+
+        public async Task<int> EliminarEtiquetaAsync(int etiquetaId, bool confirmarBorrado = true)
+        {
+            if (etiquetaId <= 0) throw new ArgumentException("El Id de la etiqueta debe ser mayor que 0.", nameof(etiquetaId));
+            _ = await ObtenerEtiquetaAsync(etiquetaId) ?? throw new InvalidOperationException("No se encontró la etiqueta.");
+            if (confirmarBorrado)
+            {
+                bool confirmacion = await _dialogService.ShowAlertAsync(
+                    "Confirmar borrado",
+                    "¿Seguro que quieres borrar esta etiqueta?",
+                    "Sí",
+                    "No");
+                if (!confirmacion)
+                    return 0; // Cancelar el borrado si el usuario no confirma      
+            }
+            try
+            {
+                return await _db.DeleteAsync<Etiqueta>(etiquetaId);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Hubo un problema al eliminar la etiqueta. {ex.Message}");
             }
         }
 
