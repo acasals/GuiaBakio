@@ -1,7 +1,8 @@
-﻿using SQLite;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using SQLite;
 namespace GuiaBakio.Models
 {
-    public class Etiqueta
+    public partial class Etiqueta : ObservableObject
     {
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
@@ -21,7 +22,7 @@ namespace GuiaBakio.Models
             Nombre = string.Empty;
         }
 
-        [Ignore]
-        public bool IsSelected { get; set; }
+        [ObservableProperty]
+        private bool isSelected;
     }
 }
