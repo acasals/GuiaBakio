@@ -71,4 +71,16 @@
         <Setter Property="BorderWidth" Value="1" />
      </Style>
 
+    <!-- Estilo para chip de etiqueta con Border -->
+    <Style x:Key="EtiquetaChipStyle" TargetType="Border">
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="10" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Padding" Value="2" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="Margin" Value="2" />
+    </Style>
+
 </ResourceDictionary>
