@@ -3,6 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="GuiaBakio.Pages.NotaPage"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:vm="clr-namespace:GuiaBakio.ViewModels"
+             x:DataType="vm:NotaViewModel"
              Title="">
     
     <Grid x:Name="MainGrid" RowSpacing="10" Padding="10">
@@ -35,7 +37,7 @@
         <Grid Grid.Row="1" ColumnDefinitions="*" >
             <ScrollView>
                 <Grid>
-                    <Label Text="{Binding Nota.Contenido}" FontSize="18"
+                    <Label Text="{Binding Nota.Texto}" FontSize="18"
    HorizontalOptions="Center" VerticalOptions="Center" />
 
                     <!-- Sugerencia si no hay texto -->

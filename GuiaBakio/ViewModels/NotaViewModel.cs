@@ -1,9 +1,9 @@
-﻿using GuiaBakio.Models;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using GuiaBakio.Models;
 using GuiaBakio.Services;
 using GuiaBakio.Services.Interfaces;
 using System.Collections.ObjectModel;
-using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace GuiaBakio.ViewModels
 {
@@ -55,9 +55,8 @@ namespace GuiaBakio.ViewModels
             try
             {
                 Nota = await _dbService.ObtenerNotaAsync(notaId);
-                var apartado = await _dbService.ObtenerApartadoAsync(Nota.ApartadoId);
-                var localidad = await _dbService.ObtenerLocalidadAsync(apartado.LocalidadId);
-                Titulo = localidad?.Nombre + " - " + apartado.Nombre + " - " + Nota.Titulo;
+                var localidad = await _dbService.ObtenerLocalidadAsync(Nota.LocalidadId);
+                Titulo = localidad?.Nombre + " - " + Nota.Titulo;
                 Imagenes = new ObservableCollection<Foto>(
                     await _dbService.ObtenerImagenesPorEntidadAsync(TipoEntidad.Nota, notaId));
                 await AsignarImagenSourceAsync();
@@ -69,7 +68,7 @@ namespace GuiaBakio.ViewModels
                 throw new InvalidOperationException($"Error al cargar datos de la nota. {ex.Message}");
             }
         }
-        
+
         private async Task AsignarImagenSourceAsync()
         {
             foreach (var imagen in Imagenes)
