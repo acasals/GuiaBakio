@@ -2,18 +2,17 @@ using GuiaBakio.Models;
 using GuiaBakio.Services;
 using GuiaBakio.Services.Interfaces;
 using GuiaBakio.ViewModels;
-using System.Diagnostics;
 
 
 namespace GuiaBakio.Pages;
 public partial class LocalidadPage : ContentPage, IQueryAttributable
 {
-    private readonly LocalidadDetalleViewModel _myViewModel;
+    private readonly LocalidadViewModel _myViewModel;
     private readonly IDialogOKService _dialogService;
 
     private int localidadId;
 
-    public LocalidadPage(LocalidadDetalleViewModel viewModel,IDialogOKService dialogService)
+    public LocalidadPage(LocalidadViewModel viewModel, IDialogOKService dialogService)
     {
         InitializeComponent();
         _myViewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel)); ;
@@ -40,26 +39,26 @@ public partial class LocalidadPage : ContentPage, IQueryAttributable
         {
             await Shell.Current.GoToAsync("..");
         }
-     }
- 
-    private async void OnAppResumed()
-    {
-       await _myViewModel.CargarDatosAsync(localidadId);
     }
 
-    private async void OnApartadoSeleccionado(object sender, SelectionChangedEventArgs e)
+    private async void OnAppResumed()
     {
-        var apartadoSeleccionado = e.CurrentSelection.FirstOrDefault() as Apartado;
+        await _myViewModel.CargarDatosAsync(localidadId);
+    }
 
-        if (apartadoSeleccionado != null)
+    private async void OnNotaSeleccionada(object sender, SelectionChangedEventArgs e)
+    {
+        Nota? notaSeleccionada = e.CurrentSelection.FirstOrDefault() as Nota;
+
+        if (notaSeleccionada != null)
         {
             try
             {
-                await Shell.Current.GoToAsync($"apartadoPage?Id={apartadoSeleccionado.Id}");
+                await Shell.Current.GoToAsync($"NotaPage?Id={notaSeleccionada.Id}");
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Error", $"No se pudo navegar a la página del apartado.{Environment.NewLine}{ex.Message}", "OK");
+                await DisplayAlert("Error", $"No se pudo navegar a la página de la nota.{Environment.NewLine}{ex.Message}", "OK");
             }
         }
     }
@@ -67,6 +66,6 @@ public partial class LocalidadPage : ContentPage, IQueryAttributable
     {
         await Shell.Current.GoToAsync("..");
     }
- 
+
 }
 

@@ -4,14 +4,26 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="GuiaBakio.Pages.LocalidadPage"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:vm="clr-namespace:GuiaBakio.ViewModels"
+             xmlns:models="clr-namespace:GuiaBakio.Models"
+             xmlns:help="clr-namespace:GuiaBakio.Helpers"
+             x:DataType="vm:LocalidadViewModel"
              Title="">
     
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <help:SeleccionColorConverter x:Key="SeleccionColorConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+
     <Grid x:Name="MainGrid" RowSpacing="10" Padding="10">
         <Grid.RowDefinitions>
             <RowDefinition x:Name="HeaderRow" Height="Auto" />
             <RowDefinition x:Name="TextRow" Height="*" />
-            <RowDefinition x:Name="ItemsRow" Height="*" />
             <RowDefinition x:Name="ImagesRow" Height="*" />
+            <RowDefinition x:Name="EtiquetasRow" Height="Auto" />
+            <RowDefinition x:Name="ItemsRow" Height="*" />
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0" ColumnDefinitions="*" Padding="5" Margin="0" BackgroundColor="AntiqueWhite">
@@ -20,7 +32,7 @@
                    HorizontalOptions="Center"
                    VerticalOptions="Center"
                    FontSize="24"/>
-            
+
             <!-- Botón flotante para eliminar -->
             <ImageButton Source="trash_can.png"
              Style="{StaticResource FloatingImageButtonStyleRed}"
@@ -31,8 +43,8 @@
             </ImageButton>
 
         </Grid>
-        
-        
+
+
         <!-- Texto -->
         <Grid Grid.Row="1" ColumnDefinitions="*" >
             <ScrollView>
@@ -48,10 +60,9 @@
                    VerticalOptions="Center"
                    TextColor="Gray" />
 
-
                 </Grid>
             </ScrollView>
-            
+
             <!-- Botón flotante de edición -->
             <ImageButton Source="edit_icon.png"
                          Style="{StaticResource FloatingImageButtonStyle}"
@@ -62,45 +73,8 @@
             </ImageButton>
         </Grid>
 
-        <!--Lista de Apartados-->
-        <Grid Grid.Row="2" ColumnDefinitions="*" >
-
-            <!-- Lista de ítems -->
-            <CollectionView ItemsSource="{Binding Apartados}"
-                        SelectionMode="Single"
-                        SelectionChanged="OnApartadoSeleccionado"
-                        VerticalOptions="Center"
-                        HorizontalOptions="Center">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Grid ColumnDefinitions="*" Padding="10" Margin="5">
-                            <Label Text="{Binding Nombre}"
-                            FontSize="Medium"
-                            VerticalOptions="Center"
-                            HorizontalOptions="Center"
-                            HorizontalTextAlignment="Center"/>
-                        </Grid>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-
-            <!--Botón flotante de añadir ítem-->
-            <Button Text="+"
-                Style="{StaticResource FloatingButtonStyle}"
-                Command="{Binding AgregarApartadoAsyncCommand}" />
-
-            <!-- Sugerencia si no hay ítems -->
-            <Label  IsVisible="{Binding NoHayApartados}"
-                Text="Esta es la sección de apartados. ¡Agrega uno!"
-                FontAttributes="Italic"
-                HorizontalOptions="Center"
-                VerticalOptions="Center"
-                TextColor="Gray" />
-
-        </Grid>
-        
         <!-- Carrusel de imágenes -->
-        <Grid Grid.Row="3" ColumnDefinitions="*" >
+        <Grid Grid.Row="2" ColumnDefinitions="*" >
 
             <!-- Carrusel -->
             <CarouselView ItemsSource="{Binding Imagenes}">
@@ -114,19 +88,82 @@
             <!-- Sugerencia si no hay imágenes -->
             <Grid IsVisible="{Binding NoHayImagenes}" BackgroundColor="White">
                 <Label Text="Agrega imágenes para esta sección"
-                       FontAttributes="Italic"
-                       HorizontalOptions="Center"
-                       VerticalOptions="Center"
-                       TextColor="Gray" />
+                   FontAttributes="Italic"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   TextColor="Gray" />
             </Grid>
 
             <!-- Botón flotante para añadir imagen -->
             <Button Text="+"
-                    Style="{StaticResource FloatingButtonStyle}"
-                    Command="{Binding AgregarImagenAsyncCommand}" />
+                Style="{StaticResource FloatingButtonStyle}"
+                Command="{Binding AgregarImagenAsyncCommand}" />
 
         </Grid>
-    </Grid>
 
+        <!--Barra de Etiquetas-->
+        <Grid Grid.Row="3"
+              ColumnDefinitions="*"
+              Margin="0,5,0,5">
+            <FlexLayout BindableLayout.ItemsSource="{Binding Etiquetas}"
+                    Wrap="Wrap"
+                    Direction="Row"
+                    JustifyContent="Start"
+                    AlignItems="Start">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="models:Etiqueta">
+                        <Border Style="{StaticResource EtiquetaChipStyle}"
+                                Background="{Binding IsSelected, Converter={StaticResource SeleccionColorConverter}}">
+                            <HorizontalStackLayout Spacing="6" Padding="1" Margin="1">
+                                <Label Text="{Binding Icono}" FontFamily="MaterialSymbols" TextColor="Black" />
+                                <Label Text="{Binding Nombre}" TextColor="Black" FontAttributes="Bold" />
+                            </HorizontalStackLayout>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ToggleEtiquetaCommand}"
+                                    CommandParameter="{Binding}" />
+                            </Border.GestureRecognizers>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </FlexLayout>
+        </Grid>
+
+        <!--Lista de Notas-->
+        <Grid Grid.Row="4" ColumnDefinitions="*" >
+
+            <!-- Lista de ítems -->
+            <CollectionView ItemsSource="{Binding NotasFiltradas}"
+                        SelectionMode="Single"
+                        SelectionChanged="OnNotaSeleccionada"
+                        VerticalOptions="Start"
+                        HorizontalOptions="Start">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Nota">
+                        <Grid ColumnDefinitions="*" Padding="10" Margin="5">
+                            <Label Text="{Binding Titulo}" FontAttributes="Bold" FontSize="Medium" />
+                            <Label Text="{Binding Texto}" LineBreakMode="TailTruncation" MaxLines="2" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!--Botón flotante de añadir ítem-->
+            <Button Text="+"
+                Style="{StaticResource FloatingButtonStyle}"
+                Command="{Binding AgregarNotaAsyncCommand}" />
+
+            <!-- Sugerencia si no hay ítems -->
+            <Label  IsVisible="{Binding NoHayNotas}"
+                Text="Esta es la sección de notas. ¡Agrega una!"
+                FontAttributes="Italic"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                TextColor="Gray" />
+
+        </Grid>
+
+
+    </Grid>
 
 </ContentPage>

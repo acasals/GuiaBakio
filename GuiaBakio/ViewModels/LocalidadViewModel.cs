@@ -1,9 +1,11 @@
-﻿using GuiaBakio.Models;
+﻿using CommunityToolkit.Maui.Core.Extensions;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using GuiaBakio.Models;
 using GuiaBakio.Services;
 using GuiaBakio.Services.Interfaces;
 using System.Collections.ObjectModel;
-using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.ComponentModel;
+using System.Diagnostics;
 
 namespace GuiaBakio.ViewModels
 {
@@ -15,20 +17,28 @@ namespace GuiaBakio.ViewModels
         private readonly IAddItemPopupService _addItemPopupService;
         private readonly IDialogOKService _dialogService;
         public IRelayCommand EditarTextoAsyncCommand { get; }
-        public IRelayCommand AgregarApartadoAsyncCommand { get; }
+        public IRelayCommand AgregarNotaAsyncCommand { get; }
         public IRelayCommand AgregarImagenAsyncCommand { get; }
         public IRelayCommand EliminarLocalidadAsyncCommand { get; }
+        public IRelayCommand ToggleEtiquetaCommand => new RelayCommand<Etiqueta>(etiqueta =>
+        {
+            etiqueta?.IsSelected = !etiqueta.IsSelected;
+            Debug.WriteLine($"Etiqueta {etiqueta?.Nombre} seleccionada: {etiqueta?.IsSelected}");
+            EtiquetasSeleccionadas = Etiquetas.Where(e => e.IsSelected).ToObservableCollection();
+        });
+
         public LocalidadViewModel(DataBaseService dbService, IAddItemPopupService addItemPopupService, IAddImagenPopupService addImagenPopupService, ITextEditorPopupService textEditorPopupService, IDialogOKService dialogService)
         {
             EditarTextoAsyncCommand = new AsyncRelayCommand(EditarTextoAsync);
-            AgregarApartadoAsyncCommand = new AsyncRelayCommand(AgregarApartadoAsync);
+            AgregarNotaAsyncCommand = new AsyncRelayCommand(AgregarNotaAsync);
             AgregarImagenAsyncCommand = new AsyncRelayCommand(AgregarImagenAsync);
             EliminarLocalidadAsyncCommand = new AsyncRelayCommand(EliminarLocalidadAsync);
+
             _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
             _textEditorPopupService = textEditorPopupService ?? throw new ArgumentNullException(nameof(textEditorPopupService));
             _addItemPopupService = addItemPopupService ?? throw new ArgumentNullException(nameof(_addItemPopupService));
             _addImagenPopupService = addImagenPopupService ?? throw new ArgumentNullException(nameof(addImagenPopupService));
-            _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService), "El servicio de diálogo no puede ser nulo.");
+            _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
         }
 
         [ObservableProperty]
@@ -39,16 +49,25 @@ namespace GuiaBakio.ViewModels
 
 
         [ObservableProperty]
-        private ObservableCollection<Apartado> apartados = new();
+        private ObservableCollection<Nota> notas = new();
 
         [ObservableProperty]
-        private ObservableCollection<MiImagen> imagenes = new();
+        private ObservableCollection<Etiqueta> etiquetas = new();
+
+        [ObservableProperty]
+        private ObservableCollection<Etiqueta> etiquetasSeleccionadas = new();
+
+        [ObservableProperty]
+        private ObservableCollection<Nota> notasFiltradas = new();
+
+        [ObservableProperty]
+        private ObservableCollection<Foto> imagenes = new();
 
         [ObservableProperty]
         private bool noHayTexto;
 
         [ObservableProperty]
-        private bool noHayApartados;
+        private bool noHayNotas;
 
         [ObservableProperty]
         private bool noHayImagenes;
@@ -63,14 +82,18 @@ namespace GuiaBakio.ViewModels
             try
             {
                 Localidad = await _dbService.ObtenerLocalidadAsync(LocalidadId);
-                Apartados = new ObservableCollection<Apartado>(
-                    await _dbService.ObtenerApartadosAsync(LocalidadId));
-                Imagenes = new ObservableCollection<MiImagen>(
-                    await _dbService.ObtenerImagenesPorEntidadAsync(TipoEntidad.Localidad, LocalidadId));
+                Notas = new ObservableCollection<Nota>(
+                    await _dbService.ObtenerNotasAsync(LocalidadId));
+                Etiquetas = new ObservableCollection<Etiqueta>(
+                    await _dbService.ObtenerEtiquetasAsync());
+                Imagenes = new ObservableCollection<Foto>(
+                await _dbService.ObtenerImagenesPorEntidadAsync(TipoEntidad.Localidad, LocalidadId));
                 await AsignarImagenSourceAsync();
                 NoHayTexto = string.IsNullOrWhiteSpace(Localidad?.Texto);
-                NoHayApartados = !Apartados?.Any() == true;
+                NoHayNotas = !Notas?.Any() == true;
                 NoHayImagenes = !Imagenes?.Any() == true;
+                EtiquetasSeleccionadas = Etiquetas.Where(e => e.IsSelected).ToObservableCollection();
+                NotasFiltradas = (await _dbService.ObtenerNotasPorEtiquetasAsync(LocalidadId, EtiquetasSeleccionadas.ToList())).ToObservableCollection();
             }
             catch (Exception ex)
             {
@@ -82,7 +105,7 @@ namespace GuiaBakio.ViewModels
         {
             foreach (var imagen in Imagenes)
             {
-                imagen.ImagenSource = await DataBaseService.ConvertirBytesAImageSourceAsync(imagen.Foto);
+                imagen.ImagenSource = await DataBaseService.ConvertirBytesAImageSourceAsync(imagen.Blob);
             }
         }
 
@@ -128,45 +151,45 @@ namespace GuiaBakio.ViewModels
         }
 
         [RelayCommand]
-        public async Task AgregarApartadoAsync()
+        public async Task AgregarNotaAsync()
         {
-            var nuevoApartado = await _addItemPopupService.MostrarAsync("Añade un apartado");
-            if (nuevoApartado is null)
+            var nuevaNota = await _addItemPopupService.MostrarAsync("Añade una nota");
+            if (nuevaNota is null)
             {
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(nuevoApartado))
+            if (string.IsNullOrWhiteSpace(nuevaNota))
             {
-                await _dialogService.ShowAlertAsync("Error", "El nombre del apartado no puede estar vacío.", "OK");
+                await _dialogService.ShowAlertAsync("Error", "El nombre del nota no puede estar vacío.", "OK");
                 return;
             }
             try
             {
-                bool yaExiste = await _dbService.ExisteApartadoAsync(nuevoApartado, Localidad.Id);
+                bool yaExiste = await _dbService.ExisteNotaAsync(nuevaNota, Localidad.Id);
                 if (yaExiste)
                 {
-                    await _dialogService.ShowAlertAsync("Error", "Apartado existente.", "OK");
+                    await _dialogService.ShowAlertAsync("Error", "Nota existente.", "OK");
                     return;
                 }
-                var id = await _dbService.InsertarApartadoAsync(nuevoApartado, Localidad.Id);
+                var id = await _dbService.InsertarNotaAsync(nuevaNota, Localidad.Id);
                 if (id <= 0)
                 {
-                    await _dialogService.ShowAlertAsync("Error", "No se pudo añadir el apartado.", "OK");
+                    await _dialogService.ShowAlertAsync("Error", "No se pudo añadir la nota.", "OK");
                     return;
                 }
                 try
                 {
-                    await Shell.Current.GoToAsync($"apartadoPage?Id={id}");
+                    await Shell.Current.GoToAsync($"notaPage?Id={id}");
                 }
                 catch (Exception ex)
                 {
-                    await _dialogService.ShowAlertAsync("Error", $"No se pudo navegar a la página del apartado.{Environment.NewLine}{ex.Message}", "OK");
+                    await _dialogService.ShowAlertAsync("Error", $"No se pudo navegar a la página de la nota.{Environment.NewLine}{ex.Message}", "OK");
                 }
             }
             catch (Exception ex)
             {
-                await _dialogService.ShowAlertAsync("Error", $"No se pudo añadir el apartado.{Environment.NewLine}{ex.Message}", "OK");
+                await _dialogService.ShowAlertAsync("Error", $"No se pudo añadir el nota.{Environment.NewLine}{ex.Message}", "OK");
             }
 
         }
@@ -181,7 +204,7 @@ namespace GuiaBakio.ViewModels
                 {
                     return;
                 }
-                if (miImagen.Foto is null || miImagen.Foto.Length == 0)
+                if (miImagen.Blob is null || miImagen.Blob.Length == 0)
                 {
                     await _dialogService.ShowAlertAsync("Error", "La imagen no puede estar vacía.", "OK");
                     return;
