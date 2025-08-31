@@ -108,8 +108,8 @@
             <FlexLayout BindableLayout.ItemsSource="{Binding Etiquetas}"
                     Wrap="Wrap"
                     Direction="Row"
-                    JustifyContent="Start"
-                    AlignItems="Start">
+                    JustifyContent="Center"
+                    AlignItems="Center">
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="models:Etiqueta">
                         <Border Style="{StaticResource EtiquetaChipStyle}"
@@ -135,14 +135,20 @@
             <!-- Lista de ítems -->
             <CollectionView ItemsSource="{Binding NotasFiltradas}"
                         SelectionMode="Single"
-                        SelectionChanged="OnNotaSeleccionada"
-                        VerticalOptions="Start"
-                        HorizontalOptions="Start">
+                        SelectionChanged="OnNotaSeleccionada">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:Nota">
                         <Grid ColumnDefinitions="*" Padding="10" Margin="5">
-                            <Label Text="{Binding Titulo}" FontAttributes="Bold" FontSize="Medium" />
-                            <Label Text="{Binding Texto}" LineBreakMode="TailTruncation" MaxLines="2" />
+                            <HorizontalStackLayout HorizontalOptions="Center">
+                                <Label Text="{Binding Titulo}"
+                                       FontAttributes="Bold"
+                                       FontSize="Medium" />
+                                <Label Text="{Binding Texto}" 
+                                       FontSize="Medium"
+                                       Margin="5,0,0,0"
+                                       LineBreakMode="TailTruncation" 
+                                       MaxLines="2" />
+                            </HorizontalStackLayout>
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>

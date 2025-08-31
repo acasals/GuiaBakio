@@ -54,7 +54,7 @@ public partial class LocalidadPage : ContentPage, IQueryAttributable
         {
             try
             {
-                await Shell.Current.GoToAsync($"NotaPage?Id={notaSeleccionada.Id}");
+                await Shell.Current.GoToAsync($"notaPage?Id={notaSeleccionada.Id}");
             }
             catch (Exception ex)
             {
