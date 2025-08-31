@@ -13,19 +13,24 @@ namespace GuiaBakio.ViewModels
         private readonly ITextEditorPopupService _textEditorPopupService;
         private readonly IAddImagenPopupService _addImagenPopupService;
         private readonly IDialogOKService _dialogService;
+        private readonly IEtiquetaEditorPopupService _etiquetasEditorPopupService;
         public IRelayCommand EditarTextoAsyncCommand { get; }
         public IRelayCommand AgregarImagenAsyncCommand { get; }
         public IRelayCommand EliminarNotaAsyncCommand { get; }
+        public IRelayCommand EditarEtiquetasAsyncCommand { get; }
 
-        public NotaViewModel(DataBaseService dbService, ITextEditorPopupService textEditorPopupService, IAddImagenPopupService addImagenPopupService, IDialogOKService dialogService)
+
+        public NotaViewModel(DataBaseService dbService, ITextEditorPopupService textEditorPopupService, IAddImagenPopupService addImagenPopupService, IDialogOKService dialogService, IEtiquetaEditorPopupService etiquetasEditorPopupService)
         {
             EditarTextoAsyncCommand = new AsyncRelayCommand(EditarTextoAsync);
+            EditarEtiquetasAsyncCommand = new AsyncRelayCommand(EditarEtiquetasAsync);
             AgregarImagenAsyncCommand = new AsyncRelayCommand(AgregarImagenAsync);
             EliminarNotaAsyncCommand = new AsyncRelayCommand(EliminarNotaAsync);
             _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
             _textEditorPopupService = textEditorPopupService ?? throw new ArgumentNullException(nameof(textEditorPopupService));
             _addImagenPopupService = addImagenPopupService ?? throw new ArgumentNullException(nameof(addImagenPopupService));
-            _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService), "El servicio de diálogo no puede ser nulo.");
+            _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+            _etiquetasEditorPopupService = etiquetasEditorPopupService ?? throw new ArgumentNullException(nameof(etiquetasEditorPopupService));
         }
 
         [ObservableProperty]
@@ -42,8 +47,15 @@ namespace GuiaBakio.ViewModels
 
         [ObservableProperty]
         private bool noHayTexto;
+
+        [ObservableProperty]
+        private bool noHayEtiquetas;
+
         [ObservableProperty]
         private bool noHayImagenes;
+
+        [ObservableProperty]
+        private ObservableCollection<Etiqueta> etiquetas = new();
 
         public async Task CargarDatosAsync(int notaId)
         {
@@ -56,11 +68,14 @@ namespace GuiaBakio.ViewModels
             {
                 Nota = await _dbService.ObtenerNotaAsync(notaId);
                 var localidad = await _dbService.ObtenerLocalidadAsync(Nota.LocalidadId);
-                Titulo = localidad?.Nombre + " - " + Nota.Titulo;
+                Titulo = Nota.Titulo + " - " + localidad?.Nombre;
                 Imagenes = new ObservableCollection<Foto>(
                     await _dbService.ObtenerImagenesPorEntidadAsync(TipoEntidad.Nota, notaId));
                 await AsignarImagenSourceAsync();
                 NoHayTexto = string.IsNullOrWhiteSpace(Nota.Texto);
+                Etiquetas = new ObservableCollection<Etiqueta>(
+                    await _dbService.ObtenerEtiquetasDeNotaAsync(Nota.Id));
+                NoHayEtiquetas = Etiquetas is null || !Etiquetas.Any();
                 NoHayImagenes = !Imagenes?.Any() == true;
             }
             catch (Exception ex)
@@ -90,6 +105,32 @@ namespace GuiaBakio.ViewModels
                 }
                 string? v = Nota?.Texto = resultado;
                 await _dbService.ActualizarNotaAsync(Nota);
+                await CargarDatosAsync(NotaId);
+            }
+            catch (Exception ex)
+            {
+                await _dialogService.ShowAlertAsync("Error al actualizar.", $"Hubo un error al actualizar el texto de la nota. El texto no fue guardado. {Environment.NewLine}{ex.Message}", "OK");
+                return;
+            }
+        }
+
+        [RelayCommand]
+        public async Task EditarEtiquetasAsync()
+        {
+            try
+            {
+                var resultado = await _etiquetasEditorPopupService.MostrarEditorAsync(Nota?.Id);
+
+                if (resultado is null)
+                {
+                    return;
+                }
+                List<Etiqueta>? nuevalistaEtiquetasDeNota = resultado;
+                await _dbService.DesasignarEtiquetasANotaAsync(Nota.Id);
+                if (nuevalistaEtiquetasDeNota is null || !nuevalistaEtiquetasDeNota.Any())
+                {
+                    await _dbService.AsignarEtiquetasANotaAsync(Nota.Id, nuevalistaEtiquetasDeNota);
+                }
                 await CargarDatosAsync(NotaId);
             }
             catch (Exception ex)

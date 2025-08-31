@@ -4,14 +4,16 @@
              x:Class="GuiaBakio.Pages.NotaPage"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:vm="clr-namespace:GuiaBakio.ViewModels"
+             xmlns:models="clr-namespace:GuiaBakio.Models"
              x:DataType="vm:NotaViewModel"
              Title="">
     
     <Grid x:Name="MainGrid" RowSpacing="10" Padding="10">
         <Grid.RowDefinitions>
             <RowDefinition x:Name="HeaderRow" Height="Auto" />
+            <RowDefinition x:Name="LabelRow" Height="Auto" />
             <RowDefinition x:Name="TextRow" Height="*" />
-            <RowDefinition x:Name="ImagesRow" Height="*" />
+            <RowDefinition x:Name="ImagesRow" Height="Auto" />
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0" ColumnDefinitions="*" Padding="5" Margin="0" BackgroundColor="AntiqueWhite">
@@ -33,8 +35,48 @@
         </Grid>
 
 
+        <!-- Etiquetas -->
+        <Grid Grid.Row="1" ColumnDefinitions="*" Margin="0,5,0,5">
+            <FlexLayout BindableLayout.ItemsSource="{Binding Etiquetas}"
+                        Wrap="Wrap"
+                        Direction="Row"
+                        JustifyContent="Start"
+                        AlignItems="Start">     
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="models:Etiqueta">
+                        <Border Style="{StaticResource EtiquetaChipStyle}"
+                                Background="AntiqueWhite">
+                            <HorizontalStackLayout Spacing="6" Padding="1" Margin="1">
+                                <Label Text="{Binding Icono}" FontFamily="MaterialSymbols" TextColor="Black" />
+                                <Label Text="{Binding Nombre}" TextColor="Black" FontAttributes="Bold" />
+                            </HorizontalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </FlexLayout>
+            
+            <!-- Sugerencia si no hay ítems -->
+            <Label  IsVisible="{Binding NoHayEtiquetas}"
+                    Text="Puedes agregar etiquetas"
+                    FontAttributes="Italic"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    TextColor="Gray" />
+            
+            <!-- Botón flotante para editar etiquetas -->
+            <ImageButton Source="edit_icon.png"
+                         Style="{StaticResource FloatingImageButtonStyle}"
+                         Command="{Binding EditarEtiquetasAsyncCommand}">
+                <ImageButton.Behaviors>
+                    <toolkit:IconTintColorBehavior TintColor="White" />
+                </ImageButton.Behaviors>
+            </ImageButton>
+
+        </Grid>
+        
+        
         <!-- Texto -->
-        <Grid Grid.Row="1" ColumnDefinitions="*" >
+        <Grid Grid.Row="2" ColumnDefinitions="*" >
             <ScrollView>
                 <Grid>
                     <Label Text="{Binding Nota.Texto}" FontSize="18"
@@ -63,7 +105,7 @@
         </Grid>
         
         <!-- Carrusel de imágenes -->
-        <Grid Grid.Row="2" ColumnDefinitions="*" >
+        <Grid Grid.Row="3" ColumnDefinitions="*" >
 
             <!-- Carrusel -->
             <CarouselView ItemsSource="{Binding Imagenes}">
