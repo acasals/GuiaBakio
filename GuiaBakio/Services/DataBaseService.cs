@@ -21,6 +21,7 @@ namespace GuiaBakio.Services
             await _db.CreateTableAsync<Nota>();
             await _db.CreateTableAsync<Foto>();
             await _db.CreateTableAsync<Etiqueta>();
+            await _db.CreateTableAsync<NotaEtiqueta>();
 
             // Crear etiquetas predeterminadas si no existen
             if (await _db.Table<Etiqueta>().CountAsync() == 0)
@@ -643,6 +644,53 @@ namespace GuiaBakio.Services
             {
                 throw new InvalidOperationException($"Hubo un problema al eliminar la etiqueta. {ex.Message}");
             }
+        }
+
+        public async Task DesasignarEtiquetasANotaAsync(int notaId)
+        {
+            if (notaId <= 0) throw new ArgumentException("El Id de la nota debe ser mayor que 0.", nameof(notaId));
+            var nota = await _db.FindAsync<Nota>(notaId) ?? throw new InvalidOperationException("No se encontró la nota.");
+            try
+            {
+                var relaciones = await _db.Table<NotaEtiqueta>()
+                                         .Where(ne => ne.NotaId == notaId)
+                                         .ToListAsync();
+                foreach (var relacion in relaciones)
+                {
+                    await _db.DeleteAsync(relacion);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Hubo un problema al eliminar las etiquetas de la nota. {ex.Message}");
+            }
+        }
+
+        public async Task AsignarEtiquetasANotaAsync(int notaId, List<Etiqueta> listaEtiquetas)
+        {
+            if (notaId <= 0) throw new ArgumentException("El Id de la nota debe ser mayor que 0.", nameof(notaId));
+            var nota = await _db.FindAsync<Nota>(notaId) ?? throw new InvalidOperationException("No se encontró la nota.");
+            if (listaEtiquetas == null || listaEtiquetas.Count == 0)
+                return; // No hay etiquetas para asignar, salir del método
+            try
+            {
+                foreach (var etiqueta in listaEtiquetas)
+                {
+                    var relacionExistente = await _db.Table<NotaEtiqueta>()
+                                                     .Where(ne => ne.NotaId == notaId && ne.EtiquetaId == etiqueta.Id)
+                                                     .FirstOrDefaultAsync();
+                    if (relacionExistente == null)
+                    {
+                        NotaEtiqueta nuevaRelacion = new(notaId, etiqueta.Id);
+                        await _db.InsertAsync(nuevaRelacion);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Hubo un problema al asignar las etiquetas a la nota. {ex.Message}");
+            }
+
         }
 
         #endregion
