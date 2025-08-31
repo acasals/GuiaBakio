@@ -29,9 +29,10 @@ namespace GuiaBakio.Services
                 AutoSize = EditorAutoSizeOption.TextChanges
             };
 
-            var cancelButton = new Button {
+            var cancelButton = new Button
+            {
                 Text = "Cancelar",
-                HorizontalOptions=LayoutOptions.Start
+                HorizontalOptions = LayoutOptions.Start
             };
             StyleHelper.ApplyStyle(cancelButton, "BotonCancelarStyle");
             cancelButton.Clicked += async (_, _) =>
@@ -63,13 +64,8 @@ namespace GuiaBakio.Services
                         new ColumnDefinition { Width = GridLength.Star }
                     }
             };
-            botonesRow.Children.Add(cancelButton);
-            Grid.SetRow(cancelButton, 0);
-            Grid.SetColumn(cancelButton, 0);
-
-            botonesRow.Children.Add(saveButton);
-            Grid.SetRow(saveButton, 0);
-            Grid.SetColumn(saveButton, 1);
+            botonesRow.Add(cancelButton, 0, 0);
+            botonesRow.Add(saveButton, 1, 0);
 
             popup.Content = new VerticalStackLayout
             {
@@ -82,7 +78,7 @@ namespace GuiaBakio.Services
                 }
             };
 
-            await currentPage.ShowPopupAsync(popup,new PopupOptions
+            await currentPage.ShowPopupAsync(popup, new PopupOptions
             {
                 OnTappingOutsideOfPopup = () => tcs.TrySetResult(null)
             });

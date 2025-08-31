@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Globalization;
 
 namespace GuiaBakio.Helpers
 {
@@ -12,7 +7,7 @@ namespace GuiaBakio.Helpers
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             bool isSelected = (bool)value;
-            return isSelected ? Color.FromArgb("#EF6C00") : Color.FromArgb("#FFA726");
+            return isSelected ? Colors.Turquoise : Colors.PaleTurquoise;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
