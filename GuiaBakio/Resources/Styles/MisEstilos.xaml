@@ -81,6 +81,7 @@
         <Setter Property="Padding" Value="2" />
         <Setter Property="StrokeThickness" Value="1" />
         <Setter Property="Margin" Value="2" />
+        <Setter Property="HeightRequest" Value="30" />
     </Style>
 
 </ResourceDictionary>
