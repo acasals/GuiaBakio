@@ -119,7 +119,7 @@ namespace GuiaBakio.ViewModels
         {
             try
             {
-                var resultado = await _etiquetasEditorPopupService.MostrarEditorAsync(Nota?.Id);
+                var resultado = await _etiquetasEditorPopupService.MostrarEditorAsync(Etiquetas);
 
                 if (resultado is null)
                 {
@@ -127,7 +127,7 @@ namespace GuiaBakio.ViewModels
                 }
                 List<Etiqueta>? nuevalistaEtiquetasDeNota = resultado;
                 await _dbService.DesasignarEtiquetasANotaAsync(Nota.Id);
-                if (nuevalistaEtiquetasDeNota is null || !nuevalistaEtiquetasDeNota.Any())
+                if (nuevalistaEtiquetasDeNota != null && nuevalistaEtiquetasDeNota.Count > 0)
                 {
                     await _dbService.AsignarEtiquetasANotaAsync(Nota.Id, nuevalistaEtiquetasDeNota);
                 }
@@ -135,7 +135,7 @@ namespace GuiaBakio.ViewModels
             }
             catch (Exception ex)
             {
-                await _dialogService.ShowAlertAsync("Error al actualizar.", $"Hubo un error al actualizar el texto de la nota. El texto no fue guardado. {Environment.NewLine}{ex.Message}", "OK");
+                await _dialogService.ShowAlertAsync("Error al actualizar.", $"Hubo un error al actualizar las etiquetas de la nota. Las etiquetas no fueron guardadas. {Environment.NewLine}{ex.Message}", "OK");
                 return;
             }
         }
