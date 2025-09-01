@@ -40,8 +40,7 @@
             <FlexLayout BindableLayout.ItemsSource="{Binding Etiquetas}"
                         Wrap="Wrap"
                         Direction="Row"
-                        JustifyContent="Start"
-                        AlignItems="Start">     
+                        JustifyContent="Center">   
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="models:Etiqueta">
                         <Border Style="{StaticResource EtiquetaChipStyle}"
