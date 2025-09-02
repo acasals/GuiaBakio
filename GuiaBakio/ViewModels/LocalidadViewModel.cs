@@ -20,11 +20,12 @@ namespace GuiaBakio.ViewModels
         public IRelayCommand AgregarNotaAsyncCommand { get; }
         public IRelayCommand AgregarImagenAsyncCommand { get; }
         public IRelayCommand EliminarLocalidadAsyncCommand { get; }
-        public IRelayCommand ToggleEtiquetaCommand => new RelayCommand<Etiqueta>(etiqueta =>
+        public IRelayCommand ToggleEtiquetaCommand => new RelayCommand<Etiqueta>(async etiqueta =>
         {
             etiqueta?.IsSelected = !etiqueta.IsSelected;
             Debug.WriteLine($"Etiqueta {etiqueta?.Nombre} seleccionada: {etiqueta?.IsSelected}");
             EtiquetasSeleccionadas = Etiquetas.Where(e => e.IsSelected).ToObservableCollection();
+            NotasFiltradas = (await _dbService.ObtenerNotasPorEtiquetasAsync(LocalidadId, EtiquetasSeleccionadas.ToList())).ToObservableCollection();
         });
 
         public LocalidadViewModel(DataBaseService dbService, IAddItemPopupService addItemPopupService, IAddImagenPopupService addImagenPopupService, ITextEditorPopupService textEditorPopupService, IDialogOKService dialogService)
