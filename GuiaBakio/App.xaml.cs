@@ -7,9 +7,12 @@
         public App(IServiceProvider services)
         {
             InitializeComponent();
-
-            MainPage = new AppShell();
             Services = services;
+        }
+
+        protected override Window CreateWindow(IActivationState activationState)
+        {
+            return new Window(new AppShell());
         }
     }
 }

@@ -43,6 +43,8 @@ namespace GuiaBakio
             builder.Services.AddTransient<LocalidadPage>();
             builder.Services.AddTransient<NotaViewModel>();
             builder.Services.AddTransient<NotaPage>();
+            builder.Services.AddTransient<LoginViewModel>();
+            builder.Services.AddTransient<LoginPage>();
 
 #if DEBUG
             builder.Logging.AddDebug();
