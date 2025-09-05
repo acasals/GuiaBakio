@@ -14,6 +14,9 @@ namespace GuiaBakio.Models
                 throw new ArgumentException("El nombre del usuario es obligatorio.", nameof(nombre));
             Nombre = nombre;
         }
-
+        public Usuario()
+        {
+            Nombre = string.Empty;
+        }
     }
 }
