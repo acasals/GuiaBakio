@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="GuiaBakio.Pages.LoginPage"
+             xmlns:vm="clr-namespace:GuiaBakio.ViewModels"
+             xmlns:models="clr-namespace:GuiaBakio.Models"
+             x:DataType="vm:LoginViewModel"
+             Title="Login">
+    <Grid RowDefinitions="Auto,Auto,Auto" Padding="5" WidthRequest="450">
+
+        <!-- Encabezado -->
+        <Grid Grid.Row="0" ColumnDefinitions="*" Padding="5" Margin="0,15,0,0" BackgroundColor="AntiqueWhite">
+            <Label Text="Nombre de usuario:"
+               FontAttributes="Bold"
+               Grid.Column="0"
+               HorizontalOptions="Center"
+               HorizontalTextAlignment="Center"/>
+        </Grid>
+
+        <!--texto-->
+        <Grid Grid.Row="1" ColumnDefinitions="*" Padding="5" Margin="0,15,0,0" >
+            <Label Text="Necesito que introduzcas un nombre de usuario. Este nombre servirá para que podamos identificar tus notas. Si has reinstalado el programa en otro dispositivo, usa el nombre que usaste la primera vez."
+               Grid.Column="0"
+               HorizontalOptions="Center"
+               HorizontalTextAlignment="Center"/>
+        </Grid>
+
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto" Padding="5" ColumnSpacing="15">
+
+            <Entry x:Name="entry"
+                   Text="{Binding NombreUsuario, Mode=TwoWay}"
+                   Placeholder="nombre de usuario"
+                   FontAttributes="Bold"
+                   Grid.Column="0"
+                   WidthRequest="250"
+                   HorizontalOptions="Center"
+                   HorizontalTextAlignment="Center"/>
+
+            <!-- Botón para añadir una nueva localidad -->
+            <Button  x:Name="BtnAñadir"
+             Text="Aceptar"
+             Grid.Column="1"
+             Command="{Binding AddUsuarioAsyncCommand}"/>
+
+        </Grid>
+    </Grid>
+</ContentPage>

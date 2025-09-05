@@ -6,13 +6,13 @@ using System.Text.RegularExpressions;
 
 namespace GuiaBakio.Services
 {
-    public class AddImagenPopupService: IAddImagenPopupService
+    public class AddImagenPopupService : IAddImagenPopupService
     {
-        private Foto miImagen=new();
-        private byte[] imagenBytes;
-        private Entry entryUrl;
-        private Button buttonUrl, buttonGuardar, buttonSelect;
-        private Image previewImage;
+        private Foto miImagen = new();
+        private byte[]? imagenBytes;
+        private Entry? entryUrl;
+        private Button? buttonUrl, buttonGuardar, buttonSelect;
+        private Image? previewImage;
         public async Task<Foto?> MostrarAsync()
         {
             var currentPage = Shell.Current?.CurrentPage;
@@ -39,7 +39,7 @@ namespace GuiaBakio.Services
             {
                 Text = "Cargar Url",
                 HorizontalOptions = LayoutOptions.Fill,
-                Command=new Command(async() => await DetectarCommandAsync())
+                Command = new Command(async () => await DetectarCommandAsync())
             };
 
             //seccion dispositivo
@@ -53,14 +53,14 @@ namespace GuiaBakio.Services
             {
                 Text = "Abrir archivo",
                 HorizontalOptions = LayoutOptions.Fill,
-                Command=new Command(async () => await SeleccionarArchivoCommandAsync())
+                Command = new Command(async () => await SeleccionarArchivoCommandAsync())
             };
 
             //Imagen previa
             previewImage = new Image
             {
                 HorizontalOptions = LayoutOptions.Fill,
-                Aspect =Aspect.AspectFill,
+                Aspect = Aspect.AspectFill,
                 IsVisible = false,
                 VerticalOptions = LayoutOptions.Start
 
@@ -109,7 +109,7 @@ namespace GuiaBakio.Services
             var scrView = new ScrollView
             {
                 Content = grid,
-                WidthRequest=350
+                WidthRequest = 350
             };
 
             popup.Content = scrView;
@@ -237,11 +237,11 @@ namespace GuiaBakio.Services
             return url.Contains("google.com/maps") || url.Contains("goo.gl/maps");
         }
 
-        private static  bool EsUrlDeImagen(string url)
+        private static bool EsUrlDeImagen(string url)
         {
             return url.EndsWith(".jpg") || url.EndsWith(".jpeg") || url.EndsWith(".png") || url.EndsWith(".webp");
         }
-       
+
         private void MostrarVistaPrevia(byte[] bytes)
         {
             if (bytes == null) return;
