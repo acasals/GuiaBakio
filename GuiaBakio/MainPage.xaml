@@ -2,6 +2,9 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="GuiaBakio.MainPage"
+             xmlns:vm="clr-namespace:GuiaBakio.ViewModels"
+             xmlns:models="clr-namespace:GuiaBakio.Models"
+             x:DataType="vm:ListaLocalidadesViewModel"
              Title="Guía de Bakio">
 
     <Grid RowDefinitions="Auto,*" Padding="5">
@@ -21,7 +24,7 @@
                         SelectionMode="Single"
                         SelectionChanged="OnLocalidadSeleccionada">
             <CollectionView.ItemTemplate>
-                <DataTemplate>
+                <DataTemplate x:DataType="models:Localidad">
                     <Grid ColumnDefinitions="*" Padding="10" Margin="5">
                         <Label Text="{Binding Nombre}"
                                FontSize="Medium"
