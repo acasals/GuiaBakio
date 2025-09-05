@@ -22,6 +22,7 @@ namespace GuiaBakio.Services
             await _db.CreateTableAsync<Foto>();
             await _db.CreateTableAsync<Etiqueta>();
             await _db.CreateTableAsync<NotaEtiqueta>();
+            await _db.CreateTableAsync<Usuario>();
 
             // Crear etiquetas predeterminadas si no existen
             if (await _db.Table<Etiqueta>().CountAsync() == 0)
@@ -695,6 +696,48 @@ namespace GuiaBakio.Services
 
         #endregion
 
+        #region "Usuarios"
+        public async Task<int> InsertarUsuarioAsync(string nombre)
+        {
+            if (string.IsNullOrWhiteSpace(nombre))
+                throw new ArgumentException("El nombre del usuario es obligatorio.", nameof(nombre));
+            bool existeUsuario = await ExisteUsuarioAsync(nombre);
+            if (existeUsuario)
+                throw new InvalidOperationException("Ya existe un usuario con ese nombre.");
+            try
+            {
+                Usuario usuario = new(nombre);
+                await _db.InsertAsync(usuario);
+                return usuario.Id;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"No se pudo crear el usuario. {ex.Message}");
+            }
+        }
+
+        public async Task<bool> ExisteUsuarioAsync(string nombre)
+        {
+            if (string.IsNullOrWhiteSpace(nombre))
+                throw new ArgumentException("El nombre del usuario es obligatorio.", nameof(nombre));
+            nombre = MisUtils.NormalizarTexto(nombre).Trim();
+            var usuario = await _db.Table<Usuario>()
+                                    .Where(a => a.Nombre.ToLower() == nombre.ToLower())
+                                    .FirstOrDefaultAsync();
+            return usuario != null;
+        }
+
+        public async Task<Usuario> ObtenerUsuarioPorIdAsync(int usuarioId)
+        {
+            if (usuarioId <= 0) throw new ArgumentException("El Id del usuario debe ser mayor que 0.", nameof(usuarioId));
+            return await _db.Table<Usuario>()
+                            .Where(a => a.Id == usuarioId)
+                            .FirstOrDefaultAsync();
+        }
+
+        #endregion
+
+        // Métodos para convertir ImageSource a byte[] y viceversa
         public static async Task<byte[]?> ConvertirImageSourceABytesAsync(ImageSource? imagen)
         {
             if (imagen == null)
