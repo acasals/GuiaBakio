@@ -5,6 +5,8 @@ using GuiaBakio.Services.Interfaces;
 using GuiaBakio.ViewModels;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using UVApp.Services;
+using UVApp.Services.Interfaces;
 
 namespace GuiaBakio
 {
@@ -33,6 +35,7 @@ namespace GuiaBakio
                 var dialogService = provider.GetRequiredService<IDialogYesNoService>();
                 return new DataBaseService(dbPath, dialogService);
             });
+            builder.Services.AddSingleton<INavigationDataService, NavigationDataService>();
             builder.Services.AddSingleton<ITextEditorPopupService, TextEditorPopupService>();
             builder.Services.AddSingleton<IEtiquetaEditorPopupService, EtiquetaEditorPopupService>();
             builder.Services.AddSingleton<IAddItemPopupService, AddItemPopupService>();
