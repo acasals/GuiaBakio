@@ -41,10 +41,6 @@ namespace GuiaBakio.ViewModels
         {
             try
             {
-                if (!Preferences.ContainsKey("UsuarioId"))
-                {
-                    await Shell.Current.GoToAsync("loginPage");
-                }
                 int usuarioId = Preferences.Get("UsuarioId", -1);
                 if (usuarioId >= 0)
                 {
