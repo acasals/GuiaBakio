@@ -5,8 +5,6 @@ using GuiaBakio.Services.Interfaces;
 using GuiaBakio.ViewModels;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
-using UVApp.Services;
-using UVApp.Services.Interfaces;
 
 namespace GuiaBakio
 {
