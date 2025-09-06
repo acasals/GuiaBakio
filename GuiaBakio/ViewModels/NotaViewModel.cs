@@ -14,13 +14,21 @@ namespace GuiaBakio.ViewModels
         private readonly IAddImagenPopupService _addImagenPopupService;
         private readonly IDialogOKService _dialogService;
         private readonly IEtiquetaEditorPopupService _etiquetasEditorPopupService;
+        private readonly INavigationDataService _navigationDataService;
+
         public IRelayCommand EditarTextoAsyncCommand { get; }
         public IRelayCommand AgregarImagenAsyncCommand { get; }
         public IRelayCommand EliminarNotaAsyncCommand { get; }
         public IRelayCommand EditarEtiquetasAsyncCommand { get; }
 
 
-        public NotaViewModel(DataBaseService dbService, ITextEditorPopupService textEditorPopupService, IAddImagenPopupService addImagenPopupService, IDialogOKService dialogService, IEtiquetaEditorPopupService etiquetasEditorPopupService)
+        public NotaViewModel(
+            DataBaseService dbService,
+            ITextEditorPopupService textEditorPopupService,
+            IAddImagenPopupService addImagenPopupService,
+            IDialogOKService dialogService,
+            IEtiquetaEditorPopupService etiquetasEditorPopupService,
+            INavigationDataService navigationDataService)
         {
             EditarTextoAsyncCommand = new AsyncRelayCommand(EditarTextoAsync);
             EditarEtiquetasAsyncCommand = new AsyncRelayCommand(EditarEtiquetasAsync);
@@ -31,6 +39,13 @@ namespace GuiaBakio.ViewModels
             _addImagenPopupService = addImagenPopupService ?? throw new ArgumentNullException(nameof(addImagenPopupService));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
             _etiquetasEditorPopupService = etiquetasEditorPopupService ?? throw new ArgumentNullException(nameof(etiquetasEditorPopupService));
+            _navigationDataService = navigationDataService ?? throw new ArgumentNullException(nameof(navigationDataService));
+
+            Usuario? usuario = _navigationDataService.Data as Usuario;
+            if (usuario == null)
+            {
+                _dialogService.ShowAlertAsync("Error", "No se pudo cargar el usuario.", "OK");
+            }
         }
 
         [ObservableProperty]

@@ -1,9 +1,9 @@
-﻿using GuiaBakio.Models;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using GuiaBakio.Models;
 using GuiaBakio.Services;
 using GuiaBakio.Services.Interfaces;
 using System.Collections.ObjectModel;
-using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace GuiaBakio.ViewModels
 {
@@ -12,20 +12,58 @@ namespace GuiaBakio.ViewModels
         private readonly DataBaseService _dbService;
         private readonly IAddItemPopupService _addItemPopupService;
         private readonly IDialogOKService _dialogService;
+        private readonly INavigationDataService _navigationDataService;
+
+        private int _usuarioID;
+        private string _usuarioName;
 
         public IRelayCommand AddLocalidadAsyncCommand { get; }
 
         [ObservableProperty]
         private ObservableCollection<Localidad> listaLocalidades = [];
-               
-        public ListaLocalidadesViewModel(DataBaseService dbService,IAddItemPopupService addItemPopupService,IDialogOKService dialogService)
+
+        public ListaLocalidadesViewModel(
+            DataBaseService dbService,
+            IAddItemPopupService addItemPopupService,
+            IDialogOKService dialogService,
+            INavigationDataService navigationDataService)
         {
             AddLocalidadAsyncCommand = new AsyncRelayCommand(AddLocalidadAsync);
             _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
-            _addItemPopupService =addItemPopupService ?? throw new ArgumentNullException(nameof(_addItemPopupService));
+            _addItemPopupService = addItemPopupService ?? throw new ArgumentNullException(nameof(addItemPopupService));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+            _navigationDataService = navigationDataService ?? throw new ArgumentNullException(nameof(navigationDataService));
+            _ = CheckUsuario();
         }
 
+
+        private async Task CheckUsuario()
+        {
+            try
+            {
+                if (!Preferences.ContainsKey("UsuarioId"))
+                {
+                    await Shell.Current.GoToAsync("loginPage");
+                }
+                int usuarioID = Preferences.Get("UsuarioId", -1);
+                if (usuarioID >= 0)
+                {
+                    _usuarioID = usuarioID;
+                    Usuario? usuario = await _dbService.ObtenerUsuarioPorIdAsync(_usuarioID);
+                    if (usuario is null)
+                    {
+                        await _dialogService.ShowAlertAsync("Error", "Hubo un problema al localizar al usuario. Contacta con Alex.", "OK");
+                        return;
+                    }
+                    _usuarioName = usuario.Nombre;
+                    _navigationDataService.Data = usuario;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("No se pudo obtener el usuario.", ex);
+            }
+        }
         public async Task CargarListaLocalidadesAsync()
         {
             try
@@ -45,7 +83,7 @@ namespace GuiaBakio.ViewModels
             var nuevaLocalidad = await _addItemPopupService.MostrarAsync("Añade una localidad");
             if (nuevaLocalidad is null)
             {
-               return;
+                return;
             }
 
             if (string.IsNullOrWhiteSpace(nuevaLocalidad))
@@ -57,11 +95,11 @@ namespace GuiaBakio.ViewModels
             {
                 bool yaExiste = await _dbService.ExisteLocalidadAsync(nuevaLocalidad);
                 if (yaExiste)
-                    {
+                {
                     await _dialogService.ShowAlertAsync("Error", "Localidad existente.", "OK");
                     return;
-                    }
-                var id= await _dbService.InsertarLocalidadAsync(nuevaLocalidad);
+                }
+                var id = await _dbService.InsertarLocalidadAsync(nuevaLocalidad);
                 if (id <= 0)
                 {
                     await _dialogService.ShowAlertAsync("Error", "No se pudo añadir la localidad.", "OK");
@@ -80,7 +118,7 @@ namespace GuiaBakio.ViewModels
             {
                 await _dialogService.ShowAlertAsync("Error", $"No se pudo añadir la localidad.{Environment.NewLine}{ex.Message}", "OK");
             }
-            
+
             await CargarListaLocalidadesAsync();
         }
 
