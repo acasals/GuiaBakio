@@ -8,9 +8,9 @@
     Shell.FlyoutBehavior="Disabled"
     Title="GuiaBakio">
 
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+    <TabBar>
+        <ShellContent Route="loadingPage" ContentTemplate="{DataTemplate pages:LoadingPage}" />
+    </TabBar>
+
 
 </Shell>

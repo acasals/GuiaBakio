@@ -11,6 +11,7 @@ namespace GuiaBakio
             Routing.RegisterRoute("notaPage", typeof(NotaPage));
             Routing.RegisterRoute("mainPage", typeof(MainPage));
             Routing.RegisterRoute("loginPage", typeof(LoginPage));
+            Routing.RegisterRoute("loadingPage", typeof(LoadingPage));
         }
     }
 }
