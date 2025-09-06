@@ -680,7 +680,7 @@ namespace GuiaBakio.Services
         {
             if (string.IsNullOrWhiteSpace(nombre))
                 throw new ArgumentException("El nombre del usuario es obligatorio.", nameof(nombre));
-            bool existeUsuario = await ExisteUsuarioAsync(nombre);
+            bool existeUsuario = (await ObtenerusuarioAsync(nombre)) != null;
             if (existeUsuario)
                 throw new InvalidOperationException("Ya existe un usuario con ese nombre.");
             try
@@ -695,7 +695,7 @@ namespace GuiaBakio.Services
             }
         }
 
-        public async Task<bool> ExisteUsuarioAsync(string nombre)
+        public async Task<Usuario> ObtenerusuarioAsync(string nombre)
         {
             if (string.IsNullOrWhiteSpace(nombre))
                 throw new ArgumentException("El nombre del usuario es obligatorio.", nameof(nombre));
@@ -703,7 +703,7 @@ namespace GuiaBakio.Services
             var usuario = await _db.Table<Usuario>()
                                     .Where(a => a.Nombre.ToLower() == nombre.ToLower())
                                     .FirstOrDefaultAsync();
-            return usuario != null;
+            return usuario;
         }
 
         public async Task<Usuario> ObtenerUsuarioPorIdAsync(int usuarioId)
