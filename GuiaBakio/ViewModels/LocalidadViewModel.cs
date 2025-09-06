@@ -64,6 +64,8 @@ namespace GuiaBakio.ViewModels
         [ObservableProperty]
         private Localidad? localidad;
 
+        [ObservableProperty]
+        private bool creadoPorUsuario;
 
         [ObservableProperty]
         private ObservableCollection<Nota> notas = new();
@@ -106,11 +108,12 @@ namespace GuiaBakio.ViewModels
                 Imagenes = new ObservableCollection<Foto>(
                 await _dbService.ObtenerImagenesPorEntidadAsync(TipoEntidad.Localidad, LocalidadId));
                 await AsignarImagenSourceAsync();
-                NoHayTexto = string.IsNullOrWhiteSpace(Localidad?.Texto);
+                NoHayTexto = string.IsNullOrWhiteSpace(Localidad?.Texto) && Localidad?.CreadorId == usuario?.Id;
                 NoHayNotas = !Notas?.Any() == true;
                 NoHayImagenes = !Imagenes?.Any() == true;
                 EtiquetasSeleccionadas = Etiquetas.Where(e => e.IsSelected).ToObservableCollection();
                 NotasFiltradas = (await _dbService.ObtenerNotasPorEtiquetasAsync(LocalidadId, EtiquetasSeleccionadas.ToList())).ToObservableCollection();
+                CreadoPorUsuario = (Localidad?.CreadorId == usuario?.Id);
             }
             catch (Exception ex)
             {
@@ -131,6 +134,17 @@ namespace GuiaBakio.ViewModels
         {
             try
             {
+                if (Localidad == null || usuario == null)
+                {
+                    await _dialogService.ShowAlertAsync("Error", "No se pudo obtener la localidad o el usuario.", "OK");
+                    return;
+                }
+                if (Localidad.CreadorId != usuario.Id)
+                {
+                    await _dialogService.ShowAlertAsync("Error", "Sólo el usuario que creó la localidad puede borrarla", "OK");
+                    return;
+                }
+
                 int eliminado = await _dbService.EliminarLocalidadAsync(LocalidadId);
                 if (eliminado > 0)
                 {
@@ -150,6 +164,17 @@ namespace GuiaBakio.ViewModels
         {
             try
             {
+                if (Localidad == null || usuario == null)
+                {
+                    await _dialogService.ShowAlertAsync("Error", "No se pudo obtener la localidad o el usuario.", "OK");
+                    return;
+                }
+                if (Localidad.CreadorId != usuario.Id)
+                {
+                    await _dialogService.ShowAlertAsync("Error", "Sólo el usuario que creó la localidad puede editar el texto", "OK");
+                    return;
+                }
+
                 var resultado = await _textEditorPopupService.MostrarEditorAsync(Localidad?.Texto);
 
                 if (resultado is null)

@@ -21,6 +21,7 @@ namespace GuiaBakio.ViewModels
         public IRelayCommand EliminarNotaAsyncCommand { get; }
         public IRelayCommand EditarEtiquetasAsyncCommand { get; }
 
+        private Usuario? usuario;
 
         public NotaViewModel(
             DataBaseService dbService,
@@ -41,7 +42,7 @@ namespace GuiaBakio.ViewModels
             _etiquetasEditorPopupService = etiquetasEditorPopupService ?? throw new ArgumentNullException(nameof(etiquetasEditorPopupService));
             _navigationDataService = navigationDataService ?? throw new ArgumentNullException(nameof(navigationDataService));
 
-            Usuario? usuario = _navigationDataService.Data as Usuario;
+            usuario = _navigationDataService.Data as Usuario;
             if (usuario == null)
             {
                 _dialogService.ShowAlertAsync("Error", "No se pudo cargar el usuario.", "OK");
@@ -70,6 +71,9 @@ namespace GuiaBakio.ViewModels
         private bool noHayImagenes;
 
         [ObservableProperty]
+        private bool creadoPorUsuario;
+
+        [ObservableProperty]
         private ObservableCollection<Etiqueta> etiquetas = new();
 
         public async Task CargarDatosAsync(int notaId)
@@ -87,11 +91,12 @@ namespace GuiaBakio.ViewModels
                 Imagenes = new ObservableCollection<Foto>(
                     await _dbService.ObtenerImagenesPorEntidadAsync(TipoEntidad.Nota, notaId));
                 await AsignarImagenSourceAsync();
-                NoHayTexto = string.IsNullOrWhiteSpace(Nota.Texto);
+                NoHayTexto = string.IsNullOrWhiteSpace(Nota.Texto) && Nota.CreadorId == usuario?.Id;
                 Etiquetas = new ObservableCollection<Etiqueta>(
                     await _dbService.ObtenerEtiquetasDeNotaAsync(Nota.Id));
                 NoHayEtiquetas = Etiquetas is null || !Etiquetas.Any();
                 NoHayImagenes = !Imagenes?.Any() == true;
+                CreadoPorUsuario = Nota.CreadorId == usuario?.Id;
             }
             catch (Exception ex)
             {

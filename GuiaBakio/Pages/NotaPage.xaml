@@ -7,77 +7,79 @@
              xmlns:models="clr-namespace:GuiaBakio.Models"
              x:DataType="vm:NotaViewModel"
              Title="">
-    
-    <Grid x:Name="MainGrid" RowSpacing="10" Padding="10">
-        <Grid.RowDefinitions>
-            <RowDefinition x:Name="HeaderRow" Height="Auto" />
-            <RowDefinition x:Name="LabelRow" Height="Auto" />
-            <RowDefinition x:Name="TextRow" Height="*" />
-            <RowDefinition x:Name="ImagesRow" Height="Auto" />
-        </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" ColumnDefinitions="*" Padding="5" Margin="0" BackgroundColor="AntiqueWhite">
-            <Label Text="{Binding Titulo}"
+    <ScrollView>
+        <Grid x:Name="MainGrid" RowSpacing="10" Padding="10">
+            <Grid.RowDefinitions>
+                <RowDefinition x:Name="HeaderRow" Height="Auto" />
+                <RowDefinition x:Name="LabelRow" Height="Auto" />
+                <RowDefinition x:Name="TextRow" Height="Auto" />
+                <RowDefinition x:Name="ImagesRow" Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" ColumnDefinitions="*" Padding="5" Margin="0" BackgroundColor="AntiqueWhite">
+                <Label Text="{Binding Titulo}"
            FontAttributes="Bold"
            HorizontalOptions="Center"
            VerticalOptions="Center"
            FontSize="24"/>
 
-            <!-- Botón flotante para eliminar -->
-            <ImageButton Source="trash_can.png"
-     Style="{StaticResource FloatingImageButtonStyleRed}"
-     Command="{Binding EliminarNotaAsyncCommand}">
-                <ImageButton.Behaviors>
-                    <toolkit:IconTintColorBehavior TintColor="White" />
-                </ImageButton.Behaviors>
-            </ImageButton>
+                <!-- Botón flotante para eliminar -->
+                <ImageButton Source="trash_can.png"
+                         IsVisible="{Binding CreadoPorUsuario}"
+                         Style="{StaticResource FloatingImageButtonStyleRed}"
+                         Command="{Binding EliminarNotaAsyncCommand}">
+                    <ImageButton.Behaviors>
+                        <toolkit:IconTintColorBehavior TintColor="White" />
+                    </ImageButton.Behaviors>
+                </ImageButton>
 
-        </Grid>
+            </Grid>
 
 
-        <!-- Etiquetas -->
-        <Grid Grid.Row="1" ColumnDefinitions="*" Margin="0,5,0,5">
-            <FlexLayout BindableLayout.ItemsSource="{Binding Etiquetas}"
+            <!-- Etiquetas -->
+            <Grid Grid.Row="1" ColumnDefinitions="*" Margin="0,5,0,5">
+                <FlexLayout BindableLayout.ItemsSource="{Binding Etiquetas}"
                         Wrap="Wrap"
                         Direction="Row"
-                        JustifyContent="Center">   
-                <BindableLayout.ItemTemplate>
-                    <DataTemplate x:DataType="models:Etiqueta">
-                        <Border Style="{StaticResource EtiquetaChipStyle}"
+                        JustifyContent="Center">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:Etiqueta">
+                            <Border Style="{StaticResource EtiquetaChipStyle}"
                                 Background="AntiqueWhite">
-                            <HorizontalStackLayout Spacing="6" Padding="1" Margin="1">
-                                <Label Text="{Binding Icono}" FontFamily="MaterialSymbols" TextColor="Black" />
-                                <Label Text="{Binding Nombre}" TextColor="Black" FontAttributes="Bold" />
-                            </HorizontalStackLayout>
-                        </Border>
-                    </DataTemplate>
-                </BindableLayout.ItemTemplate>
-            </FlexLayout>
-            
-            <!-- Sugerencia si no hay ítems -->
-            <Label  IsVisible="{Binding NoHayEtiquetas}"
+                                <HorizontalStackLayout Spacing="6" Padding="1" Margin="1">
+                                    <Label Text="{Binding Icono}" FontFamily="MaterialSymbols" TextColor="Black" />
+                                    <Label Text="{Binding Nombre}" TextColor="Black" FontAttributes="Bold" />
+                                </HorizontalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+
+                <!-- Sugerencia si no hay ítems -->
+                <Label  IsVisible="{Binding NoHayEtiquetas}"
                     Text="Puedes agregar etiquetas"
                     FontAttributes="Italic"
                     HorizontalOptions="Center"
                     VerticalOptions="Center"
                     TextColor="Gray" />
-            
-            <!-- Botón flotante para editar etiquetas -->
-            <ImageButton Source="edit_icon.png"
+
+                <!-- Botón flotante para editar etiquetas -->
+                <ImageButton Source="edit_icon.png"
                          Style="{StaticResource FloatingImageButtonStyle}"
                          Command="{Binding EditarEtiquetasAsyncCommand}">
-                <ImageButton.Behaviors>
-                    <toolkit:IconTintColorBehavior TintColor="White" />
-                </ImageButton.Behaviors>
-            </ImageButton>
+                    <ImageButton.Behaviors>
+                        <toolkit:IconTintColorBehavior TintColor="White" />
+                    </ImageButton.Behaviors>
+                </ImageButton>
 
-        </Grid>
-        
-        
-        <!-- Texto -->
-        <Grid Grid.Row="2" ColumnDefinitions="*" >
-            <ScrollView>
+            </Grid>
+
+
+            <!-- Texto -->
+            <Grid Grid.Row="2" ColumnDefinitions="*" >
                 <Grid>
+
                     <Label Text="{Binding Nota.Texto}" FontSize="18"
    HorizontalOptions="Center" VerticalOptions="Center" />
 
@@ -89,46 +91,47 @@
            VerticalOptions="Center"
            TextColor="Gray" />
 
-
                 </Grid>
-            </ScrollView>
 
-            <!-- Botón flotante de edición -->
-            <ImageButton Source="edit_icon.png"
-                 Style="{StaticResource FloatingImageButtonStyle}"
-                 Command="{Binding EditarTextoAsyncCommand}">
-                <ImageButton.Behaviors>
-                    <toolkit:IconTintColorBehavior TintColor="White" />
-                </ImageButton.Behaviors>
-            </ImageButton>
-        </Grid>
-        
-        <!-- Carrusel de imágenes -->
-        <Grid Grid.Row="3" ColumnDefinitions="*" >
+                <!-- Botón flotante de edición -->
+                <ImageButton Source="edit_icon.png"
+                         IsVisible="{Binding CreadoPorUsuario}"
+                         Style="{StaticResource FloatingImageButtonStyle}"
+                         Command="{Binding EditarTextoAsyncCommand}">
+                    <ImageButton.Behaviors>
+                        <toolkit:IconTintColorBehavior TintColor="White" />
+                    </ImageButton.Behaviors>
+                </ImageButton>
+            </Grid>
 
-            <!-- Carrusel -->
-            <CarouselView ItemsSource="{Binding Imagenes}">
-                <CarouselView.ItemTemplate>
-                    <DataTemplate>
-                        <Image Source="{Binding}" Aspect="AspectFill" />
-                    </DataTemplate>
-                </CarouselView.ItemTemplate>
-            </CarouselView>
+            <!-- Carrusel de imágenes -->
+            <Grid Grid.Row="3" ColumnDefinitions="*" >
 
-            <!-- Sugerencia si no hay imágenes -->
-            <Grid IsVisible="{Binding NoHayImagenes}" BackgroundColor="White">
-                <Label Text="Agrega imágenes para esta sección"
+                <!-- Carrusel -->
+                <CarouselView ItemsSource="{Binding Imagenes}">
+                    <CarouselView.ItemTemplate>
+                        <DataTemplate>
+                            <Image Source="{Binding}" Aspect="AspectFill" />
+                        </DataTemplate>
+                    </CarouselView.ItemTemplate>
+                </CarouselView>
+
+                <!-- Sugerencia si no hay imágenes -->
+                <Grid IsVisible="{Binding NoHayImagenes}" BackgroundColor="White">
+                    <Label Text="Agrega imágenes para esta sección"
                FontAttributes="Italic"
                HorizontalOptions="Center"
                VerticalOptions="Center"
                TextColor="Gray" />
-            </Grid>
+                </Grid>
 
-            <!-- Botón flotante para añadir imagen -->
-            <Button Text="+"
+                <!-- Botón flotante para añadir imagen -->
+                <Button Text="+"
             Style="{StaticResource FloatingButtonStyle}"
             Command="{Binding AgregarImagenAsyncCommand}" />
 
+            </Grid>
         </Grid>
-    </Grid>
+    </ScrollView>
+    
 </ContentPage>
