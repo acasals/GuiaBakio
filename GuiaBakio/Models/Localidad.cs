@@ -17,11 +17,14 @@ namespace GuiaBakio.Models
 
         public bool Sincronizado { get; set; } = false;
 
-        public Localidad(string localidad, string texto = "")
+        public Localidad(string localidad, int usuarioId, string texto = "")
         {
             if (string.IsNullOrWhiteSpace(localidad))
                 throw new ArgumentException("El nombre de la localidad es obligatorio.", nameof(localidad));
+            if (usuarioId <= 0)
+                throw new ArgumentException("El ID del usuario debe ser mayor que cero.", nameof(usuarioId));
             Nombre = localidad;
+            CreadorId = usuarioId;
             Texto = texto;
             FechaModificacion = DateTime.UtcNow;
         }
