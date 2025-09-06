@@ -17,6 +17,7 @@ namespace GuiaBakio.ViewModels
         private readonly IAddItemPopupService _addItemPopupService;
         private readonly IDialogOKService _dialogService;
         private readonly INavigationDataService _navigationDataService;
+        private readonly Usuario? usuario;
 
         public IRelayCommand EditarTextoAsyncCommand { get; }
         public IRelayCommand AgregarNotaAsyncCommand { get; }
@@ -50,7 +51,7 @@ namespace GuiaBakio.ViewModels
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
             _navigationDataService = navigationDataService ?? throw new ArgumentNullException(nameof(navigationDataService));
 
-            Usuario? usuario = _navigationDataService.Data as Usuario;
+            usuario = _navigationDataService.Data as Usuario;
             if (usuario == null)
             {
                 _dialogService.ShowAlertAsync("Error", "No se pudo cargar el usuario.", "OK");
@@ -182,13 +183,18 @@ namespace GuiaBakio.ViewModels
             }
             try
             {
+                if (Localidad == null || usuario == null)
+                {
+                    await _dialogService.ShowAlertAsync("Error", "No se pudo obtener la localidad o el usuario.", "OK");
+                    return;
+                }
                 bool yaExiste = await _dbService.ExisteNotaAsync(nuevaNota, Localidad.Id);
                 if (yaExiste)
                 {
                     await _dialogService.ShowAlertAsync("Error", "Nota existente.", "OK");
                     return;
                 }
-                var id = await _dbService.InsertarNotaAsync(nuevaNota, Localidad.Id);
+                var id = await _dbService.InsertarNotaAsync(nuevaNota, Localidad.Id, usuario.Id);
                 if (id <= 0)
                 {
                     await _dialogService.ShowAlertAsync("Error", "No se pudo añadir la nota.", "OK");

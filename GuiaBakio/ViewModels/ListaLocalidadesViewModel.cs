@@ -14,7 +14,7 @@ namespace GuiaBakio.ViewModels
         private readonly IDialogOKService _dialogService;
         private readonly INavigationDataService _navigationDataService;
 
-        private int _usuarioID;
+        private int _usuarioId;
         private string _usuarioName;
 
         public IRelayCommand AddLocalidadAsyncCommand { get; }
@@ -45,11 +45,11 @@ namespace GuiaBakio.ViewModels
                 {
                     await Shell.Current.GoToAsync("loginPage");
                 }
-                int usuarioID = Preferences.Get("UsuarioId", -1);
-                if (usuarioID >= 0)
+                int usuarioId = Preferences.Get("UsuarioId", -1);
+                if (usuarioId >= 0)
                 {
-                    _usuarioID = usuarioID;
-                    Usuario? usuario = await _dbService.ObtenerUsuarioPorIdAsync(_usuarioID);
+                    _usuarioId = usuarioId;
+                    Usuario? usuario = await _dbService.ObtenerUsuarioPorIdAsync(_usuarioId);
                     if (usuario is null)
                     {
                         await _dialogService.ShowAlertAsync("Error", "Hubo un problema al localizar al usuario. Contacta con Alex.", "OK");
@@ -99,7 +99,7 @@ namespace GuiaBakio.ViewModels
                     await _dialogService.ShowAlertAsync("Error", "Localidad existente.", "OK");
                     return;
                 }
-                var id = await _dbService.InsertarLocalidadAsync(nuevaLocalidad);
+                var id = await _dbService.InsertarLocalidadAsync(nuevaLocalidad, _usuarioId);
                 if (id <= 0)
                 {
                     await _dialogService.ShowAlertAsync("Error", "No se pudo añadir la localidad.", "OK");
