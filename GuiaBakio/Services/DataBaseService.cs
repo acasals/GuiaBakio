@@ -50,10 +50,12 @@ namespace GuiaBakio.Services
 
 
         #region "Localidades"
-        public async Task<int> InsertarLocalidadAsync(string nombreLocalidad)
+        public async Task<int> InsertarLocalidadAsync(string nombreLocalidad, int usuarioId)
         {
             if (string.IsNullOrWhiteSpace(nombreLocalidad))
                 throw new ArgumentException("El nombre de la localidad es obligatorio.", nameof(nombreLocalidad));
+            if (usuarioId <= 0)
+                throw new ArgumentException("El Id del usuario debe ser mayor que 0.", nameof(usuarioId));
 
             bool localidadExiste = await ExisteLocalidadAsync(nombreLocalidad);
             if (localidadExiste)
@@ -61,7 +63,7 @@ namespace GuiaBakio.Services
 
             try
             {
-                Localidad localidad = new(nombreLocalidad);
+                Localidad localidad = new(nombreLocalidad, usuarioId);
                 await _db.InsertAsync(localidad);
                 return localidad.Id;
             }
@@ -191,12 +193,14 @@ namespace GuiaBakio.Services
         #endregion
 
         #region "Notas"
-        public async Task<int> InsertarNotaAsync(string titulo, int localidadId, string texto = "")
+        public async Task<int> InsertarNotaAsync(string titulo, int localidadId, int usuarioId, string texto = "")
         {
             if (string.IsNullOrWhiteSpace(titulo))
                 throw new ArgumentException("El título de la nota es obligatorio.", nameof(titulo));
             if (localidadId <= 0)
                 throw new ArgumentException("El Id de la localidad debe ser mayor que cero.", nameof(localidadId));
+            if (usuarioId <= 0)
+                throw new ArgumentException("El Id del usuario debe ser mayor que 0.", nameof(usuarioId));
 
             bool localidadExiste = await ExisteLocalidadAsync(localidadId);
             if (!localidadExiste)
@@ -208,32 +212,7 @@ namespace GuiaBakio.Services
 
             try
             {
-                Nota nota = new(titulo, texto, localidadId);
-                await _db.InsertAsync(nota);
-                return nota.Id;
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"No se pudo crear la nota. {ex.Message}");
-            }
-        }
-        public async Task<int> InsertarNotaAsync(string titulo, string nombreLocalidad, string texto = "")
-        {
-            if (string.IsNullOrWhiteSpace(titulo))
-                throw new ArgumentException("El título de la nota es obligatorio.", nameof(titulo));
-            if (string.IsNullOrWhiteSpace(nombreLocalidad))
-                throw new ArgumentException("La localidad es obligatoria.", nameof(nombreLocalidad));
-
-            var _localidad = await ObtenerLocalidadAsync(nombreLocalidad) ?? throw new InvalidOperationException("No se encontró la localidad con nombre '{localidad}'.");
-
-            bool existeNota = await ExisteNotaAsync(titulo, _localidad.Id);
-
-            if (existeNota)
-                throw new InvalidOperationException("Ya existe una nota con ese título en esta localidad.");
-
-            try
-            {
-                Nota nota = new(titulo, texto, _localidad.Id);
+                Nota nota = new(titulo, texto, localidadId, usuarioId);
                 await _db.InsertAsync(nota);
                 return nota.Id;
             }
