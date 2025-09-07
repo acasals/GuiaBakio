@@ -30,6 +30,15 @@ namespace GuiaBakio.Models
         public Foto() { }
 
         [Ignore]
-        public ImageSource? ImagenSource { get; set; }
+        public ImageSource? ImagenSource
+        {
+            get
+            {
+                if (Blob == null)
+                    return null;
+
+                return ImageSource.FromStream(() => new MemoryStream(Blob));
+            }
+        }
     }
 }
