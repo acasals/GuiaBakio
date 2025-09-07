@@ -108,10 +108,29 @@
             <Grid Grid.Row="3" ColumnDefinitions="*" >
 
                 <!-- Carrusel -->
-                <CarouselView ItemsSource="{Binding Imagenes}">
+                <CarouselView ItemsSource="{Binding Imagenes}"
+                              HeightRequest="350"
+                              Loop="False"
+                              IsVisible="{Binding HayImagenes}">
+
                     <CarouselView.ItemTemplate>
-                        <DataTemplate>
-                            <Image Source="{Binding}" Aspect="AspectFill" />
+                        <DataTemplate x:DataType="models:Foto">
+                            <Border Margin="10,0"
+                                    HorizontalOptions="Center"
+                                    Stroke="DarkGray"
+                                    StrokeThickness="1"
+                                    HeightRequest="350"
+                                    WidthRequest="470">
+                                <Border.Shadow>
+                                    <Shadow Brush="Black" Opacity="0.3" Offset="5,5" Radius="10"/>
+                                </Border.Shadow>
+
+                                <Image Source="{Binding ImagenSource}"
+                                       Aspect="AspectFill" 
+                                       MaximumWidthRequest="470"
+                                       MaximumHeightRequest="350"/>
+
+                            </Border>
                         </DataTemplate>
                     </CarouselView.ItemTemplate>
                 </CarouselView>
