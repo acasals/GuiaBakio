@@ -1,7 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net9.0-android;net9.0-ios;net9.0-maccatalyst</TargetFrameworks>
+		<!--<TargetFrameworks>net9.0-android;net9.0-ios;net9.0-maccatalyst</TargetFrameworks>-->
+		<TargetFrameworks>net9.0-android</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">
 			$(TargetFrameworks);net9.0-windows10.0.19041.0
 		</TargetFrameworks>
@@ -18,12 +19,14 @@
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
 
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">11.0</SupportedOSPlatformVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
+		
+		<!--<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">11.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>-->
+		<!--<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>-->
+		
 		<LangVersion>preview</LangVersion>
 	</PropertyGroup>
 
@@ -34,7 +37,13 @@
 		<ApplicationTitle>Guia de Bakio</ApplicationTitle>
   </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-ios|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-windows10.0.19041.0|AnyCPU'">
+		<ApplicationId>com.alexcasals.guiabakio</ApplicationId>
+		<ApplicationIdGuid>00a255db-265a-4e7b-89b7-54bde1551ce9</ApplicationIdGuid>
+		<ApplicationTitle>Guia de Bakio</ApplicationTitle>
+	</PropertyGroup>
+
+	<!--<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-ios|AnyCPU'">
 		<ApplicationId>com.alexcasals.guiabakio</ApplicationId>
 		<ApplicationIdGuid>00a255db-265a-4e7b-89b7-54bde1551ce9</ApplicationIdGuid>
 		<ApplicationTitle>Guia de Bakio</ApplicationTitle>
@@ -44,38 +53,7 @@
 		<ApplicationId>com.alexcasals.guiabakio</ApplicationId>
 		<ApplicationIdGuid>00a255db-265a-4e7b-89b7-54bde1551ce9</ApplicationIdGuid>
 		<ApplicationTitle>Guia de Bakio</ApplicationTitle>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-windows10.0.19041.0|AnyCPU'">
-		<ApplicationId>com.alexcasals.guiabakio</ApplicationId>
-		<ApplicationIdGuid>00a255db-265a-4e7b-89b7-54bde1551ce9</ApplicationIdGuid>
-		<ApplicationTitle>Guia de Bakio</ApplicationTitle>
-	</PropertyGroup>
-
-	<!-- Updated Release configurations -->
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-android|AnyCPU'">
-		<ApplicationId>com.alexcasals.guiabakio</ApplicationId>
-		<ApplicationIdGuid>00a255db-265a-4e7b-89b7-54bde1551ce9</ApplicationIdGuid>
-		<ApplicationTitle>Guia de Bakio</ApplicationTitle>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-ios|AnyCPU'">
-		<ApplicationId>com.alexcasals.guiabakio</ApplicationId>
-		<ApplicationIdGuid>00a255db-265a-4e7b-89b7-54bde1551ce9</ApplicationIdGuid>
-		<ApplicationTitle>Guia de Bakio</ApplicationTitle>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-maccatalyst|AnyCPU'">
-		<ApplicationId>com.alexcasals.guiabakio</ApplicationId>
-		<ApplicationIdGuid>00a255db-265a-4e7b-89b7-54bde1551ce9</ApplicationIdGuid>
-		<ApplicationTitle>Guia de Bakio</ApplicationTitle>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-windows10.0.19041.0|AnyCPU'">
-		<ApplicationId>com.alexcasals.guiabakio</ApplicationId>
-		<ApplicationIdGuid>00a255db-265a-4e7b-89b7-54bde1551ce9</ApplicationIdGuid>
-		<ApplicationTitle>Guia de Bakio</ApplicationTitle>
-	</PropertyGroup>
+	</PropertyGroup>-->
 
 	<ItemGroup>
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
@@ -86,13 +64,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Remove="secrets.json" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <Content Include="secrets.json">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="Resources\Data\" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -102,34 +80,6 @@
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="9.0.90" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.8" />
 		<PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<MauiXaml Update="Pages\LoadingPage.xaml">
-		  <Generator>MSBuild:Compile</Generator>
-		</MauiXaml>
-		<MauiXaml Update="Pages\LocalidadPage.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</MauiXaml>
-		<MauiXaml Update="Pages\LoginPage.xaml">
-		  <Generator>MSBuild:Compile</Generator>
-		</MauiXaml>
-		<MauiXaml Update="Pages\NotaPage.xaml">
-		  <Generator>MSBuild:Compile</Generator>
-		</MauiXaml>
-		<MauiXaml Update="Resources\Styles\MisEstilos.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</MauiXaml>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Resources\Data\" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Compile Update="Pages\LoginPage.xaml.cs">
-	    <DependentUpon>LoginPage.xaml</DependentUpon>
-	  </Compile>
 	</ItemGroup>
 
 	<Import Project="Resources\Data\Signing.props" Condition="Exists('Resources\data\Signing.props')" />
