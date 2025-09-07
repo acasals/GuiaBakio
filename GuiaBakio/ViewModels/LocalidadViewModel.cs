@@ -253,6 +253,7 @@ namespace GuiaBakio.ViewModels
                 }
                 miImagen.EntidadId = LocalidadId;
                 miImagen.TipoDeEntidad = TipoEntidad.Localidad;
+                miImagen.CreadorId = usuario?.Id ?? 0;
                 int imagenId = await _dbService.InsertarImagensync(miImagen);
                 if (imagenId > 0)
                 {
