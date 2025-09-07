@@ -71,6 +71,9 @@ namespace GuiaBakio.ViewModels
         private bool noHayImagenes;
 
         [ObservableProperty]
+        private bool hayImagenes;
+
+        [ObservableProperty]
         private bool creadoPorUsuario;
 
         [ObservableProperty]
@@ -90,25 +93,17 @@ namespace GuiaBakio.ViewModels
                 Titulo = Nota.Titulo + " - " + localidad?.Nombre;
                 Imagenes = new ObservableCollection<Foto>(
                     await _dbService.ObtenerImagenesPorEntidadAsync(TipoEntidad.Nota, notaId));
-                await AsignarImagenSourceAsync();
                 NoHayTexto = string.IsNullOrWhiteSpace(Nota.Texto) && Nota.CreadorId == usuario?.Id;
                 Etiquetas = new ObservableCollection<Etiqueta>(
                     await _dbService.ObtenerEtiquetasDeNotaAsync(Nota.Id));
                 NoHayEtiquetas = Etiquetas is null || !Etiquetas.Any();
                 NoHayImagenes = !Imagenes?.Any() == true;
+                HayImagenes = Imagenes?.Any() == true;
                 CreadoPorUsuario = Nota.CreadorId == usuario?.Id;
             }
             catch (Exception ex)
             {
                 throw new InvalidOperationException($"Error al cargar datos de la nota. {ex.Message}");
-            }
-        }
-
-        private async Task AsignarImagenSourceAsync()
-        {
-            foreach (var imagen in Imagenes)
-            {
-                imagen.ImagenSource = await DataBaseService.ConvertirBytesAImageSourceAsync(imagen.Blob);
             }
         }
 
@@ -195,7 +190,18 @@ namespace GuiaBakio.ViewModels
                 }
                 miImagen.EntidadId = NotaId;
                 miImagen.TipoDeEntidad = TipoEntidad.Nota;
-                await _dbService.InsertarImagensync(miImagen);
+                int imagenId = await _dbService.InsertarImagensync(miImagen);
+                if (imagenId > 0)
+                {
+                    miImagen.Id = imagenId;
+                    Imagenes.Add(miImagen);
+                }
+                else
+                {
+                    await _dialogService.ShowAlertAsync("Error", "No se pudo guardar la imagen en la base de datos.", "OK");
+                    return;
+                }
+
             }
             catch (Exception ex)
             {
