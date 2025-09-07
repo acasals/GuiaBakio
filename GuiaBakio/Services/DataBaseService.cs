@@ -271,7 +271,9 @@ namespace GuiaBakio.Services
         {
             if (localidadId <= 0) throw new ArgumentException("El Id de la localidad debe ser mayor que 0.", nameof(localidadId));
             if (listaEtiquetas == null || listaEtiquetas.Count == 0)
-                return await _db.Table<Nota>().ToListAsync(); // O tu método personalizado
+                return await _db.Table<Nota>()
+                            .Where(a => a.LocalidadId == localidadId)
+                            .ToListAsync();
 
             var etiquetaIds = listaEtiquetas.Select(e => e.Id).ToList();
 
@@ -285,7 +287,7 @@ namespace GuiaBakio.Services
 
             // Obtener las notas correspondientes
             var notas = await _db.Table<Nota>()
-                                 .Where(n => n.LocalidadId == localidadId && notaIds.Contains(n.Id))
+                                 .Where(n => (n.LocalidadId == localidadId) && notaIds.Contains(n.Id))
                                  .ToListAsync();
 
             return notas;
@@ -733,13 +735,14 @@ namespace GuiaBakio.Services
             // Si el tipo de ImageSource no es StreamImageSource, no se puede convertir fácilmente
             return null;
         }
-        public static async Task<ImageSource?> ConvertirBytesAImageSourceAsync(byte[]? foto)
+
+        public static ImageSource? ConvertirBytesAImageSourceAsync(byte[]? foto)
         {
             if (foto == null)
                 return null;
 
-            MemoryStream stream = await Task.Run(() => new MemoryStream(foto));
-            return ImageSource.FromStream(() => stream);
+            // MemoryStream stream = await Task.Run(() => new MemoryStream(foto));
+            return ImageSource.FromStream(() => new MemoryStream(foto));
         }
     }
 }
