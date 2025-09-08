@@ -4,7 +4,6 @@ using GuiaBakio.Services;
 using GuiaBakio.Services.Interfaces;
 using GuiaBakio.ViewModels;
 using Microsoft.Extensions.Logging;
-using System.Diagnostics;
 
 namespace GuiaBakio
 {
@@ -29,7 +28,6 @@ namespace GuiaBakio
             {
                 var dbName = "GuiaBakio.db";
                 var dbPath = Path.Combine(FileSystem.AppDataDirectory, dbName);
-                Debug.WriteLine($"Database path: {dbPath}");
                 var dialogService = provider.GetRequiredService<IDialogYesNoService>();
                 return new DataBaseService(dbPath, dialogService);
             });
