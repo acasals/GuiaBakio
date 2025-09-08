@@ -81,7 +81,8 @@
                 <CarouselView ItemsSource="{Binding Imagenes}"
                               HeightRequest="370"
                               Loop="False"
-                              IsVisible="{Binding HayImagenes}">
+                              IsVisible="{Binding HayImagenes}"
+                              x:Name ="CarruselFotos">
                    
                     <CarouselView.ItemTemplate>
                         <DataTemplate x:DataType="models:Foto">
@@ -94,11 +95,18 @@
                                 <Border.Shadow>
                                     <Shadow Brush="Black" Opacity="0.3" Offset="5,5" Radius="10"/>
                                 </Border.Shadow>
-                                
-                                    <Image Source="{Binding ImagenSource}"
+
+                                <Image Source="{Binding ImagenSource}"
                                            Aspect="AspectFill" 
                                            MaximumWidthRequest="470"
-                                           MaximumHeightRequest="350"/>
+                                           MaximumHeightRequest="350">
+                                </Image>
+                                
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={x:Reference CarruselFotos}, Path=BindingContext.ImagenTocadaCommand}"
+                                        CommandParameter="{Binding .}"/>
+                                </Border.GestureRecognizers>
                                 
                             </Border>
                         </DataTemplate>

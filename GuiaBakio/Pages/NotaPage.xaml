@@ -111,7 +111,8 @@
                 <CarouselView ItemsSource="{Binding Imagenes}"
                               HeightRequest="350"
                               Loop="False"
-                              IsVisible="{Binding HayImagenes}">
+                              IsVisible="{Binding HayImagenes}"
+                              x:Name ="CarruselFotos">
 
                     <CarouselView.ItemTemplate>
                         <DataTemplate x:DataType="models:Foto">
@@ -129,6 +130,12 @@
                                        Aspect="AspectFill" 
                                        MaximumWidthRequest="470"
                                        MaximumHeightRequest="350"/>
+
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={x:Reference CarruselFotos}, Path=BindingContext.ImagenTocadaCommand}"
+                                        CommandParameter="{Binding .}"/>
+                                </Border.GestureRecognizers>
 
                             </Border>
                         </DataTemplate>

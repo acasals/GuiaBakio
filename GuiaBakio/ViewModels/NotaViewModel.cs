@@ -20,6 +20,7 @@ namespace GuiaBakio.ViewModels
         public IRelayCommand AgregarImagenAsyncCommand { get; }
         public IRelayCommand EliminarNotaAsyncCommand { get; }
         public IRelayCommand EditarEtiquetasAsyncCommand { get; }
+        public IRelayCommand<Foto?> ImagenTocadaAsyncCommand { get; }
 
         private Usuario? usuario;
 
@@ -35,6 +36,8 @@ namespace GuiaBakio.ViewModels
             EditarEtiquetasAsyncCommand = new AsyncRelayCommand(EditarEtiquetasAsync);
             AgregarImagenAsyncCommand = new AsyncRelayCommand(AgregarImagenAsync);
             EliminarNotaAsyncCommand = new AsyncRelayCommand(EliminarNotaAsync);
+            ImagenTocadaAsyncCommand = new AsyncRelayCommand<Foto?>(ImagenTocadaAsync);
+
             _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
             _textEditorPopupService = textEditorPopupService ?? throw new ArgumentNullException(nameof(textEditorPopupService));
             _addImagenPopupService = addImagenPopupService ?? throw new ArgumentNullException(nameof(addImagenPopupService));
@@ -208,6 +211,32 @@ namespace GuiaBakio.ViewModels
             {
                 await _dialogService.ShowAlertAsync("Error", $"No se pudo añadir la imagen.{Environment.NewLine}{ex.Message}", "OK");
                 return;
+            }
+        }
+
+        [RelayCommand]
+        public async Task ImagenTocadaAsync(Foto? foto)
+        {
+            if (foto == null)
+            {
+                await _dialogService.ShowAlertAsync("Error", "No se pudo obtener la foto", "Aceptar");
+                return;
+            }
+            try
+            {
+                if (foto.EsMapa)
+                {
+                    if (string.IsNullOrWhiteSpace(foto.UrlMapa))
+                    {
+                        await _dialogService.ShowAlertAsync("Error", "La foto no tiene una URL de mapa válida.", "Aceptar");
+                        return;
+                    }
+                    await Launcher.OpenAsync(new Uri(foto.UrlMapa));
+                }
+            }
+            catch (Exception ex)
+            {
+                await _dialogService.ShowAlertAsync("Error", $"Hubo un error al gestionar la imagen: {ex.Message}", "Aceptar");
             }
         }
     }
