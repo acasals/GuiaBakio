@@ -295,6 +295,23 @@ namespace GuiaBakio.ViewModels
                     }
                     await Launcher.OpenAsync(new Uri(foto.UrlMapa));
                 }
+                else
+                {
+                    byte[] blob = foto.Blob ?? [];
+                    if (blob.Length == 0)
+                    {
+                        await _dialogService.ShowAlertAsync("Error", "La foto no tiene datos de imagen válidos.", "Aceptar");
+                        return;
+                    }
+                    string tempFilePath = Path.Combine(FileSystem.CacheDirectory, $"{Guid.NewGuid()}.jpg");
+                    File.WriteAllBytes(tempFilePath, blob);
+                    await Launcher.OpenAsync(new OpenFileRequest
+                    {
+                        File = new ReadOnlyFile(tempFilePath)
+                    });
+                    await Task.Delay(5000); // Ajusta según el comportamiento observado
+                    File.Delete(tempFilePath);
+                }
             }
             catch (Exception ex)
             {
