@@ -4,23 +4,24 @@ namespace GuiaBakio.Models
 {
     public class Nota
     {
-        [PrimaryKey, AutoIncrement]
-        public int Id { get; set; }
-        public int LocalidadId { get; set; }
+        [PrimaryKey]
+        public string Id { get; set; }
+        public string LocalidadId { get; set; }
         public string Titulo { get; set; }
         public string? Texto { get; set; }
         public DateTime FechaModificacion { get; set; }
         public bool Sincronizado { get; set; } = false;
-        public int CreadorId { get; set; }
+        public string CreadorId { get; set; }
 
-        public Nota(string titulo, string texto, int localidadId, int usuarioId)
+        public Nota(string titulo, string texto, string localidadId, string usuarioId)
         {
             if (string.IsNullOrWhiteSpace(titulo))
-                throw new ArgumentException("El título de la nota es obligatorio.", nameof(titulo));
-            if (localidadId <= 0)
-                throw new ArgumentException("El ID de la localidad debe ser mayor que cero.", nameof(localidadId));
-            if (usuarioId <= 0)
-                throw new ArgumentException("El ID del usuario debe ser mayor que cero.", nameof(usuarioId));
+                throw new ArgumentNullException(nameof(titulo), "El Id de la nota no puede estar vacío.");
+            if (string.IsNullOrWhiteSpace(localidadId))
+                throw new ArgumentNullException(nameof(localidadId), "El Id de la nota no puede estar vacío.");
+            if (string.IsNullOrWhiteSpace(usuarioId))
+                throw new ArgumentNullException(nameof(usuarioId), "El Id de la nota no puede estar vacío.");
+            Id = Guid.NewGuid().ToString();
             Titulo = titulo;
             Texto = texto;
             LocalidadId = localidadId;
@@ -30,7 +31,11 @@ namespace GuiaBakio.Models
 
         public Nota()
         {
+            Id = Guid.NewGuid().ToString();
             Titulo = string.Empty;
+            LocalidadId = string.Empty;
+            CreadorId = string.Empty;
+            FechaModificacion = DateTime.UtcNow;
         }
 
     }

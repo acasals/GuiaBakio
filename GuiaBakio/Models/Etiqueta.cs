@@ -4,22 +4,34 @@ namespace GuiaBakio.Models
 {
     public partial class Etiqueta : ObservableObject
     {
-        [PrimaryKey, AutoIncrement]
-        public int Id { get; set; }
+        [PrimaryKey]
+        public string Id { get; set; }
         public string Nombre { get; set; }
 
         public string? Icono { get; set; }
-        public int CreadorId { get; set; }
-        public Etiqueta(string nombre, string? icono)
+        public string CreadorId { get; set; }
+        public DateTime FechaModificacion { get; set; }
+        public bool Sincronizado { get; set; } = false;
+
+
+        public Etiqueta(string nombre, string? icono, string usuarioId)
         {
             if (string.IsNullOrWhiteSpace(nombre))
-                throw new ArgumentException("El nombre de la etiqueta es obligatorio.", nameof(nombre));
+                throw new ArgumentNullException(nameof(nombre), "El nombre de la etiqueta es obligatorio.");
+            if (string.IsNullOrWhiteSpace(usuarioId))
+                throw new ArgumentNullException(nameof(usuarioId), "El ID del usuario no puede estar vacío.");
+            Id = Guid.NewGuid().ToString();
             Nombre = nombre;
             Icono = icono;
+            CreadorId = usuarioId;
+            FechaModificacion = DateTime.UtcNow;
         }
         public Etiqueta()
         {
+            Id = Guid.NewGuid().ToString();
             Nombre = string.Empty;
+            CreadorId = string.Empty;
+            FechaModificacion = DateTime.UtcNow;
         }
 
         [ObservableProperty]

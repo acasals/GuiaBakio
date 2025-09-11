@@ -4,25 +4,24 @@ namespace GuiaBakio.Models
 {
     public class Localidad
     {
-        [PrimaryKey, AutoIncrement]
-        public int Id { get; set; }
+        [PrimaryKey]
+        public string Id { get; set; }
 
         public string Nombre { get; set; }
-
         public string? Texto { get; set; }
-
-        public int CreadorId { get; set; }
-
+        public string CreadorId { get; set; }
         public DateTime FechaModificacion { get; set; }
-
         public bool Sincronizado { get; set; } = false;
 
-        public Localidad(string localidad, int usuarioId, string texto = "")
+
+
+        public Localidad(string localidad, string usuarioId, string texto = "")
         {
             if (string.IsNullOrWhiteSpace(localidad))
-                throw new ArgumentException("El nombre de la localidad es obligatorio.", nameof(localidad));
-            if (usuarioId <= 0)
-                throw new ArgumentException("El ID del usuario debe ser mayor que cero.", nameof(usuarioId));
+                throw new ArgumentNullException(nameof(localidad), "El Id de la nota no puede estar vacío.");
+            if (string.IsNullOrWhiteSpace(usuarioId))
+                throw new ArgumentNullException(nameof(usuarioId), "El Id de la nota no puede estar vacío.");
+            Id = Guid.NewGuid().ToString();
             Nombre = localidad;
             CreadorId = usuarioId;
             Texto = texto;
@@ -30,7 +29,10 @@ namespace GuiaBakio.Models
         }
         public Localidad()
         {
+            Id = Guid.NewGuid().ToString();
             Nombre = string.Empty;
+            CreadorId = string.Empty;
+            FechaModificacion = DateTime.UtcNow;
         }
     }
 }

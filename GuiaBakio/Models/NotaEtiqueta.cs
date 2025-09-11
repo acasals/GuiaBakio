@@ -4,13 +4,28 @@ namespace GuiaBakio.Models
 {
     public class NotaEtiqueta
     {
-        [PrimaryKey, AutoIncrement]
-        public int Id { get; set; }
-        public int NotaId { get; set; }
-        public int EtiquetaId { get; set; }
-        public NotaEtiqueta() { }
-        public NotaEtiqueta(int notaId, int etiquetaId)
+        [PrimaryKey]
+        public string Id { get; set; }
+        public string NotaId { get; set; }
+        public string EtiquetaId { get; set; }
+        public DateTime FechaModificacion { get; set; }
+
+        public bool Sincronizado { get; set; } = false;
+
+        public NotaEtiqueta()
         {
+            Id = Guid.NewGuid().ToString();
+            NotaId = string.Empty;
+            EtiquetaId = string.Empty;
+        }
+        public NotaEtiqueta(string notaId, string etiquetaId)
+        {
+            if (string.IsNullOrWhiteSpace(notaId))
+                throw new ArgumentNullException(nameof(notaId), "El Id de la nota no puede estar vacío.");
+            if (string.IsNullOrWhiteSpace(etiquetaId))
+                throw new ArgumentNullException(nameof(etiquetaId), "El Id de la etiqueta no puede estar vacío.");
+
+            Id = Guid.NewGuid().ToString();
             NotaId = notaId;
             EtiquetaId = etiquetaId;
         }
