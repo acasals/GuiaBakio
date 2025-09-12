@@ -107,9 +107,9 @@ namespace GuiaBakio.ViewModels
             {
                 Localidad = await _dbService.ObtenerLocalidadAsync(LocalidadId);
                 Notas = new ObservableCollection<Nota>(
-                    await _dbService.ObtenerNotasAsync(LocalidadId));
+                    await _dbService.ObtenerNotasPorLocalidadAsync(LocalidadId));
                 Etiquetas = new ObservableCollection<Etiqueta>(
-                    await _dbService.ObtenerEtiquetasAsync());
+                    await _dbService.ObtenerTodasLasEtiquetasAsync());
                 Imagenes = new ObservableCollection<Foto>(
                 await _dbService.ObtenerImagenesPorEntidadAsync(TipoEntidad.Localidad, LocalidadId));
                 NoHayTexto = string.IsNullOrWhiteSpace(Localidad?.Texto) && Localidad?.CreadorId == usuario?.Id;
@@ -210,7 +210,7 @@ namespace GuiaBakio.ViewModels
                     await _dialogService.ShowAlertAsync("Error", "No se pudo obtener la localidad o el usuario.", "OK");
                     return;
                 }
-                bool yaExiste = await _dbService.ExisteNotaAsync(nuevaNota, Localidad.Id);
+                bool yaExiste = await _dbService.ExisteNotaPorTituloYLocalidadAsync(nuevaNota, Localidad.Id);
                 if (yaExiste)
                 {
                     await _dialogService.ShowAlertAsync("Error", "Nota existente.", "OK");

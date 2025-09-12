@@ -89,7 +89,7 @@ namespace GuiaBakio.ViewModels
             }
             try
             {
-                bool yaExiste = await _dbService.ExisteLocalidadAsync(nuevaLocalidad);
+                bool yaExiste = await _dbService.ExisteLocalidadConNombreAsync(nuevaLocalidad);
                 if (yaExiste)
                 {
                     await _dialogService.ShowAlertAsync("Error", "Localidad existente.", "OK");

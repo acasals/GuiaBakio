@@ -91,8 +91,8 @@ namespace GuiaBakio.ViewModels
             NotaId = notaId;
             try
             {
-                Nota = await _dbService.ObtenerNotaAsync(notaId);
-                var localidad = await _dbService.ObtenerLocalidadAsync(Nota.LocalidadId);
+                Nota = await _dbService.ObtenerNotaPorIdAsync(notaId);
+                var localidad = await _dbService.ObtenerLocalidadPorNombreAsync(Nota.LocalidadId);
                 Titulo = Nota.Titulo + " - " + localidad?.Nombre;
                 Imagenes = new ObservableCollection<Foto>(
                     await _dbService.ObtenerImagenesPorEntidadAsync(TipoEntidad.Nota, notaId));
