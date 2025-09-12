@@ -20,7 +20,7 @@ namespace GuiaBakio.Services
         {
             var currentPage = (Shell.Current?.CurrentPage) ?? throw new InvalidOperationException("No se pudo obtener la página actual.");
 
-            var todasLasEtiquetas = await _dbService.ObtenerEtiquetasAsync() ?? throw new InvalidOperationException("No se pudieron obtener las etiquetas.");
+            var todasLasEtiquetas = await _dbService.ObtenerTodasLasEtiquetasAsync() ?? throw new InvalidOperationException("No se pudieron obtener las etiquetas.");
 
             foreach (var etiqueta in todasLasEtiquetas)
             {

@@ -35,7 +35,7 @@ namespace GuiaBakio.ViewModels
                 await _dialogService.ShowAlertAsync("Error", "El nombre de usuario no puede estar vacío. Por favor, introduce un nombre.", "OK");
                 return;
             }
-            var usuario = await _dbService.ObtenerusuarioAsync(NombreUsuario);
+            var usuario = await _dbService.ObtenerUsuarioPorNombreAsync(NombreUsuario);
             if (usuario != null)
             {
                 var response = await _dialogYesNoService.ShowAlertAsync("Error", $"El nombre del usuario {NombreUsuario} ya existe en otro dispositivo. Por favor, elige otro, a menos de que seas tú seguro.", "Aceptar", "Cancelar");
