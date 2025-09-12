@@ -48,7 +48,6 @@ namespace GuiaBakio.Services
 
         }
 
-
         #region "Localidades"
         public async Task<string> InsertarLocalidadAsync(string nombreLocalidad, string usuarioId)
         {
@@ -88,22 +87,13 @@ namespace GuiaBakio.Services
             nombreLocalidad = MisUtils.NormalizarTexto(nombreLocalidad).Trim();
 
             var _localidad = await _db.Table<Localidad>()
-                                    .Where(a => a.Nombre.ToLower() == nombreLocalidad.ToLower())
+                                    .Where(a => a.Nombre.Equals(nombreLocalidad, StringComparison.CurrentCultureIgnoreCase))
                                     .FirstOrDefaultAsync();
             return _localidad != null;
         }
         public async Task<List<Localidad>> ObtenerLocalidadesAsync()
         {
             return await _db.Table<Localidad>().ToListAsync();
-        }
-        public async Task<Localidad?> ObtenerLocalidadPorIdAsync(string localidadId)
-        {
-            if (string.IsNullOrWhiteSpace(localidadId))
-                throw new ArgumentNullException(nameof(localidadId), "El Id de localidad no puede estar vacío.");
-
-            return await _db.Table<Localidad>()
-                            .Where(l => l.Id == localidadId)
-                                     .FirstOrDefaultAsync();
         }
         public async Task<Localidad?> ObtenerLocalidadPorNombreAsync(string nombreLocalidad)
         {
@@ -120,7 +110,12 @@ namespace GuiaBakio.Services
             if (localidad == null)
                 throw new ArgumentNullException(nameof(localidad), "La localidad no puede ser nula.");
             if (string.IsNullOrWhiteSpace(localidad.Nombre))
-                throw new ArgumentNullException(nameof(localidad), "El nuevo nombre de la localidad es obligatorio.");
+                throw new ArgumentException($"El nuevo nombre de la localidad es obligatorio. {localidad.Nombre}");
+            if (string.IsNullOrWhiteSpace(localidad.Id))
+                throw new ArgumentException($"El Id de la localidad no puede estar vacío. {localidad.Id}");
+            bool existeLocalidad = await ExisteLocalidadConNombreAsync(localidad.Nombre);
+            if (!existeLocalidad)
+                throw new InvalidOperationException($"No se encontró la localidad con Id: {localidad.Id}");
 
             try
             {
@@ -136,29 +131,31 @@ namespace GuiaBakio.Services
         {
             if (string.IsNullOrWhiteSpace(localidadId))
                 throw new ArgumentNullException(nameof(localidadId), "El Id de la localidad no puede estar vacío.");
+            bool existeLocalidad = await ExisteLocalidadConIdAsync(localidadId);
+            if (!existeLocalidad)
+                throw new InvalidOperationException($"No se encontró la localidad con Id: {localidadId}");
 
-            var localidad = await ObtenerLocalidadPorIdAsync(localidadId) ?? throw new InvalidOperationException("No se encontró la localidad.");
-
-            var localidadImagenes = await ObtenerImagenesPorEntidadAsync(TipoEntidad.Localidad, localidadId);
-            if (confirmarBorrado)
-            {
-                string texto = "¿Seguro que quieres borrar esta localidad?";
-
-                if (localidadImagenes != null)
-                {
-                    if (localidadImagenes.Count > 0)
-                        texto = "Hay alguna(s) imagen(es) asociada(s) a esta localidad. " + texto;
-                }
-                bool confirmacion = await _dialogService.ShowAlertAsync(
-                    "Confirmar borrado",
-                    texto,
-                    "Sí",
-                    "No");
-                if (!confirmacion)
-                    return 0; // Cancelar el borrado si el usuario no confirma      
-            }
             try
             {
+                var localidadImagenes = await ObtenerImagenesPorEntidadEIdAsync(TipoEntidad.Localidad, localidadId);
+                if (confirmarBorrado)
+                {
+                    string texto = "¿Seguro que quieres borrar esta localidad?";
+
+                    if (localidadImagenes != null)
+                    {
+                        if (localidadImagenes.Count > 0)
+                            texto = "Hay alguna(s) imagen(es) asociada(s) a esta localidad. " + texto;
+                    }
+                    bool confirmacion = await _dialogService.ShowAlertAsync(
+                        "Confirmar borrado",
+                        texto,
+                        "Sí",
+                        "No");
+                    if (!confirmacion)
+                        return 0; // Cancelar el borrado si el usuario no confirma      
+                }
+
                 if (localidadImagenes != null)
                     foreach (Foto imagen in localidadImagenes)
                         await EliminarImagenAsync(imagen.Id, false);
@@ -182,9 +179,9 @@ namespace GuiaBakio.Services
             if (string.IsNullOrWhiteSpace(usuarioId))
                 throw new ArgumentNullException(nameof(usuarioId), "El Id del usuario no puede estar vacío.");
 
-            bool localidadExiste = await ExisteLocalidadConIdAsync(localidadId);
-            if (!localidadExiste)
-                throw new InvalidOperationException($"El localidad con Id '{localidadId}' no existe.");
+            bool existeLocalidad = await ExisteLocalidadConIdAsync(localidadId);
+            if (!existeLocalidad)
+                throw new InvalidOperationException($"No se encontró la localidad con Id: {localidadId}");
 
             bool existeNota = await ExisteNotaPorTituloYLocalidadAsync(titulo, localidadId);
             if (existeNota)
@@ -192,7 +189,7 @@ namespace GuiaBakio.Services
 
             try
             {
-                Nota nota = new(titulo, texto, localidadId, usuarioId);
+                Nota nota = new(titulo, localidadId, usuarioId, texto);
                 await _db.InsertAsync(nota);
                 return nota.Id;
             }
@@ -224,14 +221,17 @@ namespace GuiaBakio.Services
         }
         public async Task<List<Nota>> ObtenerNotasPorLocalidadAsync(string localidadId)
         {
-            if (string.IsNullOrWhiteSpace(localidadId)) throw new ArgumentNullException(nameof(localidadId), "El Id de la localidad no puede estar vacío.");
+            if (string.IsNullOrWhiteSpace(localidadId))
+                throw new ArgumentNullException(nameof(localidadId), "El Id de la localidad no puede estar vacío.");
+
             return await _db.Table<Nota>()
                             .Where(a => a.LocalidadId == localidadId)
                             .ToListAsync();
         }
         public async Task<List<Nota>> ObtenerNotasPorEtiquetasAsync(string localidadId, List<Etiqueta> listaEtiquetas)
         {
-            if (string.IsNullOrWhiteSpace(localidadId)) throw new ArgumentNullException(nameof(localidadId), "El Id de la localidad no puede estar vacío.");
+            if (string.IsNullOrWhiteSpace(localidadId))
+                throw new ArgumentNullException(nameof(localidadId), "El Id de la localidad no puede estar vacío.");
 
             if (listaEtiquetas == null || listaEtiquetas.Count == 0)
                 return await _db.Table<Nota>()
@@ -257,28 +257,17 @@ namespace GuiaBakio.Services
         }
         public async Task<Nota> ObtenerNotaPorIdAsync(string notaId)
         {
-            if (string.IsNullOrWhiteSpace(notaId)) throw new ArgumentNullException(nameof(notaId), "El Id de la nota no puede estar vacío.");
+            if (string.IsNullOrWhiteSpace(notaId))
+                throw new ArgumentNullException(nameof(notaId), "El Id de la nota no puede estar vacío.");
 
             return await _db.FindAsync<Nota>(notaId);
-        }
-        public async Task<Nota> ObtenerNotaAsync(string titulo, string localidadId)
-        {
-            if (string.IsNullOrWhiteSpace(titulo))
-                throw new ArgumentNullException(nameof(titulo), "El nombre del titulo es obligatorio.");
-            if (string.IsNullOrWhiteSpace(localidadId))
-                throw new ArgumentNullException(nameof(localidadId), "El Id de la localidad no puede estar vacío.");
-
-            titulo = MisUtils.NormalizarTexto(titulo).Trim();
-            return await _db.Table<Nota>()
-                            .Where(a => a.Titulo.ToLower() == titulo.ToLower() && a.LocalidadId == localidadId)
-                            .FirstOrDefaultAsync();
         }
         public async Task ActualizarNotaAsync(Nota nota)
         {
             if (nota == null)
                 throw new ArgumentNullException(nameof(nota), "La nota no puede ser nula.");
             if (string.IsNullOrWhiteSpace(nota.Titulo))
-                throw new ArgumentException("El nuevo título de la nota es obligatorio.", nameof(nota.Titulo));
+                throw new ArgumentException($"El nuevo título de la nota es obligatorio. {nameof(nota.Titulo)}");
 
             try
             {
@@ -294,32 +283,39 @@ namespace GuiaBakio.Services
         {
             if (string.IsNullOrWhiteSpace(notaId)) throw new ArgumentNullException(nameof(notaId), "El Id de la nota no puede estar vacío.");
 
-            _ = await ObtenerNotaPorIdAsync(notaId) ?? throw new InvalidOperationException("No se encontró la nota.");
-
-            var notaImagenes = await ObtenerImagenesPorEntidadAsync(TipoEntidad.Nota, notaId);
-            if (confirmarBorrado)
-            {
-                string texto = "¿Seguro que quieres borrar esta nota?";
-
-                if (notaImagenes != null)
-                {
-                    if (notaImagenes.Count > 0)
-                        texto = "Hay algunas imágenes asociadas a esta nota. " + texto;
-                }
-
-                bool confirmacion = await _dialogService.ShowAlertAsync(
-                    "Confirmar borrado",
-                    texto,
-                    "Sí",
-                    "No");
-                if (!confirmacion)
-                    return 0; // Cancelar el borrado si el usuario no confirma      
-            }
             try
             {
+                bool existeNota = await ExisteLocalidadConIdAsync(notaId);
+                if (!existeNota)
+                    throw new InvalidOperationException($"No se encontró la nota con Id: {notaId}");
+
+                var notaImagenes = await ObtenerImagenesPorEntidadEIdAsync(TipoEntidad.Nota, notaId);
+
+                if (confirmarBorrado)
+                {
+                    string texto = "¿Seguro que quieres borrar esta nota?";
+
+                    if (notaImagenes != null)
+                    {
+                        if (notaImagenes.Count > 0)
+                            texto = "Hay algunas imágenes asociadas a esta nota. " + texto;
+                    }
+
+                    bool confirmacion = await _dialogService.ShowAlertAsync(
+                        "Confirmar borrado",
+                        texto,
+                        "Sí",
+                        "No");
+                    if (!confirmacion)
+                        return 0; // Cancelar el borrado si el usuario no confirma      
+                }
+
                 if (notaImagenes != null)
                     foreach (Foto imagenNota in notaImagenes)
                         await EliminarImagenAsync(imagenNota.Id, false);
+
+                await DesasignarEtiquetasANotaAsync(notaId);
+
                 return await _db.DeleteAsync<Nota>(notaId);
             }
             catch (Exception ex)
@@ -338,31 +334,32 @@ namespace GuiaBakio.Services
             if (imagen.Blob is null)
                 throw new ArgumentException($"La imagen no puede ser null. {nameof(imagen.Blob)}");
             if (imagen.Blob.Length == 0)
-                throw new ArgumentException("La imagen no puede estar vacía.", nameof(imagen.Blob));
+                throw new ArgumentException($"La imagen no puede estar vacía. {nameof(imagen.Blob)}");
             if (string.IsNullOrWhiteSpace(imagen.CreadorId))
                 throw new ArgumentException($"El Id del usuario no puede estar vacío. {nameof(imagen.CreadorId)}");
             if ((imagen.TipoDeEntidad != TipoEntidad.Localidad && imagen.TipoDeEntidad != TipoEntidad.Nota))
-                throw new ArgumentException("El tipo de entidad (localidad, aparatado o nota) es incorrecto.", nameof(imagen.TipoDeEntidad));
+                throw new ArgumentException($"El tipo de entidad (localidad, aparatado o nota) es incorrecto. {nameof(imagen.TipoDeEntidad)}");
 
-
-            switch (imagen.TipoDeEntidad)
-            {
-                case TipoEntidad.Localidad:
-                    bool localidadExiste = await ExisteLocalidadConIdAsync(imagen.EntidadId);
-                    if (!localidadExiste)
-                        throw new InvalidOperationException($"La localidad con Id '{imagen.EntidadId}' no existe.");
-                    break;
-                case TipoEntidad.Nota:
-                    bool notaExiste = await ExisteNotaConIdAsync(imagen.EntidadId);
-                    if (!notaExiste)
-                        throw new InvalidOperationException($"La nota con Id '{imagen.EntidadId}' no existe.");
-                    break;
-                default:
-                    throw new ArgumentException($"El tipo de entidad (localidad, aparatado o nota) es incorrecto. {nameof(imagen.TipoDeEntidad)}");
-            }
 
             try
             {
+                switch (imagen.TipoDeEntidad)
+                {
+                    case TipoEntidad.Localidad:
+                        bool localidadExiste = await ExisteLocalidadConIdAsync(imagen.EntidadId);
+                        if (!localidadExiste)
+                            throw new InvalidOperationException($"La localidad con Id '{imagen.EntidadId}' no existe.");
+                        break;
+                    case TipoEntidad.Nota:
+                        bool notaExiste = await ExisteNotaConIdAsync(imagen.EntidadId);
+                        if (!notaExiste)
+                            throw new InvalidOperationException($"La nota con Id '{imagen.EntidadId}' no existe.");
+                        break;
+                    default:
+                        throw new ArgumentException($"El tipo de entidad (localidad, aparatado o nota) es incorrecto. {nameof(imagen.TipoDeEntidad)}");
+                }
+
+
                 await _db.InsertAsync(imagen);
                 return imagen.Id;
             }
@@ -377,11 +374,13 @@ namespace GuiaBakio.Services
 
             return await _db.FindAsync<Foto>(imagenId);
         }
-        public async Task<List<Foto>> ObtenerImagenesPorEntidadAsync(TipoEntidad tipoEntidad, string entidadId)
+        public async Task<List<Foto>> ObtenerImagenesPorEntidadEIdAsync(TipoEntidad tipoEntidad, string entidadId)
         {
-            if (string.IsNullOrWhiteSpace(entidadId)) throw new ArgumentNullException(nameof(entidadId), "El Id de la localidad o nota no puede estar vacío.");
+            if (string.IsNullOrWhiteSpace(entidadId))
+                throw new ArgumentNullException(nameof(entidadId), "El Id de la localidad o nota no puede estar vacío.");
             if (tipoEntidad != TipoEntidad.Localidad && tipoEntidad != TipoEntidad.Nota)
-                throw new ArgumentException("El tipo de entidad (localidad, aparatado o nota) es incorrecto.", nameof(tipoEntidad));
+                throw new ArgumentException("El tipo de entidad (localidad o nota) es incorrecto.", nameof(tipoEntidad));
+
             return await _db.Table<Foto>()
                             .Where(a => a.TipoDeEntidad == tipoEntidad && a.EntidadId == entidadId)
                             .ToListAsync();
@@ -390,20 +389,21 @@ namespace GuiaBakio.Services
         {
             if (string.IsNullOrWhiteSpace(imagenId)) throw new ArgumentNullException(nameof(imagenId), "El Id de la imagen no puede estar vacío.");
 
-            _ = await _db.FindAsync<Foto>(imagenId) ?? throw new InvalidOperationException("No se encontró la imagen.");
-
-            if (confirmarBorrado)
-            {
-                bool confirmacion = await _dialogService.ShowAlertAsync(
-                    "Confirmar borrado",
-                    "¿Seguro que quieres borrar esta imagen?",
-                    "Sí",
-                    "No");
-                if (!confirmacion)
-                    return 0; // Cancelar el borrado si el usuario no confirma      
-            }
             try
             {
+                _ = await _db.FindAsync<Foto>(imagenId) ?? throw new InvalidOperationException($"No se encontró la imagen con Id: {imagenId}");
+
+                if (confirmarBorrado)
+                {
+                    bool confirmacion = await _dialogService.ShowAlertAsync(
+                        "Confirmar borrado",
+                        "¿Seguro que quieres borrar esta imagen?",
+                        "Sí",
+                        "No");
+                    if (!confirmacion)
+                        return 0; // Cancelar el borrado si el usuario no confirma      
+                }
+
                 return await _db.DeleteAsync<Foto>(imagenId);
             }
             catch (Exception ex)
@@ -424,11 +424,12 @@ namespace GuiaBakio.Services
             if (string.IsNullOrWhiteSpace(usuarioId))
                 throw new ArgumentNullException(nameof(usuarioId), "El Id del usuario no puede estar vacío.");
 
-            bool existeEtiqueta = await ExisteEtiquetaConNombreAsync(nombre);
-            if (existeEtiqueta)
-                throw new InvalidOperationException("Ya existe una etiqueta con ese nombre.");
             try
             {
+                bool existeEtiqueta = await ExisteEtiquetaConNombreAsync(nombre);
+                if (existeEtiqueta)
+                    throw new InvalidOperationException($"Ya existe una etiqueta con el nombre: {nombre}");
+
                 Etiqueta etiqueta = new(nombre, icono, usuarioId);
                 await _db.InsertAsync(etiqueta);
                 return etiqueta.Id;
@@ -442,13 +443,14 @@ namespace GuiaBakio.Services
         {
             if (string.IsNullOrWhiteSpace(nombre))
                 throw new ArgumentException("El nombre de la etiqueta es obligatorio.", nameof(nombre));
+
             nombre = MisUtils.NormalizarTexto(nombre).Trim();
             var etiqueta = await _db.Table<Etiqueta>()
-                                    .Where(a => a.Nombre.ToLower() == nombre.ToLower())
+                                    .Where(a => a.Nombre.Equals(nombre, StringComparison.CurrentCultureIgnoreCase))
                                     .FirstOrDefaultAsync();
             return etiqueta != null;
         }
-        public async Task<List<Etiqueta>> ObtenerEtiquetasAsync()
+        public async Task<List<Etiqueta>> ObtenerTodasLasEtiquetasAsync()
         {
             return await _db.Table<Etiqueta>().ToListAsync();
         }
@@ -457,26 +459,36 @@ namespace GuiaBakio.Services
             if (string.IsNullOrWhiteSpace(notaId))
                 throw new ArgumentNullException(nameof(notaId), "El Id de la nota no puede estar vacío.");
 
-            var nota = await _db.FindAsync<Nota>(notaId) ?? throw new InvalidOperationException("No se encontró la nota.");
+            try
+            {
+                bool existeNota = await ExisteLocalidadConIdAsync(notaId);
+                if (!existeNota)
+                    throw new InvalidOperationException($"No se encontró la nota con Id: {notaId}");
 
-            // Obtener los IDs de etiquetas asociadas a la nota
-            var relaciones = await _db.Table<NotaEtiqueta>()
-                                     .Where(ne => ne.NotaId == notaId)
-                                     .ToListAsync();
+                // Obtener los IDs de etiquetas asociadas a la nota
+                var relaciones = await _db.Table<NotaEtiqueta>()
+                                         .Where(ne => ne.NotaId == notaId)
+                                         .ToListAsync();
 
-            var etiquetaIds = relaciones.Select(r => r.EtiquetaId).ToList();
+                var etiquetaIds = relaciones.Select(r => r.EtiquetaId).ToList();
 
-            // Obtener las etiquetas correspondientes
-            var etiquetas = await _db.Table<Etiqueta>()
-                                    .Where(e => etiquetaIds.Contains(e.Id))
-                                    .ToListAsync();
+                // Obtener las etiquetas correspondientes
+                var etiquetas = await _db.Table<Etiqueta>()
+                                        .Where(e => etiquetaIds.Contains(e.Id))
+                                        .ToListAsync();
 
-            return etiquetas;
+                return etiquetas;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Hubo un problema al obtener las etiquetas de la nota. {ex.Message}");
+            }
         }
         public async Task<Etiqueta> ObtenerEtiquetaPorIdAsync(string etiquetaId)
         {
             if (string.IsNullOrWhiteSpace(etiquetaId))
                 throw new ArgumentNullException(nameof(etiquetaId), "El Id de la etiqueta no puede estar vacío.");
+
             return await _db.FindAsync<Etiqueta>(etiquetaId);
         }
         public async Task ActualizarEtiquetaAsync(Etiqueta etiqueta)
@@ -484,7 +496,10 @@ namespace GuiaBakio.Services
             if (etiqueta == null)
                 throw new ArgumentNullException(nameof(etiqueta), "La etiqueta no puede ser nula.");
             if (string.IsNullOrWhiteSpace(etiqueta.Nombre))
-                throw new ArgumentException("El nuevo nombre de la etiqueta es obligatorio.", nameof(etiqueta.Nombre));
+                throw new ArgumentException($"El nuevo nombre de la etiqueta es obligatorio. {nameof(etiqueta.Nombre)}");
+            if (string.IsNullOrWhiteSpace(etiqueta.Id))
+                throw new ArgumentException($"El Id de la etiqueta no puede estar vacío. {nameof(etiqueta.Id)}");
+
             try
             {
                 await _db.UpdateAsync(etiqueta);
@@ -499,20 +514,21 @@ namespace GuiaBakio.Services
             if (string.IsNullOrWhiteSpace(etiquetaId))
                 throw new ArgumentNullException(nameof(etiquetaId), "El Id de la etiqueta no puede estar vacío.");
 
-            _ = await ObtenerEtiquetaPorIdAsync(etiquetaId) ?? throw new InvalidOperationException("No se encontró la etiqueta.");
-
-            if (confirmarBorrado)
-            {
-                bool confirmacion = await _dialogService.ShowAlertAsync(
-                    "Confirmar borrado",
-                    "¿Seguro que quieres borrar esta etiqueta?",
-                    "Sí",
-                    "No");
-                if (!confirmacion)
-                    return 0; // Cancelar el borrado si el usuario no confirma      
-            }
             try
             {
+                _ = await ObtenerEtiquetaPorIdAsync(etiquetaId) ?? throw new InvalidOperationException("No se encontró la etiqueta.");
+
+                if (confirmarBorrado)
+                {
+                    bool confirmacion = await _dialogService.ShowAlertAsync(
+                        "Confirmar borrado",
+                        "¿Seguro que quieres borrar esta etiqueta?",
+                        "Sí",
+                        "No");
+                    if (!confirmacion)
+                        return 0; // Cancelar el borrado si el usuario no confirma      
+                }
+
                 return await _db.DeleteAsync<Etiqueta>(etiquetaId);
             }
             catch (Exception ex)
@@ -525,10 +541,12 @@ namespace GuiaBakio.Services
             if (string.IsNullOrWhiteSpace(notaId))
                 throw new ArgumentNullException(nameof(notaId), "El Id de la nota no puede estar vacío.");
 
-            var nota = await _db.FindAsync<Nota>(notaId) ?? throw new InvalidOperationException("No se encontró la nota.");
-
             try
             {
+                bool existeNota = await ExisteNotaConIdAsync(notaId);
+                if (!existeNota)
+                    throw new InvalidOperationException($"No se encontró la nota con Id: {notaId}");
+
                 var relaciones = await _db.Table<NotaEtiqueta>()
                                          .Where(ne => ne.NotaId == notaId)
                                          .ToListAsync();
@@ -546,13 +564,13 @@ namespace GuiaBakio.Services
         {
             if (string.IsNullOrWhiteSpace(notaId))
                 throw new ArgumentNullException(nameof(notaId), "El Id de la nota no puede estar vacío.");
-
-            var nota = await _db.FindAsync<Nota>(notaId) ?? throw new InvalidOperationException("No se encontró la nota.");
-
             if (listaEtiquetas == null || listaEtiquetas.Count == 0)
                 return; // No hay etiquetas para asignar, salir del método
+
             try
             {
+                _ = await _db.FindAsync<Nota>(notaId) ?? throw new InvalidOperationException($"No se encontró la nota con Id: {notaId}");
+
                 foreach (var etiqueta in listaEtiquetas)
                 {
                     var relacionExistente = await _db.Table<NotaEtiqueta>()
@@ -580,11 +598,12 @@ namespace GuiaBakio.Services
             if (string.IsNullOrWhiteSpace(nombre))
                 throw new ArgumentNullException(nameof(nombre), "El nombre del usuario es obligatorio.");
 
-            bool existeUsuario = (await ObtenerUsuarioPorNombreAsync(nombre)) != null;
-            if (existeUsuario)
-                throw new InvalidOperationException("Ya existe un usuario con ese nombre.");
             try
             {
+                bool existeUsuario = (await ObtenerUsuarioPorNombreAsync(nombre)) != null;
+                if (existeUsuario)
+                    throw new InvalidOperationException("Ya existe un usuario con ese nombre.");
+
                 Usuario usuario = new(nombre);
                 await _db.InsertAsync(usuario);
                 return usuario.Id;
@@ -598,19 +617,24 @@ namespace GuiaBakio.Services
         {
             if (string.IsNullOrWhiteSpace(nombre))
                 throw new ArgumentException("El nombre del usuario es obligatorio.", nameof(nombre));
-            nombre = MisUtils.NormalizarTexto(nombre).Trim();
-            var usuario = await _db.Table<Usuario>()
-                                    .Where(a => a.Nombre.Equals(nombre, StringComparison.CurrentCultureIgnoreCase))
-                                    .FirstOrDefaultAsync();
-            return usuario;
-        }
 
+            try
+            {
+                nombre = MisUtils.NormalizarTexto(nombre).Trim();
+                var usuario = await _db.Table<Usuario>()
+                                        .Where(a => a.Nombre.Equals(nombre, StringComparison.CurrentCultureIgnoreCase))
+                                        .FirstOrDefaultAsync();
+                return usuario;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Hubo un problema al obtener el usuario. {ex.Message}");
+            }
+        }
         public async Task<Usuario> ObtenerUsuarioPorIdAsync(string usuarioId)
         {
             if (string.IsNullOrWhiteSpace(usuarioId)) throw new ArgumentNullException(nameof(usuarioId), "El Id del usuario no puede estar vacío.");
-            return await _db.Table<Usuario>()
-                            .Where(a => a.Id == usuarioId)
-                            .FirstOrDefaultAsync();
+            return await _db.FindAsync<Usuario>(usuarioId);
         }
 
         #endregion

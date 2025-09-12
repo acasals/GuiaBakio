@@ -14,12 +14,15 @@ namespace GuiaBakio.Models
         public bool Sincronizado { get; set; } = false;
 
 
-        public Etiqueta(string nombre, string? icono, string usuarioId)
+        public Etiqueta(string nombre, string icono, string usuarioId)
         {
             if (string.IsNullOrWhiteSpace(nombre))
                 throw new ArgumentNullException(nameof(nombre), "El nombre de la etiqueta es obligatorio.");
             if (string.IsNullOrWhiteSpace(usuarioId))
                 throw new ArgumentNullException(nameof(usuarioId), "El ID del usuario no puede estar vacío.");
+            if (string.IsNullOrWhiteSpace(icono))
+                throw new ArgumentNullException(nameof(icono), "El icono de la etiqueta no puede estar vacío.");
+
             Id = Guid.NewGuid().ToString();
             Nombre = nombre;
             Icono = icono;
