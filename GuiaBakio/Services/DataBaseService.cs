@@ -87,13 +87,19 @@ namespace GuiaBakio.Services
             nombreLocalidad = MisUtils.NormalizarTexto(nombreLocalidad).Trim();
 
             var _localidad = await _db.Table<Localidad>()
-                                    .Where(a => a.Nombre.Equals(nombreLocalidad, StringComparison.CurrentCultureIgnoreCase))
+                                    .Where(a => a.Nombre.ToLower() == nombreLocalidad.ToLower())
                                     .FirstOrDefaultAsync();
             return _localidad != null;
         }
         public async Task<List<Localidad>> ObtenerLocalidadesAsync()
         {
             return await _db.Table<Localidad>().ToListAsync();
+        }
+        public async Task<Localidad> ObtenerLocalidadPorIdAsync(string localidadId)
+        {
+            if (string.IsNullOrWhiteSpace(localidadId))
+                throw new ArgumentNullException(nameof(localidadId), "El Id de la localidad no puede estar vacío.");
+            return await _db.FindAsync<Localidad>(localidadId);
         }
         public async Task<Localidad?> ObtenerLocalidadPorNombreAsync(string nombreLocalidad)
         {
@@ -102,7 +108,7 @@ namespace GuiaBakio.Services
 
             nombreLocalidad = MisUtils.NormalizarTexto(nombreLocalidad).Trim();
             return await _db.Table<Localidad>()
-                            .Where(l => l.Nombre.Equals(nombreLocalidad, StringComparison.CurrentCultureIgnoreCase))
+                            .Where(l => l.Nombre.ToLower() == nombreLocalidad.ToLower())
                                      .FirstOrDefaultAsync();
         }
         public async Task ActualizarLocalidadAsync(Localidad? localidad)
@@ -137,7 +143,7 @@ namespace GuiaBakio.Services
 
             try
             {
-                var localidadImagenes = await ObtenerImagenesPorEntidadEIdAsync(TipoEntidad.Localidad, localidadId);
+                var localidadImagenes = await ObtenerImagenesPorEntidadAsync(TipoEntidad.Localidad, localidadId);
                 if (confirmarBorrado)
                 {
                     string texto = "¿Seguro que quieres borrar esta localidad?";
@@ -214,7 +220,7 @@ namespace GuiaBakio.Services
 
             titulo = MisUtils.NormalizarTexto(titulo).Trim();
             var nota = await _db.Table<Nota>()
-                                .Where(n => n.Titulo.Equals(titulo, StringComparison.CurrentCultureIgnoreCase)
+                                .Where(n => n.Titulo.ToLower() == titulo.ToLower()
                                          && n.LocalidadId == localidadId)
                                 .FirstOrDefaultAsync();
             return nota != null;
@@ -289,7 +295,7 @@ namespace GuiaBakio.Services
                 if (!existeNota)
                     throw new InvalidOperationException($"No se encontró la nota con Id: {notaId}");
 
-                var notaImagenes = await ObtenerImagenesPorEntidadEIdAsync(TipoEntidad.Nota, notaId);
+                var notaImagenes = await ObtenerImagenesPorEntidadAsync(TipoEntidad.Nota, notaId);
 
                 if (confirmarBorrado)
                 {
@@ -374,7 +380,7 @@ namespace GuiaBakio.Services
 
             return await _db.FindAsync<Foto>(imagenId);
         }
-        public async Task<List<Foto>> ObtenerImagenesPorEntidadEIdAsync(TipoEntidad tipoEntidad, string entidadId)
+        public async Task<List<Foto>> ObtenerImagenesPorEntidadAsync(TipoEntidad tipoEntidad, string entidadId)
         {
             if (string.IsNullOrWhiteSpace(entidadId))
                 throw new ArgumentNullException(nameof(entidadId), "El Id de la localidad o nota no puede estar vacío.");
@@ -446,7 +452,7 @@ namespace GuiaBakio.Services
 
             nombre = MisUtils.NormalizarTexto(nombre).Trim();
             var etiqueta = await _db.Table<Etiqueta>()
-                                    .Where(a => a.Nombre.Equals(nombre, StringComparison.CurrentCultureIgnoreCase))
+                                    .Where(a => a.Nombre.ToLower() == nombre.ToLower())
                                     .FirstOrDefaultAsync();
             return etiqueta != null;
         }
@@ -461,7 +467,7 @@ namespace GuiaBakio.Services
 
             try
             {
-                bool existeNota = await ExisteLocalidadConIdAsync(notaId);
+                bool existeNota = await ExisteNotaConIdAsync(notaId);
                 if (!existeNota)
                     throw new InvalidOperationException($"No se encontró la nota con Id: {notaId}");
 
@@ -622,7 +628,7 @@ namespace GuiaBakio.Services
             {
                 nombre = MisUtils.NormalizarTexto(nombre).Trim();
                 var usuario = await _db.Table<Usuario>()
-                                        .Where(a => a.Nombre.Equals(nombre, StringComparison.CurrentCultureIgnoreCase))
+                                        .Where(a => a.Nombre.ToLower() == nombre.ToLower())
                                         .FirstOrDefaultAsync();
                 return usuario;
             }
