@@ -22,7 +22,7 @@ namespace GuiaBakio.ViewModels
         public IRelayCommand EditarEtiquetasAsyncCommand { get; }
         public IRelayCommand<Foto?> ImagenTocadaAsyncCommand { get; }
 
-        private Usuario? usuario;
+        private Usuario usuario;
 
         public NotaViewModel(
             DataBaseService dbService,
@@ -56,7 +56,7 @@ namespace GuiaBakio.ViewModels
         private string titulo;
 
         [ObservableProperty]
-        private int notaId;
+        private string notaId;
 
         [ObservableProperty]
         private Nota? nota;
@@ -82,9 +82,9 @@ namespace GuiaBakio.ViewModels
         [ObservableProperty]
         private ObservableCollection<Etiqueta> etiquetas = new();
 
-        public async Task CargarDatosAsync(int notaId)
+        public async Task CargarDatosAsync(string notaId)
         {
-            if (notaId <= 0)
+            if (string.IsNullOrWhiteSpace(notaId))
             {
                 throw new ArgumentNullException(nameof(notaId), "La Id de la nota debe ser mayor que 0.");
             }
@@ -193,9 +193,9 @@ namespace GuiaBakio.ViewModels
                 }
                 miImagen.EntidadId = NotaId;
                 miImagen.TipoDeEntidad = TipoEntidad.Nota;
-                miImagen.CreadorId = usuario?.Id ?? 0;
-                int imagenId = await _dbService.InsertarImagensync(miImagen);
-                if (imagenId > 0)
+                miImagen.CreadorId = usuario.Id;
+                string imagenId = await _dbService.InsertarImagensync(miImagen);
+                if (!String.IsNullOrWhiteSpace(imagenId))
                 {
                     miImagen.Id = imagenId;
                     Imagenes.Add(miImagen);

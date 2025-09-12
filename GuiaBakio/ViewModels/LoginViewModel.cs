@@ -35,15 +35,32 @@ namespace GuiaBakio.ViewModels
                 await _dialogService.ShowAlertAsync("Error", "El nombre de usuario no puede estar vacío. Por favor, introduce un nombre.", "OK");
                 return;
             }
-            var usuario = await _dbService.ObtenerUsuarioPorNombreAsync(NombreUsuario);
-            if (usuario != null)
+
+            try
             {
-                var response = await _dialogYesNoService.ShowAlertAsync("Error", $"El nombre del usuario {NombreUsuario} ya existe en otro dispositivo. Por favor, elige otro, a menos de que seas tú seguro.", "Aceptar", "Cancelar");
-                if (response == true)
+                var usuario = await _dbService.ObtenerUsuarioPorNombreAsync(NombreUsuario);
+                if (usuario != null)
+                {
+                    var response = await _dialogYesNoService.ShowAlertAsync("Error", $"El nombre del usuario {NombreUsuario} ya existe en otro dispositivo. Por favor, elige otro, a menos de que seas tú seguro.", "Aceptar", "Cancelar");
+                    if (response == true)
+                    {
+                        try
+                        {
+                            Preferences.Set("UsuarioId", usuario.Id);
+                            await Shell.Current.GoToAsync("mainPage");
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new InvalidOperationException("No se pudo guardar el usuario.", ex);
+                        }
+                    }
+                }
+                else
                 {
                     try
                     {
-                        Preferences.Set("UsuarioId", usuario.Id);
+                        string usuarioId = await _dbService.InsertarUsuarioAsync(NombreUsuario);
+                        Preferences.Set("UsuarioId", usuarioId);
                         await Shell.Current.GoToAsync("mainPage");
                     }
                     catch (Exception ex)
@@ -52,18 +69,9 @@ namespace GuiaBakio.ViewModels
                     }
                 }
             }
-            else
+            catch (Exception ex)
             {
-                try
-                {
-                    int usuarioId = await _dbService.InsertarUsuarioAsync(NombreUsuario);
-                    Preferences.Set("UsuarioId", usuarioId);
-                    await Shell.Current.GoToAsync("mainPage");
-                }
-                catch (Exception ex)
-                {
-                    throw new InvalidOperationException("No se pudo guardar el usuario.", ex);
-                }
+                throw new InvalidOperationException("No se pudo añadir el usuario.", ex);
             }
         }
     }

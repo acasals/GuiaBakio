@@ -9,10 +9,10 @@ public partial class NotaPage : ContentPage, IQueryAttributable
     private readonly NotaViewModel _myViewModel;
     private readonly IDialogOKService _dialogService;
 
-    private int notaId;
+    private string notaId;
     public NotaPage(NotaViewModel viewModel, IDialogOKService dialogService)
-	{
-		InitializeComponent();
+    {
+        InitializeComponent();
         _myViewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel)); ;
         _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService), "El servicio de diálogo no puede ser nulo.");
         AppForegroundNotifier.AppResumed += OnAppResumed;
@@ -20,7 +20,9 @@ public partial class NotaPage : ContentPage, IQueryAttributable
 
     public async void ApplyQueryAttributes(IDictionary<string, object> query)
     {
-        if (query.TryGetValue("Id", out var value) && int.TryParse(value?.ToString(), out int id))
+        string? id = query["Id"]?.ToString();
+
+        if (!string.IsNullOrWhiteSpace(id))
         {
             notaId = id;
             try

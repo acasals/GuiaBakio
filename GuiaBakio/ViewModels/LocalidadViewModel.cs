@@ -17,7 +17,7 @@ namespace GuiaBakio.ViewModels
         private readonly IAddItemPopupService _addItemPopupService;
         private readonly IDialogOKService _dialogService;
         private readonly INavigationDataService _navigationDataService;
-        private readonly Usuario? usuario;
+        private readonly Usuario usuario;
 
         public IRelayCommand EditarTextoAsyncCommand { get; }
         public IRelayCommand AgregarNotaAsyncCommand { get; }
@@ -61,7 +61,7 @@ namespace GuiaBakio.ViewModels
         }
 
         [ObservableProperty]
-        private int localidadId;
+        private string localidadId;
 
         [ObservableProperty]
         private Localidad? localidad;
@@ -96,16 +96,16 @@ namespace GuiaBakio.ViewModels
         [ObservableProperty]
         private bool hayImagenes;
 
-        public async Task CargarDatosAsync(int localidadId)
+        public async Task CargarDatosAsync(string localidadId)
         {
-            if (localidadId <= 0)
+            if (string.IsNullOrWhiteSpace(localidadId))
             {
-                throw new ArgumentNullException(nameof(localidadId), "La Id de localidad debe ser mayor que 0.");
+                throw new ArgumentNullException(nameof(localidadId), "La Id de localidad no puede estar vacía.");
             }
             LocalidadId = localidadId;
             try
             {
-                Localidad = await _dbService.ObtenerLocalidadAsync(LocalidadId);
+                Localidad = await _dbService.ObtenerLocalidadPorIdAsync(LocalidadId);
                 Notas = new ObservableCollection<Nota>(
                     await _dbService.ObtenerNotasPorLocalidadAsync(LocalidadId));
                 Etiquetas = new ObservableCollection<Etiqueta>(
@@ -217,7 +217,7 @@ namespace GuiaBakio.ViewModels
                     return;
                 }
                 var id = await _dbService.InsertarNotaAsync(nuevaNota, Localidad.Id, usuario.Id);
-                if (id <= 0)
+                if (string.IsNullOrWhiteSpace(id))
                 {
                     await _dialogService.ShowAlertAsync("Error", "No se pudo añadir la nota.", "OK");
                     return;
@@ -255,9 +255,9 @@ namespace GuiaBakio.ViewModels
                 }
                 miImagen.EntidadId = LocalidadId;
                 miImagen.TipoDeEntidad = TipoEntidad.Localidad;
-                miImagen.CreadorId = usuario?.Id ?? 0;
-                int imagenId = await _dbService.InsertarImagensync(miImagen);
-                if (imagenId > 0)
+                miImagen.CreadorId = usuario.Id;
+                string imagenId = await _dbService.InsertarImagensync(miImagen);
+                if (!String.IsNullOrWhiteSpace(imagenId))
                 {
                     miImagen.Id = imagenId;
                     Imagenes.Add(miImagen);

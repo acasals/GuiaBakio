@@ -10,7 +10,7 @@ public partial class LocalidadPage : ContentPage, IQueryAttributable
     private readonly LocalidadViewModel _myViewModel;
     private readonly IDialogOKService _dialogService;
 
-    private int localidadId;
+    private string localidadId;
 
     public LocalidadPage(LocalidadViewModel viewModel, IDialogOKService dialogService)
     {
@@ -21,7 +21,9 @@ public partial class LocalidadPage : ContentPage, IQueryAttributable
     }
     public async void ApplyQueryAttributes(IDictionary<string, object> query)
     {
-        if (query.TryGetValue("Id", out var value) && int.TryParse(value?.ToString(), out int id))
+        string? id = query["Id"]?.ToString();
+
+        if (!string.IsNullOrWhiteSpace(id))
         {
             localidadId = id;
             try
