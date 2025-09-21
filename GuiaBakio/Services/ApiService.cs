@@ -116,6 +116,7 @@ namespace GuiaBakio.Services
                     etiqueta.Sincronizado = true;
                     await db.UpdateAsync(etiqueta);
                 }
+                Debug.WriteLine("Etiquetas subidas correctamente.");
                 return true;
             }
             catch (Exception ex)
@@ -147,6 +148,7 @@ namespace GuiaBakio.Services
                     localidad.Sincronizado = true;
                     await db.UpdateAsync(localidad);
                 }
+                Debug.WriteLine("Localidades subidas correctamente.");
                 return true;
             }
             catch (Exception ex)
@@ -178,6 +180,7 @@ namespace GuiaBakio.Services
                     nota.Sincronizado = true;
                     await db.UpdateAsync(nota);
                 }
+                Debug.WriteLine("Notas subidas correctamente.");
                 return true;
             }
             catch (Exception ex)
@@ -209,6 +212,7 @@ namespace GuiaBakio.Services
                     notaEtiqueta.Sincronizado = true;
                     await db.UpdateAsync(notaEtiqueta);
                 }
+                Debug.WriteLine("NotaEtiquetas subidas correctamente.");
                 return true;
             }
             catch (Exception ex)
@@ -240,6 +244,7 @@ namespace GuiaBakio.Services
                     foto.Sincronizado = true;
                     await db.UpdateAsync(foto);
                 }
+                Debug.WriteLine("Fotos subidas correctamente.");
                 return true;
             }
             catch (Exception ex)
@@ -270,6 +275,7 @@ namespace GuiaBakio.Services
                         usuario.Sincronizado = true;
                         await db.UpdateAsync(usuario);
                     }
+                Debug.WriteLine("Usuarios subidos correctamente.");
                 return true;
             }
             catch (Exception ex)
@@ -302,6 +308,7 @@ namespace GuiaBakio.Services
 
                 foreach (var item in entidadesEliminadas)
                     await db.DeleteAsync(item);
+                Debug.WriteLine("Subida lista de localidades eliminadas correctamente.");
                 return true;
 
             }
@@ -331,6 +338,7 @@ namespace GuiaBakio.Services
 
                 foreach (var item in entidadesEliminadas)
                     await db.DeleteAsync(item);
+                Debug.WriteLine("Subida lista de notas eliminadas correctamente.");
                 return true;
             }
             catch (Exception ex)
@@ -359,6 +367,7 @@ namespace GuiaBakio.Services
 
                 foreach (var item in entidadesEliminadas)
                     await db.DeleteAsync(item);
+                Debug.WriteLine("Subida lista de fotos eliminadas correctamente.");
                 return true;
             }
             catch (Exception ex)
@@ -387,6 +396,7 @@ namespace GuiaBakio.Services
 
                 foreach (var item in entidadesEliminadas)
                     await db.DeleteAsync(item);
+                Debug.WriteLine("Subida lista de etiquetas eliminadas correctamente.");
                 return true;
             }
             catch (Exception ex)
@@ -414,6 +424,7 @@ namespace GuiaBakio.Services
                     return false;
                 foreach (var item in entidadesEliminadas)
                     await db.DeleteAsync(item);
+                Debug.WriteLine("Subida lista de notaEtiquetas eliminadas correctamente.");
                 return true;
             }
             catch (Exception ex)
@@ -464,6 +475,7 @@ namespace GuiaBakio.Services
                         FechaModificacion = DateTime.UtcNow
                     });
                 }
+                Debug.WriteLine("Usuarios sincronizados correctamente.");
                 return true;
             }
             catch (Exception ex)
@@ -509,6 +521,7 @@ namespace GuiaBakio.Services
                         FechaModificacion = DateTime.UtcNow
                     });
                 }
+                Debug.WriteLine("Localidades sincronizadas correctamente.");
                 return true;
             }
             catch (Exception ex)
@@ -554,6 +567,7 @@ namespace GuiaBakio.Services
                         FechaModificacion = DateTime.UtcNow
                     });
                 }
+                Debug.WriteLine("Notas sincronizadas correctamente.");
                 return true;
             }
             catch (Exception ex)
@@ -600,6 +614,7 @@ namespace GuiaBakio.Services
                         FechaModificacion = DateTime.UtcNow
                     });
                 }
+                Debug.WriteLine("Etiquetas sincronizadas correctamente.");
                 return true;
             }
             catch (Exception ex)
@@ -648,6 +663,7 @@ namespace GuiaBakio.Services
                         FechaModificacion = DateTime.UtcNow
                     });
                 }
+                Debug.WriteLine("Fotos sincronizadas correctamente.");
                 return true;
             }
             catch (Exception ex)
@@ -694,6 +710,7 @@ namespace GuiaBakio.Services
                         FechaModificacion = DateTime.UtcNow
                     });
                 }
+                Debug.WriteLine("NotaEtiquetas sincronizadas correctamente.");
                 return false;
 
             }
