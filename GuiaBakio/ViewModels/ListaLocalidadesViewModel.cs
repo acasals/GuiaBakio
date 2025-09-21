@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using GuiaBakio.Models;
 using GuiaBakio.Services;
 using GuiaBakio.Services.Interfaces;
+using SQLite;
 using System.Collections.ObjectModel;
 
 namespace GuiaBakio.ViewModels
@@ -13,7 +14,10 @@ namespace GuiaBakio.ViewModels
         private readonly IAddItemPopupService _addItemPopupService;
         private readonly IDialogOKService _dialogService;
         private readonly INavigationDataService _navigationDataService;
+        private readonly SQLiteAsyncConnection _db;
+        private readonly ApiService _apiService;
 
+        private DateTime? ultimaSincronizacion;
         private string _usuarioId;
         private string _usuarioName;
 
@@ -26,13 +30,18 @@ namespace GuiaBakio.ViewModels
             DataBaseService dbService,
             IAddItemPopupService addItemPopupService,
             IDialogOKService dialogService,
-            INavigationDataService navigationDataService)
+            INavigationDataService navigationDataService,
+            SQLiteAsyncConnection db,
+            ApiService apiService)
         {
             AddLocalidadAsyncCommand = new AsyncRelayCommand(AddLocalidadAsync);
             _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
             _addItemPopupService = addItemPopupService ?? throw new ArgumentNullException(nameof(addItemPopupService));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
             _navigationDataService = navigationDataService ?? throw new ArgumentNullException(nameof(navigationDataService));
+            _db = db ?? throw new ArgumentNullException(nameof(db));
+            _apiService = apiService ?? throw new ArgumentNullException(nameof(apiService));
+
             _ = CheckUsuario();
         }
 
@@ -60,6 +69,41 @@ namespace GuiaBakio.ViewModels
                 throw new InvalidOperationException("No se pudo obtener el usuario.", ex);
             }
         }
+
+        public async Task OnAppearedOrResumed()
+        {
+            try
+            {
+                await CargarListaLocalidadesAsync();
+                await SincronizarSiNoRecienteAsync();
+            }
+            catch (Exception ex)
+            {
+                await _dialogService.ShowAlertAsync("Error", $"No se pudo obtener la lista de localidades: {Environment.NewLine}{ex.Message}", "OK");
+            }
+        }
+
+        private async Task SincronizarSiNoRecienteAsync()
+        {
+            if (ultimaSincronizacion == null ||
+                DateTime.UtcNow - ultimaSincronizacion > TimeSpan.FromMinutes(30))
+            {
+                string resultado = "";
+                try
+                {
+                    var estado = _db.FindAsync<EstadoSincronizacion>("Descendente");
+                    if (estado.Result == null || !estado.Result.FueExitosa)
+                        resultado = await Task.Run(() => _apiService.SincronizarDescendenteAsync());
+                }
+                catch (Exception ex)
+                {
+                    resultado = ex.Message;
+                }
+                if (resultado != "OK")
+                    await _dialogService.ShowAlertAsync("Error", $"No se pudieron sincronizar los datos con el servidor: {Environment.NewLine}{resultado}", "OK");
+            }
+        }
+
         public async Task CargarListaLocalidadesAsync()
         {
             try

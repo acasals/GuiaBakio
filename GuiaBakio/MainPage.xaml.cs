@@ -8,7 +8,9 @@ namespace GuiaBakio
     public partial class MainPage : ContentPage
     {
         private ListaLocalidadesViewModel _myViewModel;
-        public MainPage(ListaLocalidadesViewModel viewmodel)
+
+        public MainPage(
+            ListaLocalidadesViewModel viewmodel)
         {
             InitializeComponent();
             _myViewModel = viewmodel;
@@ -20,34 +22,20 @@ namespace GuiaBakio
         {
             base.OnAppearing();
 
-            try
-            {
-                await _myViewModel.CargarListaLocalidadesAsync();
-            }
-            catch (Exception ex)
-            {
-                await DisplayAlert("Error", $"No se pudo obtener la lista de localidades.\n{ex.Message}", "OK");
-            }
+            await _myViewModel.OnAppearedOrResumed();
             await MisUtils.MostrarBotonAnimado(BtnAñadir);
         }
 
         private async void OnAppResumed()
         {
-            try
-            {
-                await _myViewModel.CargarListaLocalidadesAsync();
-            }
-            catch (Exception ex)
-            {
-                await DisplayAlert("Error", $"No se pudo obtener la lista de localidades.\n{ex.Message}", "OK");
-            }
+            await _myViewModel.OnAppearedOrResumed();
             await MisUtils.MostrarBotonAnimado(BtnAñadir);
         }
 
         private async void OnLocalidadSeleccionada(object sender, SelectionChangedEventArgs e)
         {
             var localidadSeleccionada = e.CurrentSelection.FirstOrDefault() as Localidad;
-           
+
             if (localidadSeleccionada != null)
             {
                 try
