@@ -86,7 +86,7 @@ namespace GuiaBakio.ViewModels
         private async Task SincronizarSiNoRecienteAsync()
         {
             if (ultimaSincronizacion == null ||
-                DateTime.UtcNow - ultimaSincronizacion > TimeSpan.FromMinutes(30))
+                DateTime.UtcNow - ultimaSincronizacion > TimeSpan.FromMinutes(60))
             {
                 string resultado = "";
                 try
@@ -100,7 +100,24 @@ namespace GuiaBakio.ViewModels
                     resultado = ex.Message;
                 }
                 if (resultado != "OK")
-                    await _dialogService.ShowAlertAsync("Error", $"No se pudieron sincronizar los datos con el servidor: {Environment.NewLine}{resultado}", "OK");
+                    await _dialogService.ShowAlertAsync("Error", $"No se pudieron recibir los datos  del servidor: {Environment.NewLine}{resultado}", "OK");
+                else
+                {
+                    resultado = "";
+                    try
+                    {
+                        var estado = _db.FindAsync<EstadoSincronizacion>("Ascendente");
+                        if (estado.Result == null || !estado.Result.FueExitosa)
+                            resultado = await Task.Run(() => _apiService.SincronizarAscendenteAsync());
+                    }
+                    catch (Exception ex)
+                    {
+                        resultado = ex.Message;
+                    }
+                    if (resultado != "OK")
+                        await _dialogService.ShowAlertAsync("Error", $"No se pudieron subir los datos al servidor: {Environment.NewLine}{resultado}", "OK");
+                }
+                ultimaSincronizacion = DateTime.UtcNow;
             }
         }
 
