@@ -4,6 +4,7 @@ namespace GuiaBakio.Helpers
 {
     public static class ApiMapper
     {
+        #region "Conversores"
         public static LocalidadDto LocalidadToDto(Localidad localidad)
         {
             return new LocalidadDto
@@ -157,6 +158,10 @@ namespace GuiaBakio.Helpers
                 Sincronizado = true
             };
         }
+
+        #endregion
+
+
 
     }
 

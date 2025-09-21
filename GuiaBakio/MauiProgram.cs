@@ -4,6 +4,7 @@ using GuiaBakio.Services;
 using GuiaBakio.Services.Interfaces;
 using GuiaBakio.ViewModels;
 using Microsoft.Extensions.Logging;
+using SQLite;
 
 namespace GuiaBakio
 {
@@ -22,6 +23,14 @@ namespace GuiaBakio
                 fonts.AddFont("MaterialSymbolsOutlined.ttf", "MaterialSymbols");
             });
 
+            builder.Services.AddSingleton<HttpClient>();
+            builder.Services.AddSingleton<SQLiteAsyncConnection>(provider =>
+            {
+                var dbName = "GuiaBakio.db";
+                var dbPath = Path.Combine(FileSystem.AppDataDirectory, dbName);
+                return new SQLiteAsyncConnection(dbPath);
+            });
+            builder.Services.AddSingleton<ApiService>();
             builder.Services.AddSingleton<IDialogOKService, DialogOKService>();
             builder.Services.AddSingleton<IDialogYesNoService, DialogYesNoService>();
             builder.Services.AddSingleton<DataBaseService>(provider =>
