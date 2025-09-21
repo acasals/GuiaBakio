@@ -24,6 +24,8 @@ namespace GuiaBakio.Services
             await _db.CreateTableAsync<NotaEtiqueta>();
             await _db.CreateTableAsync<Usuario>();
             await _db.CreateTableAsync<EntidadEliminada>();
+            await _db.CreateTableAsync<RegistroSincronizacion>();
+            await _db.CreateTableAsync<EstadoSincronizacion>();
 
             // Crear etiquetas predeterminadas si no existen
             if (await _db.Table<Etiqueta>().CountAsync() == 0)
