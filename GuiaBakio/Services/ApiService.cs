@@ -9,14 +9,23 @@ namespace GuiaBakio.Services
 {
     public class ApiService(HttpClient httpClient, SQLiteAsyncConnection db)
     {
-        private const string BaseUrl = "https://glidercm.net/api/";
+        //private const string BaseUrl = "https://glidercm.net/api/";
+        private const string BaseUrl = "https://localhost:44332/api/";
 
         private async Task<bool> PostAsync<T>(string endpoint, List<T> payload)
         {
-            var json = JsonSerializer.Serialize(payload);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await httpClient.PostAsync(endpoint, content);
-            return response.IsSuccessStatusCode;
+            try
+            {
+                var json = JsonSerializer.Serialize(payload);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await httpClient.PostAsync(endpoint, content);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error en POST a {endpoint}. {ex.Message}");
+                return false;
+            }
         }
 
         private async Task GuardarEstadoSincronizacionAsync(TipoSincronizacion tipoSincronizacion, bool fueExitosa, string error = "")
@@ -269,12 +278,13 @@ namespace GuiaBakio.Services
                 var success = await PostAsync($"{BaseUrl}usuarios/sincronizar", dtoList);
 
                 if (!success)
+                    return false;
 
-                    foreach (var usuario in usuarios)
-                    {
-                        usuario.Sincronizado = true;
-                        await db.UpdateAsync(usuario);
-                    }
+                foreach (var usuario in usuarios)
+                {
+                    usuario.Sincronizado = true;
+                    await db.UpdateAsync(usuario);
+                }
                 Debug.WriteLine("Usuarios subidos correctamente.");
                 return true;
             }
@@ -444,11 +454,12 @@ namespace GuiaBakio.Services
             {
                 var registro = await db.FindAsync<RegistroSincronizacion>(TipoEntidad.Usuario);
                 var fechaSync = registro?.FechaModificacion ?? DateTime.MinValue;
-                var url = $"{BaseUrl}usuarios/actualizadas-desde/{fechaSync:o}";
+                var fechaCodificada = Uri.EscapeDataString(fechaSync.ToString("o"));
+                var url = $"{BaseUrl}usuarios/actualizadas-desde?fecha={fechaCodificada}";
 
                 var response = await httpClient.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
-                    return false; ;
+                    return false;
 
                 var json = await response.Content.ReadAsStringAsync();
                 var nuevosUsuarios = JsonSerializer.Deserialize<List<UsuarioDto>>(json);
@@ -490,7 +501,8 @@ namespace GuiaBakio.Services
             {
                 var registro = await db.FindAsync<RegistroSincronizacion>(TipoEntidad.Localidad);
                 var fechaSync = registro?.FechaModificacion ?? DateTime.MinValue;
-                var url = $"{BaseUrl}localidades/actualizadas-desde/{fechaSync:o}";
+                var fechaCodificada = Uri.EscapeDataString(fechaSync.ToString("o"));
+                var url = $"{BaseUrl}localidades/actualizadas-desde?fecha={fechaCodificada}";
 
                 var response = await httpClient.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
@@ -536,7 +548,8 @@ namespace GuiaBakio.Services
             {
                 var registro = await db.FindAsync<RegistroSincronizacion>(TipoEntidad.Nota);
                 var fechaSync = registro?.FechaModificacion ?? DateTime.MinValue;
-                var url = $"{BaseUrl}notas/actualizadas-desde/{fechaSync:o}";
+                var fechaCodificada = Uri.EscapeDataString(fechaSync.ToString("o"));
+                var url = $"{BaseUrl}notas/actualizadas-desde?fecha={fechaCodificada}";
 
                 var response = await httpClient.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
@@ -582,7 +595,8 @@ namespace GuiaBakio.Services
             {
                 var registro = await db.FindAsync<RegistroSincronizacion>(TipoEntidad.Etiqueta);
                 var fechaSync = registro?.FechaModificacion ?? DateTime.MinValue;
-                var url = $"{BaseUrl}etiquetas/actualizadas-desde/{fechaSync:o}";
+                var fechaCodificada = Uri.EscapeDataString(fechaSync.ToString("o"));
+                var url = $"{BaseUrl}etiquetas/actualizadas-desde?fecha={fechaCodificada}";
 
                 var response = await httpClient.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
@@ -629,7 +643,8 @@ namespace GuiaBakio.Services
             {
                 var registro = await db.FindAsync<RegistroSincronizacion>(TipoEntidad.Foto);
                 var fechaSync = registro?.FechaModificacion ?? DateTime.MinValue;
-                var url = $"{BaseUrl}fotos/actualizadas-desde/{fechaSync:o}";
+                var fechaCodificada = Uri.EscapeDataString(fechaSync.ToString("o"));
+                var url = $"{BaseUrl}fotos/actualizadas-desde?fecha={fechaCodificada}";
 
                 var response = await httpClient.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
@@ -678,7 +693,8 @@ namespace GuiaBakio.Services
             {
                 var registro = await db.FindAsync<RegistroSincronizacion>(TipoEntidad.NotaEtiqueta);
                 var fechaSync = registro?.FechaModificacion ?? DateTime.MinValue;
-                var url = $"{BaseUrl}notaetiquetas/actualizadas-desde/{fechaSync:o}";
+                var fechaCodificada = Uri.EscapeDataString(fechaSync.ToString("o"));
+                var url = $"{BaseUrl}notaetiquetas/actualizadas-desde?fecha={fechaCodificada}";
 
                 var response = await httpClient.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
@@ -711,7 +727,7 @@ namespace GuiaBakio.Services
                     });
                 }
                 Debug.WriteLine("NotaEtiquetas sincronizadas correctamente.");
-                return false;
+                return true;
 
             }
             catch (Exception ex)
