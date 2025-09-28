@@ -5,6 +5,7 @@ using GuiaBakio.Services;
 using GuiaBakio.Services.Interfaces;
 using SQLite;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 
 namespace GuiaBakio.ViewModels
 {
@@ -103,6 +104,7 @@ namespace GuiaBakio.ViewModels
                     await _dialogService.ShowAlertAsync("Error", $"No se pudieron recibir los datos  del servidor: {Environment.NewLine}{resultado}", "OK");
                 else
                 {
+                    Debug.WriteLine("Sincronización descendente correcta.");
                     resultado = "";
                     try
                     {
