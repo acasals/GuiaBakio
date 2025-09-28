@@ -17,12 +17,12 @@ namespace GuiaBakio.Services
         }
         public async Task InitTablesAsync()
         {
+            await _db.CreateTableAsync<Usuario>();
             await _db.CreateTableAsync<Localidad>();
             await _db.CreateTableAsync<Nota>();
             await _db.CreateTableAsync<Foto>();
             await _db.CreateTableAsync<Etiqueta>();
             await _db.CreateTableAsync<NotaEtiqueta>();
-            await _db.CreateTableAsync<Usuario>();
             await _db.CreateTableAsync<EntidadEliminada>();
             await _db.CreateTableAsync<RegistroSincronizacion>();
             await _db.CreateTableAsync<EstadoSincronizacion>();
@@ -32,14 +32,15 @@ namespace GuiaBakio.Services
             {
                 try
                 {
+                    var creadorId = Guid.NewGuid().ToString(); // Usuario genérico para las etiquetas predeterminadas
                     List<Etiqueta> etiquetasPredeterminadas =
                     [
-                        new Etiqueta("Comer", "restaurant","aabbccdd"),
-                        new Etiqueta("Cafetería", "emoji_food_beverage","aabbccdd"),
-                        new Etiqueta("Pintxos", "tapas", "aabbccdd"),
-                        new Etiqueta("Pasear", "hiking", "aabbccdd"),
-                        new Etiqueta("Paisaje", "landscape", "aabbccdd"),
-                        new Etiqueta("Aparcar", "local_parking", "aabbccdd"),
+                        new Etiqueta("Comer", "restaurant",creadorId),
+                        new Etiqueta("Cafetería", "emoji_food_beverage",creadorId),
+                        new Etiqueta("Pintxos", "tapas", creadorId),
+                        new Etiqueta("Pasear", "hiking", creadorId),
+                        new Etiqueta("Paisaje", "landscape", creadorId),
+                        new Etiqueta("Aparcar", "local_parking", creadorId),
                     ];
                     await _db.InsertAllAsync(etiquetasPredeterminadas);
                 }
