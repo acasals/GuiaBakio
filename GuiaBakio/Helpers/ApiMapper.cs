@@ -11,7 +11,6 @@ namespace GuiaBakio.Helpers
             {
                 Id = localidad.Id,
                 Nombre = localidad.Nombre,
-                Texto = localidad.Texto,
                 CreadorId = localidad.CreadorId,
                 FechaModificacion = localidad.FechaModificacion
             };
@@ -23,7 +22,6 @@ namespace GuiaBakio.Helpers
             {
                 Id = dto.Id,
                 Nombre = dto.Nombre,
-                Texto = dto.Texto,
                 CreadorId = dto.CreadorId,
                 FechaModificacion = dto.FechaModificacion,
                 Sincronizado = true
@@ -35,7 +33,6 @@ namespace GuiaBakio.Helpers
             return new NotaDto
             {
                 Id = nota.Id,
-                LocalidadId = nota.LocalidadId,
                 Titulo = nota.Titulo,
                 Texto = nota.Texto,
                 CreadorId = nota.CreadorId,
@@ -48,7 +45,6 @@ namespace GuiaBakio.Helpers
             return new Nota
             {
                 Id = dto.Id,
-                LocalidadId = dto.LocalidadId,
                 Titulo = dto.Titulo,
                 Texto = dto.Texto,
                 CreadorId = dto.CreadorId,
@@ -159,6 +155,28 @@ namespace GuiaBakio.Helpers
             };
         }
 
+        public static NotaLocalidadDto NotaLocalidadToDto(NotaLocalidad relacion)
+        {
+            return new NotaLocalidadDto
+            {
+                Id = relacion.Id,
+                NotaId = relacion.NotaId,
+                LocalidadId = relacion.LocalidadId,
+                FechaModificacion = relacion.FechaModificacion
+            };
+        }
+
+        public static NotaLocalidad DtoToLocalidad(NotaLocalidadDto dto)
+        {
+            return new NotaLocalidad
+            {
+                Id = dto.Id,
+                NotaId = dto.NotaId,
+                LocalidadId = dto.LocalidadId,
+                FechaModificacion = dto.FechaModificacion,
+                Sincronizado = true
+            };
+        }
         #endregion
 
 

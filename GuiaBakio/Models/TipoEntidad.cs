@@ -2,11 +2,12 @@
 {
     public enum TipoEntidad
     {
-        Localidad = 0,
+        Usuario = 0,
         Nota = 1,
-        Foto = 2,
+        Localidad = 2,
         Etiqueta = 3,
         NotaEtiqueta = 4,
-        Usuario = 5
+        NotaLocalidad = 5,
+        Foto = 6
     }
 }

@@ -3,7 +3,7 @@ using SQLite;
 
 namespace GuiaBakio.Models
 {
-    public class Localidad : ObservableObject
+    public partial class Localidad : ObservableObject
     {
         [PrimaryKey]
         public string Id { get; set; }

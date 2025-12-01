@@ -520,7 +520,6 @@ namespace GuiaBakio.Services
                             await db.InsertAsync(ApiMapper.DtoToLocalidad(localidad));
                         else if (localidad.FechaModificacion > localidadLocal.FechaModificacion)
                         {
-                            localidadLocal.Texto = localidad.Texto;
                             localidadLocal.FechaModificacion = localidad.FechaModificacion;
                             await db.UpdateAsync(localidadLocal);
                         }

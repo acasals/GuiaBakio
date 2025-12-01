@@ -12,7 +12,7 @@ namespace GuiaBakio.Models
         public bool Sincronizado { get; set; } = false;
         public string CreadorId { get; set; }
 
-        public Nota(string titulo, string localidadId, string usuarioId, string texto = "")
+        public Nota(string titulo, string usuarioId, string texto = "")
         {
             if (string.IsNullOrWhiteSpace(titulo))
                 throw new ArgumentNullException(nameof(titulo), "El Id de la nota no puede estar vacío.");
