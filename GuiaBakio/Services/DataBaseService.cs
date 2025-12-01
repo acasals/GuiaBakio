@@ -19,10 +19,11 @@ namespace GuiaBakio.Services
         {
             await _db.CreateTableAsync<Usuario>();
             await _db.CreateTableAsync<Localidad>();
-            await _db.CreateTableAsync<Nota>();
-            await _db.CreateTableAsync<Foto>();
             await _db.CreateTableAsync<Etiqueta>();
             await _db.CreateTableAsync<NotaEtiqueta>();
+            await _db.CreateTableAsync<NotaLocalidad>();
+            await _db.CreateTableAsync<Nota>();
+            await _db.CreateTableAsync<Foto>();
             await _db.CreateTableAsync<EntidadEliminada>();
             await _db.CreateTableAsync<RegistroSincronizacion>();
             await _db.CreateTableAsync<EstadoSincronizacion>();
@@ -147,16 +148,10 @@ namespace GuiaBakio.Services
 
             try
             {
-                var localidadImagenes = await ObtenerImagenesPorEntidadAsync(TipoEntidad.Localidad, localidadId);
                 if (confirmarBorrado)
                 {
                     string texto = "¿Seguro que quieres borrar esta localidad?";
 
-                    if (localidadImagenes != null)
-                    {
-                        if (localidadImagenes.Count > 0)
-                            texto = "Hay alguna(s) imagen(es) asociada(s) a esta localidad. " + texto;
-                    }
                     bool confirmacion = await _dialogService.ShowAlertAsync(
                         "Confirmar borrado",
                         texto,
@@ -166,9 +161,6 @@ namespace GuiaBakio.Services
                         return 0; // Cancelar el borrado si el usuario no confirma      
                 }
 
-                if (localidadImagenes != null)
-                    foreach (Foto imagen in localidadImagenes)
-                        await EliminarImagenAsync(imagen.Id, false);
                 return await _db.DeleteAsync<Localidad>(localidadId);
             }
             catch (Exception ex)
@@ -177,29 +169,54 @@ namespace GuiaBakio.Services
             }
         }
 
+        public async Task<List<Localidad>> ObtenerLocalidadsDeNotaAsync(string notaId)
+        {
+            if (string.IsNullOrWhiteSpace(notaId))
+                throw new ArgumentNullException(nameof(notaId), "El Id de la nota no puede estar vacío.");
+
+            try
+            {
+                bool existeNota = await ExisteNotaConIdAsync(notaId);
+                if (!existeNota)
+                    throw new InvalidOperationException($"No se encontró la nota con Id: {notaId}");
+
+                // Obtener los IDs de Localidads asociadas a la nota
+                var relaciones = await _db.Table<NotaLocalidad>()
+                                         .Where(ne => ne.NotaId == notaId)
+                                         .ToListAsync();
+
+                var LocalidadIds = relaciones.Select(r => r.LocalidadId).ToList();
+
+                // Obtener las Localidads correspondientes
+                var Localidades = await _db.Table<Localidad>()
+                                        .Where(e => LocalidadIds.Contains(e.Id))
+                                        .ToListAsync();
+
+                return Localidades;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Hubo un problema al obtener las Localidads de la nota. {ex.Message}");
+            }
+        }
+
         #endregion
 
         #region "Notas"
-        public async Task<string> InsertarNotaAsync(string titulo, string localidadId, string usuarioId, string texto = "")
+        public async Task<string> InsertarNotaAsync(string titulo, string usuarioId, string texto = "")
         {
             if (string.IsNullOrWhiteSpace(titulo))
                 throw new ArgumentNullException(nameof(titulo), "El título de la nota es obligatorio.");
-            if (string.IsNullOrWhiteSpace(localidadId))
-                throw new ArgumentNullException(nameof(localidadId), "El Id de la localidad no puede estar vacío.");
             if (string.IsNullOrWhiteSpace(usuarioId))
                 throw new ArgumentNullException(nameof(usuarioId), "El Id del usuario no puede estar vacío.");
 
-            bool existeLocalidad = await ExisteLocalidadConIdAsync(localidadId);
-            if (!existeLocalidad)
-                throw new InvalidOperationException($"No se encontró la localidad con Id: {localidadId}");
-
-            bool existeNota = await ExisteNotaPorTituloYLocalidadAsync(titulo, localidadId);
+            bool existeNota = await ExisteNotaPorTituloAsync(titulo);
             if (existeNota)
                 throw new InvalidOperationException("Ya existe una nota con ese título en este localidad.");
 
             try
             {
-                Nota nota = new(titulo, localidadId, usuarioId, texto);
+                Nota nota = new(titulo, usuarioId, texto);
                 await _db.InsertAsync(nota);
                 return nota.Id;
             }
@@ -215,52 +232,66 @@ namespace GuiaBakio.Services
             var nota = await _db.FindAsync<Nota>(notaId);
             return nota != null;
         }
-        public async Task<bool> ExisteNotaPorTituloYLocalidadAsync(string titulo, string localidadId)
+        public async Task<bool> ExisteNotaPorTituloAsync(string titulo)
         {
             if (string.IsNullOrWhiteSpace(titulo))
                 throw new ArgumentNullException(nameof(titulo), "El título de la nota es obligatorio.");
-            if (string.IsNullOrWhiteSpace(localidadId))
-                throw new ArgumentNullException(nameof(localidadId), "El Id de la localidad debe ser mayor que cero.");
 
             titulo = MisUtils.NormalizarTexto(titulo).Trim();
             var nota = await _db.Table<Nota>()
-                                .Where(n => n.Titulo.ToLower() == titulo.ToLower()
-                                         && n.LocalidadId == localidadId)
+                                .Where(n => n.Titulo.ToLower() == titulo.ToLower())
                                 .FirstOrDefaultAsync();
             return nota != null;
         }
-        public async Task<List<Nota>> ObtenerNotasPorLocalidadAsync(string localidadId)
+        public async Task<List<Nota>> ObtenerNotasAsync()
         {
-            if (string.IsNullOrWhiteSpace(localidadId))
-                throw new ArgumentNullException(nameof(localidadId), "El Id de la localidad no puede estar vacío.");
-
             return await _db.Table<Nota>()
-                            .Where(a => a.LocalidadId == localidadId)
                             .ToListAsync();
         }
-        public async Task<List<Nota>> ObtenerNotasPorEtiquetasAsync(string localidadId, List<Etiqueta> listaEtiquetas)
+        public async Task<List<Nota>> ObtenerNotasAsync(List<Etiqueta> listaEtiquetas, List<Localidad> listaLocalidades)
         {
-            if (string.IsNullOrWhiteSpace(localidadId))
-                throw new ArgumentNullException(nameof(localidadId), "El Id de la localidad no puede estar vacío.");
+            List<string>? notaEtiquetaIds;
+            List<string>? notaLocalidadIds;
 
             if (listaEtiquetas == null || listaEtiquetas.Count == 0)
-                return await _db.Table<Nota>()
-                            .Where(a => a.LocalidadId == localidadId)
-                            .ToListAsync();
+            {
+                notaEtiquetaIds = (await _db.Table<Nota>().ToListAsync()).Select(n => n.Id).ToList();
+            }
+            else
+            {
+                var etiquetasIds = listaEtiquetas.Select(e => e.Id).ToList();
 
-            var etiquetaIds = listaEtiquetas.Select(e => e.Id).ToList();
+                // Obtener relaciones que coincidan con alguna etiqueta
+                var relacionesEtiquetas = await _db.Table<NotaEtiqueta>()
+                                          .Where(ne => etiquetasIds.Contains(ne.EtiquetaId))
+                                          .ToListAsync();
 
-            // Obtener relaciones que coincidan con alguna etiqueta
-            var relaciones = await _db.Table<NotaEtiqueta>()
-                                      .Where(ne => etiquetaIds.Contains(ne.EtiquetaId))
-                                      .ToListAsync();
 
-            // Obtener los IDs únicos de notas relacionadas
-            var notaIds = relaciones.Select(r => r.NotaId).Distinct().ToList();
+                // Obtener los IDs únicos de notas relacionadas con etiquetas
+                notaEtiquetaIds = relacionesEtiquetas.Select(r => r.NotaId).Distinct().ToList();
+            }
+
+            if (listaLocalidades == null || listaLocalidades.Count == 0)
+            {
+                notaLocalidadIds = (await _db.Table<Nota>().ToListAsync()).Select(n => n.Id).ToList();
+            }
+            else
+            {
+                var localidadesIds = listaLocalidades.Select(l => l.Id).ToList();
+
+                // Obtener relaciones que coincidan con alguna localidad
+                var relacionesLocalidades = await _db.Table<NotaLocalidad>()
+                                          .Where(nl => localidadesIds.Contains(nl.LocalidadId))
+                                          .ToListAsync();
+
+                // Obtener los IDs únicos de notas relacionadas con localidades
+                notaLocalidadIds = relacionesLocalidades.Select(r => r.NotaId).Distinct().ToList();
+            }
+
 
             // Obtener las notas correspondientes
             var notas = await _db.Table<Nota>()
-                                 .Where(n => (n.LocalidadId == localidadId) && notaIds.Contains(n.Id))
+                                 .Where(n => (notaEtiquetaIds.Contains(n.Id) && notaLocalidadIds.Contains(n.Id)))
                                  .ToListAsync();
 
             return notas;
@@ -644,7 +675,14 @@ namespace GuiaBakio.Services
         public async Task<Usuario> ObtenerUsuarioPorIdAsync(string usuarioId)
         {
             if (string.IsNullOrWhiteSpace(usuarioId)) throw new ArgumentNullException(nameof(usuarioId), "El Id del usuario no puede estar vacío.");
-            return await _db.FindAsync<Usuario>(usuarioId);
+            try
+            {
+                return await _db.FindAsync<Usuario>(usuarioId);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Hubo un problema al obtener el usuario. {ex.Message}");
+            }
         }
 
         #endregion
