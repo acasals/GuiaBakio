@@ -72,7 +72,7 @@
      </Style>
 
     <!-- Estilo para chip de etiqueta con Border -->
-    <Style x:Key="EtiquetaChipStyle" TargetType="Border">
+    <Style x:Key="MyChipStyle" TargetType="Border">
         <Setter Property="StrokeShape">
             <Setter.Value>
                 <RoundRectangle CornerRadius="10" />
