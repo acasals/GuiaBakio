@@ -64,6 +64,16 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Pages\LocalidadPage.xaml.cs" />
+	  <Compile Remove="ViewModels\ListaLocalidadesViewModel.cs" />
+	  <Compile Remove="ViewModels\LocalidadViewModel.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <MauiXaml Remove="Pages\LocalidadPage.xaml" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <Content Include="secrets.json">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </Content>
