@@ -491,7 +491,7 @@ namespace GuiaBakio.Services
                                     .FirstOrDefaultAsync();
             return etiqueta != null;
         }
-        public async Task<List<Etiqueta>> ObtenerTodasLasEtiquetasAsync()
+        public async Task<List<Etiqueta>> ObtenerEtiquetasAsync()
         {
             return await _db.Table<Etiqueta>().ToListAsync();
         }

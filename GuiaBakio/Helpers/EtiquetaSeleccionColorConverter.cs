@@ -2,7 +2,7 @@
 
 namespace GuiaBakio.Helpers
 {
-    public class SeleccionColorConverter : IValueConverter
+    public class EtiquetaSeleccionColorConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
