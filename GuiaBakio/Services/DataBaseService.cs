@@ -56,9 +56,17 @@ namespace GuiaBakio.Services
             {
                 try
                 {
-                    var creadorId = Guid.NewGuid().ToString(); // Usuario genérico para la localidad predeterminada
-                    Localidad localidadPredeterminada = new("Bakio", creadorId);
-                    await _db.InsertAsync(localidadPredeterminada);
+                    var creadorId = Guid.NewGuid().ToString(); // Usuario genérico para las localidades predeterminadas
+                    List<Localidad> localidadesPredeterminadas =
+                    [
+                        new Localidad("Bakio", creadorId),
+                        new Localidad("Munguía", creadorId),
+                        new Localidad("Bermeo", creadorId),
+                        new Localidad("Gernika", creadorId),
+                        new Localidad("Mundaka", creadorId),
+                        new Localidad("Bilbao", creadorId)
+                    ];
+                    await _db.InsertAllAsync(localidadesPredeterminadas);
                 }
                 catch (Exception ex)
                 {
@@ -113,7 +121,9 @@ namespace GuiaBakio.Services
         }
         public async Task<List<Localidad>> ObtenerLocalidadesAsync()
         {
-            return await _db.Table<Localidad>().ToListAsync();
+            return await _db.Table<Localidad>()
+                            .OrderBy(e => e.Nombre)
+                            .ToListAsync();
         }
         public async Task<Localidad> ObtenerLocalidadPorIdAsync(string localidadId)
         {
@@ -261,6 +271,7 @@ namespace GuiaBakio.Services
         public async Task<List<Nota>> ObtenerNotasAsync()
         {
             return await _db.Table<Nota>()
+                            .OrderByDescending(n => n.FechaModificacion)
                             .ToListAsync();
         }
         public async Task<List<Nota>> ObtenerNotasAsync(List<Etiqueta> listaEtiquetas, List<Localidad> listaLocalidades)
@@ -307,6 +318,7 @@ namespace GuiaBakio.Services
             // Obtener las notas correspondientes
             var notas = await _db.Table<Nota>()
                                  .Where(n => (notaEtiquetaIds.Contains(n.Id) && notaLocalidadIds.Contains(n.Id)))
+                                 .OrderByDescending(n => n.FechaModificacion)
                                  .ToListAsync();
 
             return notas;
@@ -508,7 +520,9 @@ namespace GuiaBakio.Services
         }
         public async Task<List<Etiqueta>> ObtenerEtiquetasAsync()
         {
-            return await _db.Table<Etiqueta>().ToListAsync();
+            return await _db.Table<Etiqueta>()
+                        .OrderBy(e => e.Nombre)
+                        .ToListAsync();
         }
         public async Task<List<Etiqueta>> ObtenerEtiquetasDeNotaAsync(string notaId)
         {
