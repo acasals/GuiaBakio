@@ -51,6 +51,21 @@ namespace GuiaBakio.Services
                 }
             }
 
+            // Crear Localidad predeterminada si no existe
+            if (await _db.Table<Localidad>().CountAsync() == 0)
+            {
+                try
+                {
+                    var creadorId = Guid.NewGuid().ToString(); // Usuario genérico para la localidad predeterminada
+                    Localidad localidadPredeterminada = new("Bakio", creadorId);
+                    await _db.InsertAsync(localidadPredeterminada);
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"No se pudo crear la localidad predeterminada. {ex.Message}");
+                }
+            }
+
         }
 
         #region "Localidades"

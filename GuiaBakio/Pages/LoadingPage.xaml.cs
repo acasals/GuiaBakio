@@ -12,7 +12,7 @@ public partial class LoadingPage : ContentPage
         base.OnAppearing();
 
 
-        //Preferences.Clear(); // Descomenta esta línea si has borrado la base de datos y quieres reiniciar las preferencias
+        // Preferences.Clear(); // Descomenta esta línea si has borrado la base de datos y quieres reiniciar las preferencias
         if (!Preferences.ContainsKey("UsuarioId"))
         {
             await Shell.Current.GoToAsync("loginPage");
