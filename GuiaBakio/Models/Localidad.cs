@@ -33,7 +33,21 @@ namespace GuiaBakio.Models
             FechaModificacion = DateTime.UtcNow;
         }
 
-        [ObservableProperty]
+        // Propiedades ignoradas por SQLite
         private bool isSelected;
+        [Ignore]
+        public bool IsSelected
+        {
+            get => isSelected;
+            set => SetProperty(ref isSelected, value);
+        }
+
+        private bool isButton;
+        [Ignore]
+        public bool IsButton
+        {
+            get => isButton;
+            set => SetProperty(ref isButton, value);
+        }
     }
 }
