@@ -82,7 +82,7 @@ namespace GuiaBakio.Services
                 };
                 etiquetaBorder.GestureRecognizers.Add(tapGesture);
 
-                StyleHelper.ApplyStyle(etiquetaBorder, "EtiquetaChipStyle");
+                StyleHelper.ApplyStyle(etiquetaBorder, "MyChipStyle");
                 stackEtiquetas.Add(etiquetaBorder);
             }
 
