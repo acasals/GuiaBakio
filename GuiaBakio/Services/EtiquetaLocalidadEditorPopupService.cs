@@ -8,15 +8,15 @@ using System.Collections.ObjectModel;
 
 namespace GuiaBakio.Services
 {
-    public class EtiquetaEditorPopupService : IEtiquetaEditorPopupService
+    public class EtiquetaLocalidadEditorPopupService : IEtiquetaLocalidadEditorPopupService
     {
         private readonly DataBaseService _dbService;
 
-        public EtiquetaEditorPopupService(DataBaseService dbService)
+        public EtiquetaLocalidadEditorPopupService(DataBaseService dbService)
         {
             _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
         }
-        public async Task<List<Etiqueta>?> MostrarEditorAsync(ObservableCollection<Etiqueta> listaEtiquetas)
+        public async Task<(List<Etiqueta>?, List<Localidad>?)> MostrarEditorAsync(ObservableCollection<Etiqueta> listaEtiquetas, ObservableCollection<Localidad> listaLocalidades)
         {
             var currentPage = (Shell.Current?.CurrentPage) ?? throw new InvalidOperationException("No se pudo obtener la página actual.");
 
@@ -30,7 +30,16 @@ namespace GuiaBakio.Services
                 }
             }
 
-            var tcs = new TaskCompletionSource<List<Etiqueta>?>();
+            var todasLasLocalidades = await _dbService.ObtenerLocalidadesAsync() ?? throw new InvalidOperationException("No se pudieron obtener las localidades.");
+
+            foreach (var localidad in todasLasLocalidades)
+            {
+                if (listaLocalidades.Any(e => e.Id == localidad.Id))
+                {
+                    localidad.IsSelected = true;
+                }
+            }
+            var tcs = new TaskCompletionSource<(List<Etiqueta>?, List<Localidad>?)>();
 
             var popup = new CommunityToolkit.Maui.Views.Popup
             {
@@ -86,6 +95,49 @@ namespace GuiaBakio.Services
                 stackEtiquetas.Add(etiquetaBorder);
             }
 
+
+            // localidades
+            FlexLayout stackLocalidades = new()
+            {
+                WidthRequest = 350,
+                Direction = FlexDirection.Row,
+                //JustifyContent = FlexJustify.Start,
+                Wrap = FlexWrap.Wrap,
+                Margin = new Thickness(0, 5, 0, 5),
+            };
+
+            foreach (var localidad in todasLasLocalidades)
+            {
+                Border localidadBorder = new()
+                {
+                    BackgroundColor = localidad.IsSelected ? Colors.LightGray : Colors.White,
+                };
+
+                HorizontalStackLayout chip = new()
+                {
+                    Spacing = 6,
+                    Padding = new Thickness(1),
+                    Margin = new Thickness(1),
+                };
+
+                Label labelTexto = new()
+                {
+                    Text = localidad.Nombre,
+                };
+                chip.Children.Add(labelTexto);
+                localidadBorder.Content = chip;
+                var tapGesture = new TapGestureRecognizer();
+                tapGesture.Tapped += (s, e) =>
+                {
+                    localidad.IsSelected = !localidad.IsSelected;
+                    localidadBorder.BackgroundColor = localidad.IsSelected ? Colors.LightGray : Colors.White;
+                };
+                localidadBorder.GestureRecognizers.Add(tapGesture);
+
+                StyleHelper.ApplyStyle(localidadBorder, "MyChipStyle");
+                stackLocalidades.Add(localidadBorder);
+            }
+
             // botones
             var cancelButton = new Button
             {
@@ -95,7 +147,7 @@ namespace GuiaBakio.Services
             StyleHelper.ApplyStyle(cancelButton, "BotonCancelarStyle");
             cancelButton.Clicked += async (_, _) =>
             {
-                tcs.TrySetResult(null);
+                tcs.TrySetResult((null, null));
                 await popup.CloseAsync();
             };
             var saveButton = new Button
@@ -105,8 +157,9 @@ namespace GuiaBakio.Services
             };
             saveButton.Clicked += async (_, _) =>
             {
-                var etiquetasSeleccionadas = todasLasEtiquetas.Where(e => e.IsSelected).ToList();
-                tcs.TrySetResult(etiquetasSeleccionadas);
+                var etiquetasSeleccionadas = new List<Etiqueta>(todasLasEtiquetas.Where(e => e.IsSelected));
+                var localidadesSeleccionadas = new List<Localidad>(todasLasLocalidades.Where(l => l.IsSelected));
+                tcs.TrySetResult((etiquetasSeleccionadas, localidadesSeleccionadas));
                 await popup.CloseAsync();
             };
             var botonesRow = new Grid
@@ -131,15 +184,16 @@ namespace GuiaBakio.Services
                 Spacing = 10,
                 Children =
                 {
-                    new Label { Text = "Seleccionar etiquetas", FontAttributes = FontAttributes.Bold, FontSize=18, HorizontalOptions=LayoutOptions.Center },
+                    new Label { Text = "Seleccionar etiquetas y localidades", FontAttributes = FontAttributes.Bold, FontSize=18, HorizontalOptions=LayoutOptions.Center },
                     stackEtiquetas,
+                    stackLocalidades,
                     botonesRow
                 }
             };
             popup.Content = layout;
             await currentPage.ShowPopupAsync(popup, new PopupOptions
             {
-                OnTappingOutsideOfPopup = () => tcs.TrySetResult(null)
+                OnTappingOutsideOfPopup = () => tcs.TrySetResult((null, null))
             });
             return await tcs.Task;
         }

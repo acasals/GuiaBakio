@@ -22,10 +22,10 @@ namespace GuiaBakio.ViewModels
 
         private DateTime? ultimaSincronizacion;
         private string _usuarioId;
-        private string _usuarioName;
+        private Usuario? usuario;
 
         public IRelayCommand AgregarNotaAsyncCommand { get; }
-        public IRelayCommand EditarLocalidadesAsyncCommand { get; }
+        public IRelayCommand AgregarLocalidadAsyncCommand { get; }
 
         public IRelayCommand ToggleEtiquetaCommand => new RelayCommand<Etiqueta>(async etiqueta =>
         {
@@ -34,14 +34,15 @@ namespace GuiaBakio.ViewModels
             NotasFiltradas = (await _dbService.ObtenerNotasAsync(EtiquetasSeleccionadas.ToList(), LocalidadesSeleccionadas.ToList())).ToObservableCollection();
         });
 
-        public IRelayCommand ToggleLocalidadCommand => new RelayCommand<Localidad>(async Localidad =>
+        public IRelayCommand ToggleLocalidadCommand => new RelayCommand<Localidad>(async localidad =>
         {
-            Localidad?.IsSelected = !Localidad.IsSelected;
+            if (localidad == null || localidad.IsButton)
+                return; // <- ignoramos el botón especial
+
+            localidad?.IsSelected = !localidad.IsSelected;
             LocalidadesSeleccionadas = Localidades.Where(e => e.IsSelected).ToObservableCollection();
             NotasFiltradas = (await _dbService.ObtenerNotasAsync(EtiquetasSeleccionadas.ToList(), LocalidadesSeleccionadas.ToList())).ToObservableCollection();
         });
-        [ObservableProperty]
-        private ObservableCollection<Nota> listaNotas = [];
 
         [ObservableProperty]
         private ObservableCollection<Nota> notas = new();
@@ -73,6 +74,7 @@ namespace GuiaBakio.ViewModels
              ApiService apiService)
         {
             AgregarNotaAsyncCommand = new AsyncRelayCommand(AgregarNotaAsync);
+            AgregarLocalidadAsyncCommand = new AsyncRelayCommand(AgregarLocalidadAsync);
             _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
             _addItemPopupService = addItemPopupService ?? throw new ArgumentNullException(nameof(addItemPopupService));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
@@ -91,13 +93,12 @@ namespace GuiaBakio.ViewModels
                 if (!string.IsNullOrWhiteSpace(usuarioId))
                 {
                     _usuarioId = usuarioId;
-                    Usuario? usuario = await _dbService.ObtenerUsuarioPorIdAsync(_usuarioId);
+                    usuario = await _dbService.ObtenerUsuarioPorIdAsync(_usuarioId);
                     if (usuario is null)
                     {
                         await _dialogService.ShowAlertAsync("Error", "Hubo un problema al localizar al usuario. Contacta con Alex.", "OK");
                         return;
                     }
-                    _usuarioName = usuario.Nombre;
                     _navigationDataService.Data = usuario;
                 }
             }
@@ -111,12 +112,48 @@ namespace GuiaBakio.ViewModels
         {
             try
             {
+                await CargarListaEtiquetasAsync();
+                await CargarListaLocalidadesAsync();
                 await CargarListaNotasAsync();
-                await SincronizarSiNoRecienteAsync();
+                //await SincronizarSiNoRecienteAsync();
             }
             catch (Exception ex)
             {
                 await _dialogService.ShowAlertAsync("Error", $"No se pudo obtener la lista de notas: {Environment.NewLine}{ex.Message}", "OK");
+            }
+        }
+
+        public async Task CargarListaEtiquetasAsync()
+        {
+            try
+            {
+                Etiquetas = new ObservableCollection<Etiqueta>(
+                     await _dbService.ObtenerEtiquetasAsync());
+                EtiquetasSeleccionadas = Etiquetas.Where(e => e.IsSelected).ToObservableCollection();
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("No se pudo cargar la lista de etiquetas.", ex);
+            }
+        }
+
+        public async Task CargarListaLocalidadesAsync()
+        {
+            try
+            {
+                Localidades = new ObservableCollection<Localidad>(
+                    await _dbService.ObtenerLocalidadesAsync());
+                LocalidadesSeleccionadas = Localidades.Where(e => e.IsSelected).ToObservableCollection();
+                // Añadimos el ítem especial al final
+                Localidades.Add(new Localidad
+                {
+                    Nombre = "Añadir localidad",
+                    IsButton = true
+                });
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("No se pudo cargar la lista de localidades.", ex);
             }
         }
 
@@ -163,8 +200,8 @@ namespace GuiaBakio.ViewModels
         {
             try
             {
-                var lista = await _dbService.ObtenerNotasAsync();
-                ListaNotas = new ObservableCollection<Nota>(lista);
+                var lista = await _dbService.ObtenerNotasAsync(EtiquetasSeleccionadas.ToList(), LocalidadesSeleccionadas.ToList());
+                NotasFiltradas = new ObservableCollection<Nota>(lista);
             }
             catch (Exception ex)
             {
@@ -175,8 +212,98 @@ namespace GuiaBakio.ViewModels
         [RelayCommand]
         public async Task AgregarNotaAsync()
         {
+            var nuevaNota = await _addItemPopupService.MostrarAsync("Añade una nota");
+            if (nuevaNota is null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(nuevaNota))
+            {
+                await _dialogService.ShowAlertAsync("Error", "El nombre del nota no puede estar vacío.", "OK");
+                return;
+            }
+            try
+            {
+                bool yaExiste = await _dbService.ExisteNotaPorTituloAsync(nuevaNota);
+                if (yaExiste)
+                {
+                    await _dialogService.ShowAlertAsync("Error", "Nota existente.", "OK");
+                    return;
+                }
+                if (usuario is null)
+                {
+                    await _dialogService.ShowAlertAsync("Error", "No se ha encontrado el usuario. Contacta con Alex.", "OK");
+                    return;
+                }
+                var id = await _dbService.InsertarNotaAsync(nuevaNota, usuario.Id);
+                if (string.IsNullOrWhiteSpace(id))
+                {
+                    await _dialogService.ShowAlertAsync("Error", "No se pudo añadir la nota.", "OK");
+                    return;
+                }
+                try
+                {
+                    await Shell.Current.GoToAsync($"notaPage?Id={id}");
+                }
+                catch (Exception ex)
+                {
+                    await _dialogService.ShowAlertAsync("Error", $"No se pudo navegar a la página de la nota.{Environment.NewLine}{ex.Message}", "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                await _dialogService.ShowAlertAsync("Error", $"No se pudo añadir el nota.{Environment.NewLine}{ex.Message}", "OK");
+            }
 
         }
 
+        [RelayCommand]
+        public async Task AgregarLocalidadAsync()
+        {
+            {
+                var nuevaLocalidad = await _addItemPopupService.MostrarAsync("Añade una localidad");
+                if (nuevaLocalidad is null)
+                {
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(nuevaLocalidad))
+                {
+                    await _dialogService.ShowAlertAsync("Error", "El nombre de la localidad no puede estar vacío.", "OK");
+                    return;
+                }
+                try
+                {
+                    bool yaExiste = await _dbService.ExisteLocalidadConNombreAsync(nuevaLocalidad);
+                    if (yaExiste)
+                    {
+                        await _dialogService.ShowAlertAsync("Error", "Localidad existente.", "OK");
+                        return;
+                    }
+                    var id = await _dbService.InsertarLocalidadAsync(nuevaLocalidad, _usuarioId);
+                    if (string.IsNullOrWhiteSpace(id))
+                    {
+                        await _dialogService.ShowAlertAsync("Error", "No se pudo añadir la localidad.", "OK");
+                        return;
+                    }
+                    try
+                    {
+                        await Shell.Current.GoToAsync($"localidadPage?Id={id}");
+                    }
+                    catch (Exception ex)
+                    {
+                        await _dialogService.ShowAlertAsync("Error", $"No se pudo navegar a la página de la localidad.{Environment.NewLine}{ex.Message}", "OK");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await _dialogService.ShowAlertAsync("Error", $"No se pudo añadir la localidad.{Environment.NewLine}{ex.Message}", "OK");
+                }
+
+                await CargarListaLocalidadesAsync();
+            }
+        }
     }
+
 }

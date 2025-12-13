@@ -42,7 +42,7 @@ namespace GuiaBakio
             });
             builder.Services.AddSingleton<INavigationDataService, NavigationDataService>();
             builder.Services.AddSingleton<ITextEditorPopupService, TextEditorPopupService>();
-            builder.Services.AddSingleton<IEtiquetaEditorPopupService, EtiquetaEditorPopupService>();
+            builder.Services.AddSingleton<IEtiquetaLocalidadEditorPopupService, EtiquetaLocalidadEditorPopupService>();
             builder.Services.AddSingleton<IAddItemPopupService, AddItemPopupService>();
             builder.Services.AddSingleton<IAddImagenPopupService, AddImagenPopupService>();
             builder.Services.AddTransient<ListaNotasViewModel>();
