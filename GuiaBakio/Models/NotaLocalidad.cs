@@ -22,8 +22,8 @@ namespace GuiaBakio.Models
         {
             if (string.IsNullOrWhiteSpace(notaId))
                 throw new ArgumentNullException(nameof(notaId), "El Id de la nota no puede estar vacío.");
-            if (string.IsNullOrWhiteSpace(LocalidadId))
-                throw new ArgumentNullException(nameof(LocalidadId), "El Id de la localidad no puede estar vacío.");
+            if (string.IsNullOrWhiteSpace(localidadId))
+                throw new ArgumentNullException(nameof(localidadId), "El Id de la localidad no puede estar vacío.");
 
             Id = Guid.NewGuid().ToString();
             NotaId = notaId;
