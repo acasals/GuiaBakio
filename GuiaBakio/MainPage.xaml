@@ -4,45 +4,135 @@
              x:Class="GuiaBakio.MainPage"
              xmlns:vm="clr-namespace:GuiaBakio.ViewModels"
              xmlns:models="clr-namespace:GuiaBakio.Models"
-             x:DataType="vm:ListaLocalidadesViewModel"
+             xmlns:help="clr-namespace:GuiaBakio.Helpers"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:DataType="vm:ListaNotasViewModel"
              Title="Guía de Bakio">
 
-    <Grid RowDefinitions="Auto,*" Padding="5">
+ 
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <help:EtiquetaSeleccionColorConverter x:Key="EtiquetaSeleccionColorConverter" />
+            <help:LocalidadSeleccionColorConverter x:Key="LocalidadSeleccionColorConverter" />
+                
+        <DataTemplate x:Key="LocalidadTemplate" x:DataType="models:Localidad">
+            <Border Style="{StaticResource MyChipStyle}"
+                Background="{Binding IsSelected, Converter={StaticResource LocalidadSeleccionColorConverter}}">
+                <HorizontalStackLayout Spacing="6" Padding="1" Margin="1">
+                    <Label Text="{Binding Nombre}" TextColor="Black" FontAttributes="Bold" />
+                </HorizontalStackLayout>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer
+                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ToggleLocalidadCommand}"
+                    CommandParameter="{Binding}" />
+                </Border.GestureRecognizers>
+            </Border>
+        </DataTemplate>
 
-        <!-- Encabezado -->
-        <Grid Grid.Row="0" ColumnDefinitions="*" Padding="5" Margin="0,5,0,0" BackgroundColor="AntiqueWhite">
-            <Label Text="Localidades"
-                   FontAttributes="Bold"
-                   Grid.Column="0"
-                   HorizontalOptions="Center"
-                   HorizontalTextAlignment="Center"/>
-        </Grid>
+        <DataTemplate x:Key="AddButtonTemplate" x:DataType="models:Localidad">
+            <Border Style="{StaticResource MyChipStyle}" BackgroundColor="White">
+                <HorizontalStackLayout Spacing="6" Padding="1" Margin="1">
+                    <Label Text="{Binding Nombre}" TextColor="Black" FontAttributes="Bold" />
+                </HorizontalStackLayout>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer
+                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.AgregarLocalidadAsyncCommand}" />
+                </Border.GestureRecognizers>
+            </Border>
+        </DataTemplate>
 
-        <!-- Lista de localidades  -->
-        <CollectionView Grid.Row="1"
-                        ItemsSource="{Binding ListaLocalidades}"
-                        SelectionMode="Single"
-                        SelectionChanged="OnLocalidadSeleccionada">
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="models:Localidad">
-                    <Grid ColumnDefinitions="*" Padding="10" Margin="5">
-                        <Label Text="{Binding Nombre}"
+        <help:LocalidadTemplateSelector x:Key="LocalidadTemplateSelector"
+                                     LocalidadTemplate="{StaticResource LocalidadTemplate}"
+                                     AddButtonTemplate="{StaticResource AddButtonTemplate}" />
+
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <Grid RowDefinitions="Auto, Auto, *">
+
+            <!-- CHIPS DE ETIQUETAS -->
+            <Grid Grid.Row="0"
+              ColumnDefinitions="*"
+              Margin="0,5,0,5">
+                <FlexLayout BindableLayout.ItemsSource="{Binding Etiquetas}"
+                    Wrap="Wrap"
+                    Direction="Row"
+                    JustifyContent="Center"
+                    AlignItems="Center">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:Etiqueta">
+                            <Border Style="{StaticResource MyChipStyle}"
+                        Background="{Binding IsSelected, Converter={StaticResource EtiquetaSeleccionColorConverter}}">
+                                <HorizontalStackLayout Spacing="6" Padding="1" Margin="1">
+                                    <Label Text="{Binding Icono}" FontFamily="MaterialSymbols" TextColor="Black" />
+                                    <Label Text="{Binding Nombre}" TextColor="Black" FontAttributes="Bold" />
+                                </HorizontalStackLayout>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ToggleEtiquetaCommand}"
+                                        CommandParameter="{Binding}" />
+                                </Border.GestureRecognizers>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </Grid>
+
+
+            <!-- CHIPS DE LOCALIDADES -->
+            <Grid Grid.Row="1"
+                  ColumnDefinitions="*"
+                  Margin="0,5,0,5">
+                <FlexLayout BindableLayout.ItemsSource="{Binding Localidades}"
+                    BindableLayout.ItemTemplateSelector="{StaticResource LocalidadTemplateSelector}"
+                    Wrap="Wrap"
+                    Direction="Row"
+                    JustifyContent="Center"
+                    AlignItems="Center" />
+            </Grid>
+            
+            <!-- LISTA DE NOTAS -->
+            <Grid Grid.Row="2" ColumnDefinitions="*" Margin="0,20,0,0" >
+
+                <!-- Lista de ítems -->
+                <CollectionView ItemsSource="{Binding NotasFiltradas}"
+                SelectionMode="Single"
+                SelectionChanged="OnNotaSeleccionada">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Nota">
+                            <Grid ColumnDefinitions="*" Padding="10" Margin="5">
+                                <HorizontalStackLayout HorizontalOptions="Center">
+                                    <Label Text="{Binding Titulo}"
+                               FontAttributes="Bold"
+                               FontSize="Medium" />
+                                    <Label Text="{Binding Texto}" 
                                FontSize="Medium"
-                               VerticalOptions="Center"
-                               HorizontalOptions="Center"
-                               HorizontalTextAlignment="Center"/>
-                    </Grid>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+                               Margin="5,0,0,0"
+                               LineBreakMode="TailTruncation" 
+                               MaxLines="2" />
+                                </HorizontalStackLayout>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
 
-        <!-- Botón para añadir una nueva localidad -->
-        <Button  x:Name="BtnAñadir"
-                 Text="+"
-                 Grid.Row="1"
-                 Style="{StaticResource FloatingButtonStyle}"
-                 Command="{Binding AddLocalidadAsyncCommand}" />
+                <!--Botón flotante de añadir ítem-->
+                <Button x:Name="BtnAñadirNota" Text="+"
+                    Style="{StaticResource FloatingButtonStyle}"
+                    Command="{Binding AgregarNotaAsyncCommand}" />
 
-    </Grid>
+                <!-- Sugerencia si no hay ítems -->
+                <Label  IsVisible="{Binding NoHayNotas}"
+                    Text="Esta es la sección de notas. ¡Agrega una!"
+                    FontAttributes="Italic"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    TextColor="Gray" />
+
+            </Grid>
+
+        </Grid>
+    </ScrollView>
 
 </ContentPage>

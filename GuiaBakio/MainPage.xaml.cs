@@ -7,10 +7,10 @@ namespace GuiaBakio
 {
     public partial class MainPage : ContentPage
     {
-        private ListaLocalidadesViewModel _myViewModel;
+        private ListaNotasViewModel _myViewModel;
 
         public MainPage(
-            ListaLocalidadesViewModel viewmodel)
+            ListaNotasViewModel viewmodel)
         {
             InitializeComponent();
             _myViewModel = viewmodel;
@@ -23,28 +23,26 @@ namespace GuiaBakio
             base.OnAppearing();
 
             await _myViewModel.OnAppearedOrResumed();
-            await MisUtils.MostrarBotonAnimado(BtnAñadir);
+            await MisUtils.MostrarBotonAnimado(BtnAñadirNota);
         }
 
         private async void OnAppResumed()
         {
             await _myViewModel.OnAppearedOrResumed();
-            await MisUtils.MostrarBotonAnimado(BtnAñadir);
+            await MisUtils.MostrarBotonAnimado(BtnAñadirNota);
         }
 
-        private async void OnLocalidadSeleccionada(object sender, SelectionChangedEventArgs e)
+        private async void OnNotaSeleccionada(object sender, SelectionChangedEventArgs e)
         {
-            var localidadSeleccionada = e.CurrentSelection.FirstOrDefault() as Localidad;
-
-            if (localidadSeleccionada != null)
+            if (e.CurrentSelection.FirstOrDefault() is Nota notaSeleccionada)
             {
                 try
                 {
-                    await Shell.Current.GoToAsync($"localidadPage?Id={localidadSeleccionada.Id}");
+                    await Shell.Current.GoToAsync($"notaPage?Id={notaSeleccionada.Id}");
                 }
                 catch (Exception ex)
                 {
-                    await DisplayAlert("Error", $"No se pudo navegar a la página de la localidad.{Environment.NewLine}{ex.Message}", "OK");
+                    await DisplayAlert("Error", $"No se pudo navegar a la página de la nota.{Environment.NewLine}{ex.Message}", "OK");
                 }
             }
         }
