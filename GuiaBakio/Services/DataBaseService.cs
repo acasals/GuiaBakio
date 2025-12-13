@@ -224,6 +224,59 @@ namespace GuiaBakio.Services
             }
 
         }
+        public async Task DesasignarLocalidadesANotaAsync(string notaId)
+        {
+            if (string.IsNullOrWhiteSpace(notaId))
+                throw new ArgumentNullException(nameof(notaId), "El Id de la nota no puede estar vacío.");
+
+            try
+            {
+                bool existeNota = await ExisteNotaConIdAsync(notaId);
+                if (!existeNota)
+                    throw new InvalidOperationException($"No se encontró la nota con Id: {notaId}");
+
+                var relaciones = await _db.Table<NotaLocalidad>()
+                                         .Where(nl => nl.NotaId == notaId)
+                                         .ToListAsync();
+                foreach (var relacion in relaciones)
+                {
+                    await _db.DeleteAsync(relacion);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Hubo un problema al eliminar las localidades de la nota. {ex.Message}");
+            }
+        }
+        public async Task AsignarLocalidadesANotaAsync(string notaId, List<Localidad> listaLocalidades)
+        {
+            if (string.IsNullOrWhiteSpace(notaId))
+                throw new ArgumentNullException(nameof(notaId), "El Id de la nota no puede estar vacío.");
+            if (listaLocalidades == null || listaLocalidades.Count == 0)
+                return; // No hay localidades para asignar, salir del método
+
+            try
+            {
+                _ = await _db.FindAsync<Nota>(notaId) ?? throw new InvalidOperationException($"No se encontró la nota con Id: {notaId}");
+
+                foreach (var localidad in listaLocalidades)
+                {
+                    var relacionExistente = await _db.Table<NotaLocalidad>()
+                                                     .Where(nl => nl.NotaId == notaId && nl.LocalidadId == localidad.Id)
+                                                     .FirstOrDefaultAsync();
+                    if (relacionExistente == null)
+                    {
+                        NotaLocalidad nuevaRelacion = new(notaId, localidad.Id);
+                        await _db.InsertAsync(nuevaRelacion);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Hubo un problema al asignar las localidades a la nota. {ex.Message}");
+            }
+
+        }
 
         #endregion
 
