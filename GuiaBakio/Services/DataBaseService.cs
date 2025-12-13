@@ -353,7 +353,7 @@ namespace GuiaBakio.Services
 
             try
             {
-                bool existeNota = await ExisteLocalidadConIdAsync(notaId);
+                bool existeNota = await ExisteNotaConIdAsync(notaId);
                 if (!existeNota)
                     throw new InvalidOperationException($"No se encontró la nota con Id: {notaId}");
 
