@@ -2,6 +2,7 @@
 using GuiaBakio.Models;
 using GuiaBakio.Services.Interfaces;
 using SQLite;
+using System.Diagnostics;
 
 namespace GuiaBakio.Services
 {
@@ -75,6 +76,8 @@ namespace GuiaBakio.Services
             }
 
         }
+
+        private class NotaIdResult { public string NotaId { get; set; } }
 
         #region "Localidades"
         public async Task<string> InsertarLocalidadAsync(string nombreLocalidad, string usuarioId)
@@ -332,49 +335,80 @@ namespace GuiaBakio.Services
             List<string>? notaEtiquetaIds;
             List<string>? notaLocalidadIds;
 
-            if (listaEtiquetas == null || listaEtiquetas.Count == 0)
+            try
             {
-                notaEtiquetaIds = (await _db.Table<Nota>().ToListAsync()).Select(n => n.Id).ToList();
+
+                if (listaEtiquetas == null || listaEtiquetas.Count == 0)
+                {
+                    notaEtiquetaIds = (await _db.Table<Nota>().ToListAsync()).Select(n => n.Id).ToList();
+                }
+                else
+                {
+                    var etiquetasIds = listaEtiquetas.Select(e => e.Id).ToList();
+                    var etiquetaPlaceholders = string.Join(",", etiquetasIds.Select(_ => "?"));
+
+                    // Consulta SQL: notas que tienen TODAS las etiquetas
+                    var sql = $@"
+                        SELECT NotaId
+                        FROM NotaEtiqueta
+                        WHERE EtiquetaId IN ({etiquetaPlaceholders})
+                        GROUP BY NotaId
+                        HAVING COUNT(DISTINCT EtiquetaId) = {etiquetasIds.Count};
+                         ";
+                    var rows = await _db.QueryAsync<NotaIdResult>(sql, etiquetasIds.ToArray());
+                    notaEtiquetaIds = rows.Select(r => r.NotaId).Distinct().ToList();
+
+
+                    // Obtener relaciones que coincidan con ALGUNA etiqueta
+                    //var relacionesEtiquetas = await _db.Table<NotaEtiqueta>()
+                    //                          .Where(ne => etiquetasIds.Contains(ne.EtiquetaId))
+                    //                          .ToListAsync();
+                    //// Obtener los IDs únicos de notas relacionadas con etiquetas
+                    //notaEtiquetaIds = relacionesEtiquetas.Select(r => r.NotaId).Distinct().ToList();
+                }
+
+                if (listaLocalidades == null || listaLocalidades.Count == 0)
+                {
+                    notaLocalidadIds = (await _db.Table<Nota>().ToListAsync()).Select(n => n.Id).ToList();
+                }
+                else
+                {
+                    var localidadesIds = listaLocalidades.Select(l => l.Id).ToList();
+                    var localidadPlaceholders = string.Join(",", localidadesIds.Select(_ => "?"));
+
+                    // Consulta SQL: notas que tienen TODAS las localidades
+                    var sql = $@"
+                        SELECT NotaId
+                        FROM NotaLocalidad
+                        WHERE LocalidadId IN ({localidadPlaceholders})
+                        GROUP BY NotaId
+                        HAVING COUNT(DISTINCT LocalidadId) = {localidadesIds.Count};
+                         ";
+                    var rows = await _db.QueryAsync<NotaIdResult>(sql, localidadesIds.ToArray());
+                    notaLocalidadIds = rows.Select(r => r.NotaId).Distinct().ToList();
+
+
+                    //// Obtener relaciones que coincidan con ALGUNA localidad
+                    //var relacionesLocalidades = await _db.Table<NotaLocalidad>()
+                    //                          .Where(nl => localidadesIds.Contains(nl.LocalidadId))
+                    //                          .ToListAsync();
+                    //// Obtener los IDs únicos de notas relacionadas con localidades
+                    //notaLocalidadIds = relacionesLocalidades.Select(r => r.NotaId).Distinct().ToList();
+                }
+
+                // Obtener las notas correspondientes
+                var notas = await _db.Table<Nota>()
+                                        .Where(n => (notaEtiquetaIds.Contains(n.Id) && notaLocalidadIds.Contains(n.Id)))
+                                        .OrderByDescending(n => n.FechaModificacion)
+                                        .ToListAsync();
+
+                return notas;
             }
-            else
+            catch (Exception ex)
             {
-                var etiquetasIds = listaEtiquetas.Select(e => e.Id).ToList();
-
-                // Obtener relaciones que coincidan con alguna etiqueta
-                var relacionesEtiquetas = await _db.Table<NotaEtiqueta>()
-                                          .Where(ne => etiquetasIds.Contains(ne.EtiquetaId))
-                                          .ToListAsync();
-
-
-                // Obtener los IDs únicos de notas relacionadas con etiquetas
-                notaEtiquetaIds = relacionesEtiquetas.Select(r => r.NotaId).Distinct().ToList();
+                Debug.WriteLine($"Error al obtener la lista de notas!!! {ex}");
+                return new List<Nota>();
             }
-
-            if (listaLocalidades == null || listaLocalidades.Count == 0)
-            {
-                notaLocalidadIds = (await _db.Table<Nota>().ToListAsync()).Select(n => n.Id).ToList();
-            }
-            else
-            {
-                var localidadesIds = listaLocalidades.Select(l => l.Id).ToList();
-
-                // Obtener relaciones que coincidan con alguna localidad
-                var relacionesLocalidades = await _db.Table<NotaLocalidad>()
-                                          .Where(nl => localidadesIds.Contains(nl.LocalidadId))
-                                          .ToListAsync();
-
-                // Obtener los IDs únicos de notas relacionadas con localidades
-                notaLocalidadIds = relacionesLocalidades.Select(r => r.NotaId).Distinct().ToList();
-            }
-
-
-            // Obtener las notas correspondientes
-            var notas = await _db.Table<Nota>()
-                                 .Where(n => (notaEtiquetaIds.Contains(n.Id) && notaLocalidadIds.Contains(n.Id)))
-                                 .OrderByDescending(n => n.FechaModificacion)
-                                 .ToListAsync();
-
-            return notas;
         }
         public async Task<Nota> ObtenerNotaPorIdAsync(string notaId)
         {
