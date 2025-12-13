@@ -72,7 +72,6 @@
                                 <Border Style="{StaticResource MyChipStyle}"
                                  Background="White">
                                     <HorizontalStackLayout Spacing="6" Padding="1" Margin="1">
-                                        <Label Text="{Binding Icono}" FontFamily="MaterialSymbols" TextColor="Black" />
                                         <Label Text="{Binding Nombre}" TextColor="Black" FontAttributes="Bold" />
                                     </HorizontalStackLayout>
                                 </Border>
@@ -94,7 +93,7 @@
                              IsVisible="{Binding CreadoPorUsuario}"
                              Grid.Column="1"
                              Style="{StaticResource FloatingImageButtonStyle}"
-                             Command="{Binding EditarEtiquetasAsyncCommand}">
+                             Command="{Binding EditarEtiquetasLocalidadesAsyncCommand}">
                     <ImageButton.Behaviors>
                         <toolkit:IconTintColorBehavior TintColor="White" />
                     </ImageButton.Behaviors>
