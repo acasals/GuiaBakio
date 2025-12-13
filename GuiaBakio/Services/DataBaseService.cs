@@ -193,8 +193,7 @@ namespace GuiaBakio.Services
                 throw new InvalidOperationException($"Hubo un problema al eliminar la localidad.{ex.Message}");
             }
         }
-
-        public async Task<List<Localidad>> ObtenerLocalidadsDeNotaAsync(string notaId)
+        public async Task<List<Localidad>> ObtenerLocalidadesDeNotaAsync(string notaId)
         {
             if (string.IsNullOrWhiteSpace(notaId))
                 throw new ArgumentNullException(nameof(notaId), "El Id de la nota no puede estar vacío.");
@@ -205,24 +204,25 @@ namespace GuiaBakio.Services
                 if (!existeNota)
                     throw new InvalidOperationException($"No se encontró la nota con Id: {notaId}");
 
-                // Obtener los IDs de Localidads asociadas a la nota
+                // Obtener los IDs de Localidades asociadas a la nota
                 var relaciones = await _db.Table<NotaLocalidad>()
                                          .Where(ne => ne.NotaId == notaId)
                                          .ToListAsync();
 
-                var LocalidadIds = relaciones.Select(r => r.LocalidadId).ToList();
+                var localidadIds = relaciones.Select(r => r.LocalidadId).ToList();
 
-                // Obtener las Localidads correspondientes
-                var Localidades = await _db.Table<Localidad>()
-                                        .Where(e => LocalidadIds.Contains(e.Id))
+                // Obtener las Localidades correspondientes
+                var localidades = await _db.Table<Localidad>()
+                                        .Where(e => localidadIds.Contains(e.Id))
                                         .ToListAsync();
 
-                return Localidades;
+                return localidades;
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException($"Hubo un problema al obtener las Localidads de la nota. {ex.Message}");
+                throw new InvalidOperationException($"Hubo un problema al obtener las localidades de la nota. {ex.Message}");
             }
+
         }
 
         #endregion
