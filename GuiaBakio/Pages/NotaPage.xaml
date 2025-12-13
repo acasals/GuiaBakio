@@ -37,37 +37,64 @@
             </Grid>
 
 
-            <!-- Etiquetas -->
-            <Grid Grid.Row="1" ColumnDefinitions="*" Margin="0,5,0,5">
-                <FlexLayout BindableLayout.ItemsSource="{Binding Etiquetas}"
-                        Wrap="Wrap"
-                        Direction="Row"
-                        JustifyContent="Center">
-                    <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="models:Etiqueta">
-                            <Border Style="{StaticResource EtiquetaChipStyle}"
+            
+            <Grid Grid.Row="1" ColumnDefinitions="*,auto" Margin="0,5,0,5">
+                
+                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*">
+
+                    <!-- Etiquetas -->
+                    <FlexLayout BindableLayout.ItemsSource="{Binding Etiquetas}"
+                            Grid.Row="0"
+                            Wrap="Wrap"
+                            Direction="Row"
+                            JustifyContent="Center">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:Etiqueta">
+                                <Border Style="{StaticResource MyChipStyle}"
                                 Background="AntiqueWhite">
-                                <HorizontalStackLayout Spacing="6" Padding="1" Margin="1">
-                                    <Label Text="{Binding Icono}" FontFamily="MaterialSymbols" TextColor="Black" />
-                                    <Label Text="{Binding Nombre}" TextColor="Black" FontAttributes="Bold" />
-                                </HorizontalStackLayout>
-                            </Border>
-                        </DataTemplate>
-                    </BindableLayout.ItemTemplate>
-                </FlexLayout>
+                                    <HorizontalStackLayout Spacing="6" Padding="1" Margin="1">
+                                        <Label Text="{Binding Icono}" FontFamily="MaterialSymbols" TextColor="Black" />
+                                        <Label Text="{Binding Nombre}" TextColor="Black" FontAttributes="Bold" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </FlexLayout>
 
-                <!-- Sugerencia si no hay ítems -->
-                <Label  IsVisible="{Binding NoHayEtiquetas}"
-                    Text="Puedes agregar etiquetas"
-                    FontAttributes="Italic"
-                    HorizontalOptions="Center"
-                    VerticalOptions="Center"
-                    TextColor="Gray" />
+                    <!-- Localidades -->
+                    <FlexLayout BindableLayout.ItemsSource="{Binding Localidades}"
+                             Grid.Row="1"
+                             Wrap="Wrap"
+                             Direction="Row"
+                             JustifyContent="Center">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:Localidad">
+                                <Border Style="{StaticResource MyChipStyle}"
+                                 Background="White">
+                                    <HorizontalStackLayout Spacing="6" Padding="1" Margin="1">
+                                        <Label Text="{Binding Icono}" FontFamily="MaterialSymbols" TextColor="Black" />
+                                        <Label Text="{Binding Nombre}" TextColor="Black" FontAttributes="Bold" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </FlexLayout>
 
+                    <!-- Sugerencia si no hay ítems -->
+                    <Label  IsVisible="{Binding NoHayEtiquetas}"
+                        Text="Puedes agregar etiquetas o localidades"
+                        FontAttributes="Italic"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center"
+                        TextColor="Gray" />
+                </Grid>
+                
                 <!-- Botón flotante para editar etiquetas -->
                 <ImageButton Source="edit_icon.png"
-                         Style="{StaticResource FloatingImageButtonStyle}"
-                         Command="{Binding EditarEtiquetasAsyncCommand}">
+                             IsVisible="{Binding CreadoPorUsuario}"
+                             Grid.Column="1"
+                             Style="{StaticResource FloatingImageButtonStyle}"
+                             Command="{Binding EditarEtiquetasAsyncCommand}">
                     <ImageButton.Behaviors>
                         <toolkit:IconTintColorBehavior TintColor="White" />
                     </ImageButton.Behaviors>
