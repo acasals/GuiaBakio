@@ -5,6 +5,7 @@ using GuiaBakio.Services;
 using GuiaBakio.Services.Interfaces;
 using System.Collections.ObjectModel;
 
+
 namespace GuiaBakio.ViewModels
 {
     public partial class NotaViewModel : ObservableObject
@@ -265,6 +266,26 @@ namespace GuiaBakio.ViewModels
             {
                 await _dialogService.ShowAlertAsync("Error", $"Hubo un error al gestionar la imagen: {ex.Message}", "Aceptar");
             }
+        }
+
+        public async Task HandleDroppedFilesAsync(IEnumerable<string> filePaths)
+        {
+            foreach (var filePath in filePaths)
+            {
+                try
+                {
+                    //        var resultado = await _dbService.ImportarNotaDesdeArchivoAsync(filePath, _usuarioId);
+                    //        if (resultado != "OK")
+                    //        {
+                    //            await _dialogService.ShowAlertAsync("Error", $"No se pudo importar la nota desde el archivo {filePath}: {Environment.NewLine}{resultado}", "OK");
+                    //        }
+                }
+                catch (Exception ex)
+                {
+                    
+                }
+            }
+            //await CargarListaNotasAsync();
         }
     }
 }

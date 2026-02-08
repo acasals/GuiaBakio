@@ -49,7 +49,9 @@
     </ContentPage.Resources>
 
     <ScrollView>
-        <Grid RowDefinitions="Auto, Auto, *">
+        <Grid RowDefinitions="Auto, Auto, *"
+              x:Name="MainGrid">
+
 
             <!-- CHIPS DE ETIQUETAS -->
             <Grid Grid.Row="0"

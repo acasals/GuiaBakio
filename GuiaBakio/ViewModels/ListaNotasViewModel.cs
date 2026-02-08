@@ -123,6 +123,26 @@ namespace GuiaBakio.ViewModels
             }
         }
 
+        public async Task HandleDroppedFilesAsync(IEnumerable<string> filePaths)
+        {
+            foreach (var filePath in filePaths)
+            {
+                try
+                {
+                    //        var resultado = await _dbService.ImportarNotaDesdeArchivoAsync(filePath, _usuarioId);
+                    //        if (resultado != "OK")
+                    //        {
+                    //            await _dialogService.ShowAlertAsync("Error", $"No se pudo importar la nota desde el archivo {filePath}: {Environment.NewLine}{resultado}", "OK");
+                    //        }
+                }
+                catch (Exception ex)
+                {
+
+                }
+            }
+            //await CargarListaNotasAsync();
+        }
+
         public async Task CargarListaEtiquetasAsync()
         {
             try
