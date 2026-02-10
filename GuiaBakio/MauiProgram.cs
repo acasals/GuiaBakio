@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Maui;
 using GuiaBakio.Pages;
+using GuiaBakio.Popups;
 using GuiaBakio.Services;
 using GuiaBakio.Services.Interfaces;
 using GuiaBakio.ViewModels;
@@ -41,10 +42,11 @@ namespace GuiaBakio
                 return new DataBaseService(dbPath, dialogService);
             });
             builder.Services.AddSingleton<INavigationDataService, NavigationDataService>();
-            builder.Services.AddSingleton<ITextEditorPopupService, TextEditorPopupService>();
-            builder.Services.AddSingleton<IEtiquetaLocalidadEditorPopupService, EtiquetaLocalidadEditorPopupService>();
-            builder.Services.AddSingleton<IAddItemPopupService, AddItemPopupService>();
-            builder.Services.AddSingleton<IAddImagenPopupService, AddImagenPopupService>();
+            builder.Services.AddTransient<ITextEditorPopupService, TextEditorPopupService>();
+            builder.Services.AddTransient<IEtiquetaLocalidadEditorPopupService, EtiquetaLocalidadEditorPopupService>();
+            builder.Services.AddTransient<AddItemPopup>();
+            builder.Services.AddTransient<IAddItemPopupService, AddItemPopupService>();
+            builder.Services.AddTransient<IAddImagenPopupService, AddImagenPopupService>();
             builder.Services.AddTransient<ListaNotasViewModel>();
             builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<NotaViewModel>();

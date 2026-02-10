@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Extensions;
+using GuiaBakio.Popups;
 using GuiaBakio.Services.Interfaces;
 
 
@@ -8,57 +9,32 @@ namespace GuiaBakio.Services
 {
     public class AddItemPopupService : IAddItemPopupService
     {
+        private readonly IServiceProvider _services;
+
+        public AddItemPopupService(IServiceProvider services)
+        {
+            _services = services;
+        }
+
         public async Task<string?> MostrarAsync(string texto)
         {
-            var currentPage = Shell.Current?.CurrentPage;
-
-            if (currentPage is null)
-                throw new InvalidOperationException("No se pudo obtener la página actual.");
-
-            var popup = new CommunityToolkit.Maui.Views.Popup
-            {
-                BackgroundColor = Colors.White
-            };
+            var currentPage = (Shell.Current?.CurrentPage) ?? throw new InvalidOperationException("No se pudo obtener la página actual.");
+            var popup = _services.GetRequiredService<AddItemPopup>();
+            popup.EntryControl.Placeholder = texto;
 
             var tcs = new TaskCompletionSource<string?>();
 
-            var entry = new Entry
+            popup.Aceptado += async (_, __) =>
             {
-                Placeholder = texto,
-                HorizontalOptions = LayoutOptions.Fill,
-                VerticalOptions = LayoutOptions.Fill
+                tcs.TrySetResult(popup.Texto);
+                await popup.CloseAsync();
             };
 
-            var button = new Button
-            {
-                Text = "Añadir",
-                HorizontalOptions = LayoutOptions.Fill,
-                Command = new Command(async () =>
-                {
-                    tcs.TrySetResult(entry.Text);
-                    await popup.CloseAsync();
-                })
-            };
-
-            var grid = new Grid
-            {
-                ColumnSpacing=10,
-                WidthRequest = 300,
-                ColumnDefinitions =
-            {
-                new ColumnDefinition { Width = new GridLength(2,GridUnitType.Star) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }
-            }
-            };
-
-            grid.Add(entry, 0, 0);
-            grid.Add(button, 1, 0);
-
-            popup.Content = grid;
             await currentPage.ShowPopupAsync(popup, new PopupOptions
             {
                 OnTappingOutsideOfPopup = () => tcs.TrySetResult(null)
             });
+
             return await tcs.Task;
         }
     }

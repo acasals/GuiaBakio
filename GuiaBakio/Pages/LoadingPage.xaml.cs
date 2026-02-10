@@ -13,12 +13,13 @@ public partial class LoadingPage : ContentPage
 
         var dbName = "GuiaBakio.db";
         var dbPath = Path.Combine(FileSystem.AppDataDirectory, dbName);
+
         if (!File.Exists(dbPath))
         {
             Preferences.Clear(); // Limpiar las preferencias si la base de datos no existe  
         }
 
-        if (!Preferences.ContainsKey("UsuarioId"))
+        if (!Preferences.ContainsKey("UsuarioId") || Preferences.Get("UsuarioId","") == "")
         {
             await Shell.Current.GoToAsync("loginPage");
         }
