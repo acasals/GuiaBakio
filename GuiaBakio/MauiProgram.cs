@@ -42,6 +42,8 @@ namespace GuiaBakio
                 return new DataBaseService(dbPath, dialogService);
             });
             builder.Services.AddSingleton<INavigationDataService, NavigationDataService>();
+            builder.Services.AddTransient<INotaServices, NotaServices>();
+            builder.Services.AddTransient<IListaNotasServices, ListaNotasServices>();
             builder.Services.AddTransient<TextEditorPopup>();
             builder.Services.AddTransient<ITextEditorPopupService, TextEditorPopupService>();
             builder.Services.AddTransient<IEtiquetaLocalidadEditorPopupService, EtiquetaLocalidadEditorPopupService>();
@@ -49,6 +51,8 @@ namespace GuiaBakio
             builder.Services.AddTransient<IAddItemPopupService, AddItemPopupService>();
             builder.Services.AddTransient<AddImagenPopup>();
             builder.Services.AddTransient<IAddImagenPopupService, AddImagenPopupService>();
+            builder.Services.AddTransient<NotaSeleccionPopup>();
+            builder.Services.AddTransient<INotaSeleccionPopupService, NotaSeleccionPopupService>();
             builder.Services.AddTransient<ListaNotasViewModel>();
             builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<NotaViewModel>();

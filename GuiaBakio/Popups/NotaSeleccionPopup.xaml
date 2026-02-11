@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup
+    x:Class="GuiaBakio.Popups.NotaSeleccionPopup"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit">
+
+    <Border
+        BackgroundColor="White"
+        Padding="15"
+        StrokeThickness="0"
+        Stroke="Transparent">
+
+        <VerticalStackLayout Spacing="10" WidthRequest="350">
+
+            <Label Text="Selecciona una nota"
+                   FontAttributes="Bold"
+                   FontSize="18"/>
+
+            <CollectionView x:Name="NotasView"
+                            SelectionMode="Single"
+                            HeightRequest="250">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border
+                            Stroke="#dddddd"
+                            StrokeThickness="1"
+                            Padding="10"
+                            Margin="0,5"
+                            BackgroundColor="#fafafa">
+
+                            <Label Text="{Binding Titulo}" />
+
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Grid ColumnSpacing="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Button x:Name="BtnCancelar"
+                        Text="Cancelar"
+                        Grid.Column="0"
+                        Clicked="OnCancelarClicked"/>
+
+                <Button x:Name="BtnAceptar"
+                        Text="Aceptar"
+                        Grid.Column="1"
+                        Clicked="OnAceptarClicked"/>
+            </Grid>
+
+        </VerticalStackLayout>
+
+    </Border>
+
+</toolkit:Popup>

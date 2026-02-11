@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GuiaBakio.Models;
-using GuiaBakio.Services;
 using GuiaBakio.Services.Interfaces;
 using System.Collections.ObjectModel;
 
@@ -10,12 +9,12 @@ namespace GuiaBakio.ViewModels
 {
     public partial class NotaViewModel : ObservableObject
     {
-        private readonly DataBaseService _dbService;
-        private readonly ITextEditorPopupService _textEditorPopupService;
-        private readonly IAddImagenPopupService _addImagenPopupService;
-        private readonly IDialogOKService _dialogService;
-        private readonly IEtiquetaLocalidadEditorPopupService _etiquetasLocalidadesEditorPopupService;
-        private readonly INavigationDataService _navigationDataService;
+        //private readonly DataBaseService _dbService;
+        //private readonly ITextEditorPopupService _textEditorPopupService;
+        //private readonly IAddImagenPopupService _addImagenPopupService;
+        //private readonly IDialogOKService _dialogService;
+        //private readonly IEtiquetaLocalidadEditorPopupService _etiquetasLocalidadesEditorPopupService;
+        //private readonly INavigationDataService _navigationDataService;
 
         public IRelayCommand EditarTextoAsyncCommand { get; }
         public IRelayCommand AgregarImagenAsyncCommand { get; }
@@ -23,35 +22,27 @@ namespace GuiaBakio.ViewModels
         public IRelayCommand EditarEtiquetasLocalidadesAsyncCommand { get; }
         public IRelayCommand<Foto?> ImagenTocadaAsyncCommand { get; }
 
+        private readonly INotaServices _s;
+
         private Usuario? usuario;
 
-        public NotaViewModel(
-            DataBaseService dbService,
-            ITextEditorPopupService textEditorPopupService,
-            IAddImagenPopupService addImagenPopupService,
-            IDialogOKService dialogService,
-            IEtiquetaLocalidadEditorPopupService etiquetasEditorPopupService,
-            INavigationDataService navigationDataService)
+        public NotaViewModel(INotaServices services)
         {
+            _s = services;
+
             EditarTextoAsyncCommand = new AsyncRelayCommand(EditarTextoAsync);
             EditarEtiquetasLocalidadesAsyncCommand = new AsyncRelayCommand(EditarEtiquetasLocalidadesAsync);
             AgregarImagenAsyncCommand = new AsyncRelayCommand(AgregarImagenAsync);
             EliminarNotaAsyncCommand = new AsyncRelayCommand(EliminarNotaAsync);
             ImagenTocadaAsyncCommand = new AsyncRelayCommand<Foto?>(ImagenTocadaAsync);
 
-            _dbService = dbService ?? throw new ArgumentNullException(nameof(dbService));
-            _textEditorPopupService = textEditorPopupService ?? throw new ArgumentNullException(nameof(textEditorPopupService));
-            _addImagenPopupService = addImagenPopupService ?? throw new ArgumentNullException(nameof(addImagenPopupService));
-            _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
-            _etiquetasLocalidadesEditorPopupService = etiquetasEditorPopupService ?? throw new ArgumentNullException(nameof(etiquetasEditorPopupService));
-            _navigationDataService = navigationDataService ?? throw new ArgumentNullException(nameof(navigationDataService));
+            usuario = _s.Navigation.Data as Usuario;
 
-            usuario = _navigationDataService.Data as Usuario;
             if (usuario == null)
-            {
-                _dialogService.ShowAlertAsync("Error", "No se pudo cargar el usuario.", "OK");
-            }
+                _ = _s.Dialog.ShowAlertAsync("Error", "No se pudo cargar el usuario.", "OK");
         }
+
+
 
         [ObservableProperty]
         private string titulo;
@@ -95,15 +86,15 @@ namespace GuiaBakio.ViewModels
             NotaId = notaId;
             try
             {
-                Nota = await _dbService.ObtenerNotaPorIdAsync(notaId);
+                Nota = await _s.Db.ObtenerNotaPorIdAsync(notaId);
                 Titulo = Nota.Titulo;
                 Imagenes = new ObservableCollection<Foto>(
-                    await _dbService.ObtenerImagenesPorEntidadAsync(TipoEntidad.Nota, notaId));
+                    await _s.Db.ObtenerImagenesPorEntidadAsync(TipoEntidad.Nota, notaId));
                 NoHayTexto = string.IsNullOrWhiteSpace(Nota.Texto) && Nota.CreadorId == usuario?.Id;
                 Etiquetas = new ObservableCollection<Etiqueta>(
-                    await _dbService.ObtenerEtiquetasDeNotaAsync(Nota.Id));
+                    await _s.Db.ObtenerEtiquetasDeNotaAsync(Nota.Id));
                 Localidades = new ObservableCollection<Localidad>(
-                    await _dbService.ObtenerLocalidadesDeNotaAsync(Nota.Id));
+                    await _s.Db.ObtenerLocalidadesDeNotaAsync(Nota.Id));
                 NoHayEtiquetas = (Etiquetas is null || !Etiquetas.Any()) && (Localidades is null || !Localidades.Any());
                 NoHayImagenes = !Imagenes?.Any() == true;
                 HayImagenes = Imagenes?.Any() == true;
@@ -120,19 +111,19 @@ namespace GuiaBakio.ViewModels
         {
             try
             {
-                var resultado = await _textEditorPopupService.MostrarEditorAsync(Nota?.Texto);
+                var resultado = await _s.TextEditor.MostrarEditorAsync(Nota?.Texto);
 
                 if (resultado is null)
                 {
                     return;
                 }
                 string? v = Nota?.Texto = resultado;
-                await _dbService.ActualizarNotaAsync(Nota);
+                await _s.Db.ActualizarNotaAsync(Nota);
                 await CargarDatosAsync(NotaId);
             }
             catch (Exception ex)
             {
-                await _dialogService.ShowAlertAsync("Error al actualizar.", $"Hubo un error al actualizar el texto de la nota. El texto no fue guardado. {Environment.NewLine}{ex.Message}", "OK");
+                await _s.Dialog.ShowAlertAsync("Error al actualizar.", $"Hubo un error al actualizar el texto de la nota. El texto no fue guardado. {Environment.NewLine}{ex.Message}", "OK");
                 return;
             }
         }
@@ -142,29 +133,29 @@ namespace GuiaBakio.ViewModels
         {
             try
             {
-                var resultado = await _etiquetasLocalidadesEditorPopupService.MostrarEditorAsync(Etiquetas, Localidades);
+                var resultado = await _s.Etiquetas.MostrarEditorAsync(Etiquetas, Localidades);
 
                 if (resultado is (null, null))
                 {
                     return;
                 }
                 List<Etiqueta>? nuevalistaEtiquetasDeNota = resultado.Item1;
-                await _dbService.DesasignarEtiquetasANotaAsync(Nota.Id);
+                await _s.Db.DesasignarEtiquetasANotaAsync(Nota.Id);
                 if (nuevalistaEtiquetasDeNota != null && nuevalistaEtiquetasDeNota.Count > 0)
                 {
-                    await _dbService.AsignarEtiquetasANotaAsync(Nota.Id, nuevalistaEtiquetasDeNota);
+                    await _s.Db.AsignarEtiquetasANotaAsync(Nota.Id, nuevalistaEtiquetasDeNota);
                 }
                 List<Localidad>? nuevalistaLocalidadesDeNota = resultado.Item2;
-                await _dbService.DesasignarLocalidadesANotaAsync(Nota.Id);
+                await _s.Db.DesasignarLocalidadesANotaAsync(Nota.Id);
                 if (nuevalistaLocalidadesDeNota != null && nuevalistaLocalidadesDeNota.Count > 0)
                 {
-                    await _dbService.AsignarLocalidadesANotaAsync(Nota.Id, nuevalistaLocalidadesDeNota);
+                    await _s.Db.AsignarLocalidadesANotaAsync(Nota.Id, nuevalistaLocalidadesDeNota);
                 }
                 await CargarDatosAsync(NotaId);
             }
             catch (Exception ex)
             {
-                await _dialogService.ShowAlertAsync("Error al actualizar.", $"Hubo un error al actualizar las etiquetas y/o localidades de la nota. Las etiquetas y/o localidades no fueron guardadas. {Environment.NewLine}{ex.Message}", "OK");
+                await _s.Dialog.ShowAlertAsync("Error al actualizar.", $"Hubo un error al actualizar las etiquetas y/o localidades de la nota. Las etiquetas y/o localidades no fueron guardadas. {Environment.NewLine}{ex.Message}", "OK");
                 return;
             }
         }
@@ -174,7 +165,7 @@ namespace GuiaBakio.ViewModels
         {
             try
             {
-                int eliminado = await _dbService.EliminarNotaAsync(NotaId);
+                int eliminado = await _s.Db.EliminarNotaAsync(NotaId);
                 if (eliminado > 0)
                 {
                     await Shell.Current.GoToAsync("..");
@@ -182,7 +173,7 @@ namespace GuiaBakio.ViewModels
             }
             catch (Exception ex)
             {
-                await _dialogService.ShowAlertAsync("Error al eliminar", $"Hubo un error al eliminar la nota. {Environment.NewLine}{ex.Message}", "OK");
+                await _s.Dialog.ShowAlertAsync("Error al eliminar", $"Hubo un error al eliminar la nota. {Environment.NewLine}{ex.Message}", "OK");
                 return;
             }
         }
@@ -192,7 +183,7 @@ namespace GuiaBakio.ViewModels
         {
             try
             {
-                var miImagen = await _addImagenPopupService.MostrarAsync();
+                var miImagen = await _s.AddImagen.MostrarAsync();
                 if (miImagen is null)
                 {
                     return;
@@ -205,7 +196,7 @@ namespace GuiaBakio.ViewModels
                 miImagen.EntidadId = NotaId;
                 miImagen.TipoDeEntidad = TipoEntidad.Nota;
                 miImagen.CreadorId = usuario.Id;
-                string imagenId = await _dbService.InsertarImagensync(miImagen);
+                string imagenId = await _s.Db.InsertarImagensync(miImagen);
                 if (!String.IsNullOrWhiteSpace(imagenId))
                 {
                     miImagen.Id = imagenId;
@@ -213,14 +204,14 @@ namespace GuiaBakio.ViewModels
                 }
                 else
                 {
-                    await _dialogService.ShowAlertAsync("Error", "No se pudo guardar la imagen en la base de datos.", "OK");
+                    await _s.Dialog.ShowAlertAsync("Error", "No se pudo guardar la imagen en la base de datos.", "OK");
                     return;
                 }
                 await CargarDatosAsync(NotaId);
             }
             catch (Exception ex)
             {
-                await _dialogService.ShowAlertAsync("Error", $"No se pudo añadir la imagen.{Environment.NewLine}{ex.Message}", "OK");
+                await _s.Dialog.ShowAlertAsync("Error", $"No se pudo añadir la imagen.{Environment.NewLine}{ex.Message}", "OK");
                 return;
             }
         }
@@ -230,7 +221,7 @@ namespace GuiaBakio.ViewModels
         {
             if (foto == null)
             {
-                await _dialogService.ShowAlertAsync("Error", "No se pudo obtener la foto", "Aceptar");
+                await _s.Dialog.ShowAlertAsync("Error", "No se pudo obtener la foto", "Aceptar");
                 return;
             }
             try
@@ -239,7 +230,7 @@ namespace GuiaBakio.ViewModels
                 {
                     if (string.IsNullOrWhiteSpace(foto.UrlMapa))
                     {
-                        await _dialogService.ShowAlertAsync("Error", "La foto no tiene una URL de mapa válida.", "Aceptar");
+                        await _s.Dialog.ShowAlertAsync("Error", "La foto no tiene una URL de mapa válida.", "Aceptar");
                         return;
                     }
                     await Launcher.OpenAsync(new Uri(foto.UrlMapa));
@@ -249,7 +240,7 @@ namespace GuiaBakio.ViewModels
                     byte[] blob = foto.Blob ?? [];
                     if (blob.Length == 0)
                     {
-                        await _dialogService.ShowAlertAsync("Error", "La foto no tiene datos de imagen válidos.", "Aceptar");
+                        await _s.Dialog.ShowAlertAsync("Error", "La foto no tiene datos de imagen válidos.", "Aceptar");
                         return;
                     }
                     string tempFilePath = Path.Combine(FileSystem.CacheDirectory, $"{Guid.NewGuid()}.jpg");
@@ -264,7 +255,7 @@ namespace GuiaBakio.ViewModels
             }
             catch (Exception ex)
             {
-                await _dialogService.ShowAlertAsync("Error", $"Hubo un error al gestionar la imagen: {ex.Message}", "Aceptar");
+                await _s.Dialog.ShowAlertAsync("Error", $"Hubo un error al gestionar la imagen: {ex.Message}", "Aceptar");
             }
         }
 
