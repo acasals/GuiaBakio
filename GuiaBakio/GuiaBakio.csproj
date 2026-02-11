@@ -75,6 +75,9 @@
 	  <MauiXaml Update="Popups\AddItemPopup.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Popups\TextEditorPopup.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	</ItemGroup>
 
 	<Import Project="Resources\Data\Signing.props" Condition="Exists('Resources\data\Signing.props')" />

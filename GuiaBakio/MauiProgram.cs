@@ -42,6 +42,7 @@ namespace GuiaBakio
                 return new DataBaseService(dbPath, dialogService);
             });
             builder.Services.AddSingleton<INavigationDataService, NavigationDataService>();
+            builder.Services.AddTransient<TextEditorPopup>();
             builder.Services.AddTransient<ITextEditorPopupService, TextEditorPopupService>();
             builder.Services.AddTransient<IEtiquetaLocalidadEditorPopupService, EtiquetaLocalidadEditorPopupService>();
             builder.Services.AddTransient<AddItemPopup>();
