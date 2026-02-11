@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup
+    x:Class="GuiaBakio.Popups.AddImagenPopup"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit">
+
+    <Border
+        BackgroundColor="White"
+        Padding="15"
+        StrokeThickness="0"
+        Stroke="Transparent">
+
+        <ScrollView WidthRequest="350">
+            <Grid RowSpacing="10" ColumnSpacing="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- URL -->
+                <Entry x:Name="EntryUrl" Placeholder="Pega una URL de imagen o mapa"/>
+                <Button Grid.Column="1" Text="Cargar URL" Clicked="OnCargarUrlClicked"/>
+
+                <!-- Dispositivo -->
+                <Label Grid.Row="1" Text="O selecciona una desde el dispositivo"/>
+                <Button Grid.Row="1" Grid.Column="1" Text="Abrir archivo" Clicked="OnSeleccionarArchivoClicked"/>
+
+                <!-- Vista previa -->
+                <Image x:Name="PreviewImage"
+                       Grid.Row="2"
+                       Grid.ColumnSpan="2"
+                       Aspect="AspectFill"
+                       IsVisible="False"/>
+
+                <!-- Guardar -->
+                <Button x:Name="BtnGuardar"
+                        Grid.Row="3"
+                        Grid.Column="1"
+                        Text="Guardar"
+                        IsEnabled="False"
+                        Clicked="OnGuardarClicked"/>
+            </Grid>
+        </ScrollView>
+
+    </Border>
+
+</toolkit:Popup>

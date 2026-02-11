@@ -46,6 +46,7 @@ namespace GuiaBakio
             builder.Services.AddTransient<IEtiquetaLocalidadEditorPopupService, EtiquetaLocalidadEditorPopupService>();
             builder.Services.AddTransient<AddItemPopup>();
             builder.Services.AddTransient<IAddItemPopupService, AddItemPopupService>();
+            builder.Services.AddTransient<AddImagenPopup>();
             builder.Services.AddTransient<IAddImagenPopupService, AddImagenPopupService>();
             builder.Services.AddTransient<ListaNotasViewModel>();
             builder.Services.AddTransient<MainPage>();
