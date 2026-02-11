@@ -307,14 +307,7 @@ namespace GuiaBakio.ViewModels
                         await _dialogService.ShowAlertAsync("Error", "No se pudo añadir la localidad.", "OK");
                         return;
                     }
-                    try
-                    {
-                        await Shell.Current.GoToAsync($"localidadPage?Id={id}");
-                    }
-                    catch (Exception ex)
-                    {
-                        await _dialogService.ShowAlertAsync("Error", $"No se pudo navegar a la página de la localidad.{Environment.NewLine}{ex.Message}", "OK");
-                    }
+                    
                 }
                 catch (Exception ex)
                 {

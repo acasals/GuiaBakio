@@ -216,7 +216,7 @@ namespace GuiaBakio.ViewModels
                     await _dialogService.ShowAlertAsync("Error", "No se pudo guardar la imagen en la base de datos.", "OK");
                     return;
                 }
-
+                await CargarDatosAsync(NotaId);
             }
             catch (Exception ex)
             {
