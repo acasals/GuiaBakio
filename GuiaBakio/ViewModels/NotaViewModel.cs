@@ -190,7 +190,7 @@ namespace GuiaBakio.ViewModels
                 }
                 if (miImagen.Blob is null || miImagen.Blob.Length == 0)
                 {
-                    await _dialogService.ShowAlertAsync("Error", "La imagen no puede estar vacía.", "OK");
+                    await _s.Dialog.ShowAlertAsync("Error", "La imagen no puede estar vacía.", "OK");
                     return;
                 }
                 miImagen.EntidadId = NotaId;
