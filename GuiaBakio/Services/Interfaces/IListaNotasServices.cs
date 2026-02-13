@@ -10,5 +10,6 @@ namespace GuiaBakio.Services.Interfaces
         INavigationDataService Navigation { get; }
         SQLiteAsyncConnection Sqlite { get; }
         ApiService Api { get; }
+        INotaSeleccionPopupService NotaSeleccion { get; }
     }
 }

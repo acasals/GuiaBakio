@@ -10,8 +10,9 @@ namespace GuiaBakio.Services
             IAddItemPopupService addItem,
             IDialogOKService dialog,
             INavigationDataService navigation,
-            SQLiteAsyncConnection sqlite,
-            ApiService api)
+            ApiService api,
+            INotaSeleccionPopupService notaSeleccion,
+            SQLiteAsyncConnection sqlite)
         {
             Db = db;
             AddItem = addItem;
@@ -19,6 +20,7 @@ namespace GuiaBakio.Services
             Navigation = navigation;
             Sqlite = sqlite;
             Api = api;
+            NotaSeleccion = notaSeleccion;
         }
 
         public DataBaseService Db { get; }
@@ -27,5 +29,6 @@ namespace GuiaBakio.Services
         public INavigationDataService Navigation { get; }
         public SQLiteAsyncConnection Sqlite { get; }
         public ApiService Api { get; }
+        public INotaSeleccionPopupService NotaSeleccion { get; }
     }
 }
