@@ -31,6 +31,11 @@
 
                             <Label Text="{Binding Titulo}" />
 
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnItemTapped" />
+                            </Border.GestureRecognizers>
+
+
                         </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
@@ -45,7 +50,8 @@
                 <Button x:Name="BtnCancelar"
                         Text="Cancelar"
                         Grid.Column="0"
-                        Clicked="OnCancelarClicked"/>
+                        Clicked="OnCancelarClicked"
+                        BackgroundColor="LightSlateGray"/>
 
                 <Button x:Name="BtnAceptar"
                         Text="Aceptar"
