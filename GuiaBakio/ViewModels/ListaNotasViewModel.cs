@@ -116,18 +116,50 @@ namespace GuiaBakio.ViewModels
             {
                 try
                 {
-                    //        var resultado = await _s.Db.ImportarNotaDesdeArchivoAsync(filePath, _usuarioId);
-                    //        if (resultado != "OK")
-                    //        {
-                    //            await _s.Dialog.ShowAlertAsync("Error", $"No se pudo importar la nota desde el archivo {filePath}: {Environment.NewLine}{resultado}", "OK");
-                    //        }
+                    if (filePath != null)
+                    {
+                        if (!File.Exists(filePath))
+                            return;
+
+                        var notas = await _s.Db.ObtenerNotasAsync();
+
+                        var seleccion = await _s.NotaSeleccion.MostrarAsync(notas);
+
+                        if (seleccion == null)
+                            return;
+                        byte[] imagenBytes;
+                        using var stream = File.OpenRead(filePath);
+                        using var ms = new MemoryStream();
+                        {
+                            await stream.CopyToAsync(ms);
+                            imagenBytes = ms.ToArray();
+                        }
+                        if (imagenBytes == null || imagenBytes.Length == 0)
+                            return;
+
+
+                        Foto miImagen = new();
+                        miImagen.EsMapa = false;
+                        miImagen.UrlMapa = "";
+                        miImagen.Blob = imagenBytes;
+                        miImagen.EntidadId = seleccion.Id;
+                        miImagen.TipoDeEntidad = TipoEntidad.Nota;
+                        miImagen.CreadorId = usuario.Id;
+                        string imagenId = await _s.Db.InsertarImagensync(miImagen);
+                        if (String.IsNullOrWhiteSpace(imagenId))
+                        {
+                            await _s.Dialog.ShowAlertAsync("Error", "No se pudo guardar la imagen en la base de datos.", "OK");
+                            return;
+                        }
+                    }
+
                 }
                 catch (Exception ex)
                 {
-
+                    await _s.Dialog.ShowAlertAsync("Error", $"No se pudo guardar la imagen en la base de datos. {Environment.NewLine}{ ex.Message}", "OK");
                 }
             }
-            //await CargarListaNotasAsync();
+            await CargarListaNotasAsync();
         }
 
         public async Task CargarListaEtiquetasAsync()
