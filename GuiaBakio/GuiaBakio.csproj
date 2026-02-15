@@ -18,8 +18,8 @@
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
 
-		<!-- Android: mínimo API 21 -->
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21</SupportedOSPlatformVersion>
+		<!-- Android: mínimo API 31 -->
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">31</SupportedOSPlatformVersion>
 		<TargetSdkVersion>34</TargetSdkVersion>
 
 		<!-- Windows -->
@@ -27,18 +27,6 @@
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 
 		<LangVersion>preview</LangVersion>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-android|AnyCPU'">
-		<ApplicationId>com.alexcasals.guiabakio</ApplicationId>
-		<ApplicationIdGuid>00a255db-265a-4e7b-89b7-54bde1551ce9</ApplicationIdGuid>
-		<ApplicationTitle>Guia de Bakio</ApplicationTitle>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-windows10.0.19041.0|AnyCPU'">
-		<ApplicationId>com.alexcasals.guiabakio</ApplicationId>
-		<ApplicationIdGuid>00a255db-265a-4e7b-89b7-54bde1551ce9</ApplicationIdGuid>
-		<ApplicationTitle>Guia de Bakio</ApplicationTitle>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -56,33 +44,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Resources\Data\" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Maui" Version="12.1.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.90" />
-		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="9.0.90" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.8" />
 		<PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <MauiXaml Update="Popups\AddImagenPopup.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Popups\AddItemPopup.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Popups\NotaSeleccionPopup.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Popups\TextEditorPopup.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	</ItemGroup>
-
+	
 	<Import Project="Resources\Data\Signing.props" Condition="Exists('Resources\data\Signing.props')" />
 
 </Project>
