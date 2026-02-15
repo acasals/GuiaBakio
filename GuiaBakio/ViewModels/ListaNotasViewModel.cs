@@ -6,7 +6,11 @@ using GuiaBakio.Services.Interfaces;
 using SQLite;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-
+using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Core;
+#if ANDROID
+using static Android.Provider.ContactsContract.CommonDataKinds;
+# endif
 
 namespace GuiaBakio.ViewModels
 {
@@ -67,10 +71,11 @@ namespace GuiaBakio.ViewModels
             AgregarNotaAsyncCommand = new AsyncRelayCommand(AgregarNotaAsync);
             AgregarLocalidadAsyncCommand = new AsyncRelayCommand(AgregarLocalidadAsync);
 
+            ShareHandler.OnFilesReceived += HandleDroppedFilesAsync;
+
+
             _ = CheckUsuario();
         }
-
-
 
         private async Task CheckUsuario()
         {
@@ -151,6 +156,9 @@ namespace GuiaBakio.ViewModels
                             await _s.Dialog.ShowAlertAsync("Error", "No se pudo guardar la imagen en la base de datos.", "OK");
                             return;
                         }
+                        await Toast.Make("Imagen añadida correctamente").Show();
+                        await Shell.Current.GoToAsync($"notaPage?Id={seleccion.Id}");
+
                     }
 
                 }
